@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const NEWS_API_URL = `https://newsapi.org/v2/top-headlines?country=us&category=general&apiKey=${process.env.REACT_APP_API_KEY}`;
+const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY
+const NEWS_API_URL = `https://newsapi.org/v2/top-headlines?country=us&category=general&apiKey=${REACT_APP_API_KEY}`;
 
 const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
