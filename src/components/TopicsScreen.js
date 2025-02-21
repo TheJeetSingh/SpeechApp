@@ -11,6 +11,8 @@ function TopicsScreen() {
       navigate("/concrete");
     } else if (topicType === "abstract") {
       navigate("/abstract");
+    } else if (topicType == "current") {
+      navigate("/current");
     }
   };
 
@@ -26,6 +28,9 @@ function TopicsScreen() {
         </button>
         <button style={styles.button} onClick={() => handleTopicSelect("abstract")}>
           Abstract
+        </button>
+        <button style={styles.button} onClick={() => handleTopicSelect("current")}>
+          Current Events
         </button>
       </div>
     </div>

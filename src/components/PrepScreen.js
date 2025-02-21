@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const PrepScreen = () => {
   const location = useLocation();
-  const { topicName, quoteText } = location.state || {};
+  const { topicName } = location.state || {}; // Retrieve topicName from state
   const [timer, setTimer] = useState(120); // 2-minute timer for prep time
   const [isTimerActive, setIsTimerActive] = useState(true);
   const navigate = useNavigate();
@@ -15,14 +15,14 @@ const PrepScreen = () => {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/speech", { state: { topicName: topicName || quoteText } });
+      navigate("/speech", { state: { topicName } }); // Pass topicName to speech screen
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer, navigate, topicName, quoteText]);
+  }, [isTimerActive, timer, navigate, topicName]);
 
   // Handle when the user clicks to start the speech manually
   const handleStartSpeaking = () => {
-    navigate("/speech", { state: { topicName: topicName || quoteText } });
+    navigate("/speech", { state: { topicName } }); // Pass topicName to speech screen
   };
 
   return (
@@ -34,15 +34,10 @@ const PrepScreen = () => {
       <div style={styles.contentContainer}>
         <h1 style={styles.heading}>Prepare Your Speech</h1>
         <div style={styles.contentBox}>
-          {topicName ? (
+          {topicName && (
             <>
               <h2 style={styles.subHeading}>Topic:</h2>
               <p style={styles.contentText}>{topicName}</p>
-            </>
-          ) : (
-            <>
-              <h2 style={styles.subHeading}>Quote:</h2>
-              <p style={styles.contentText}>{quoteText}</p>
             </>
           )}
         </div>
