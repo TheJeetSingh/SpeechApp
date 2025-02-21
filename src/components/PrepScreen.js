@@ -1,44 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const PrepScreen = () => {
   const location = useLocation();
-  const { topicName } = location.state || {}; // Retrieve topicName from state
-  const [timer, setTimer] = useState(120); // 2-minute timer for prep time
-  const [isTimerActive, setIsTimerActive] = useState(true);
   const navigate = useNavigate();
+  const { topic } = useParams(); // Get topic from URL
+  const topicName = location.state?.topicName || topic; // Use state first, fallback to URL param
 
-  // Timer countdown logic
+  const [timer, setTimer] = useState(120); // 2-minute prep time
+  const [isTimerActive, setIsTimerActive] = useState(true);
+
   useEffect(() => {
     let interval;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/speech", { state: { topicName } }); // Pass topicName to speech screen
+      navigate("/speech", { state: { topicName } }); // Move to SpeechScreen
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer, navigate, topicName]);
 
-  // Handle when the user clicks to start the speech manually
+  // Manually start speech
   const handleStartSpeaking = () => {
-    navigate("/speech", { state: { topicName } }); // Pass topicName to speech screen
+    navigate("/speech", { state: { topicName } });
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.timerContainer}>
         <div style={styles.timer}>Prep Time: {timer}s</div>
-        <div style={styles.timerLabel}>Get ready to present your {topicName ? "topic" : "quote"}!</div>
+        <div style={styles.timerLabel}>
+          Get ready to present your topic: <strong>{topicName || "No topic selected"}</strong>
+        </div>
       </div>
       <div style={styles.contentContainer}>
         <h1 style={styles.heading}>Prepare Your Speech</h1>
         <div style={styles.contentBox}>
-          {topicName && (
+          {topicName ? (
             <>
-              <h2 style={styles.subHeading}>Topic:</h2>
+              <h2 style={styles.subHeading}>Your Topic:</h2>
               <p style={styles.contentText}>{topicName}</p>
             </>
+          ) : (
+            <p style={styles.contentText}>No topic available.</p>
           )}
         </div>
       </div>
@@ -51,6 +56,7 @@ const PrepScreen = () => {
   );
 };
 
+// Styles remain unchanged
 const styles = {
   container: {
     display: "flex",

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_KEY = "d424846d83d545a09151e339b5f79ef3";
-const NEWS_API_URL = `https://newsapi.org/v2/top-headlines?country=us&category=general&apiKey=${API_KEY}`;
+const NEWS_API_URL = `https://newsapi.org/v2/top-headlines?country=us&category=general&apiKey=${process.env.REACT_APP_API_KEY}`;
 
 const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
@@ -40,8 +39,8 @@ const CurrentScreen = () => {
   }, [isTimerActive, timer, articles]);
 
   const handleTopicSelect = (title) => {
-    // Pass the topicName in the state when navigating
-    navigate(`/prep/${encodeURIComponent(title)}`, { state: { topicName: title } });
+    // Navigate directly to /prep/${title} (making sure to encode the topic to avoid issues with spaces)
+    navigate(`/prep/${encodeURIComponent(title)}`);
   };
 
   return (
@@ -50,11 +49,7 @@ const CurrentScreen = () => {
       <h1 style={styles.heading}>Current Events Topics</h1>
       <ul style={styles.list}>
         {articles.map((article, index) => (
-          <li
-            key={index}
-            style={styles.listItem}
-            onClick={() => handleTopicSelect(article.title)}
-          >
+          <li key={index} style={styles.listItem} onClick={() => handleTopicSelect(article.title)}>
             {article.title}
           </li>
         ))}
