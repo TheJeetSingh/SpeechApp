@@ -17,6 +17,10 @@ const axiosInstance = axios.create({
   httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Ignore SSL certificate issues
 });
 
+app.get('/', (req, res) => {
+  res.send('Hello from Vercel!');
+});
+
 // Set up a route to fetch news data
 app.get("/api/news", async (req, res) => {
   try {
