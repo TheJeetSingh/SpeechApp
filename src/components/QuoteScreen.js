@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import quotes from "../data/quotes"; // Your quotes data file
+import quotes from "../data/quotes";
 
 function QuoteScreen() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ function QuoteScreen() {
   };
 
   const handleQuoteSelect = (quote) => {
-    navigate(`/prep/${quote}`, { state: { quoteText: quote } }); // Send quote to PrepScreen
+    navigate(`/prep/${quote}`, { state: { quoteText: quote } });
   };
 
   useEffect(() => {
@@ -62,29 +62,28 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    background: "#ecf0f1",
+    background: "linear-gradient(to bottom right, #6a1b9a, #ffeb3b)",
+    color: "#fff",
     padding: "40px",
-    borderRadius: "10px",
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
     textAlign: "center",
     fontFamily: "Roboto, sans-serif",
   },
   timer: {
     fontSize: "1.5rem",
     fontWeight: "600",
-    color: "#e74c3c",
-    backgroundColor: "#fff",
+    color: "#fff",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     padding: "8px 16px",
     borderRadius: "20px",
     marginBottom: "20px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
   },
   heading: {
     fontSize: "2.5rem",
     fontWeight: "700",
-    color: "#2c3e50",
     marginBottom: "30px",
     letterSpacing: "1px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
   list: {
     listStyle: "none",
@@ -97,12 +96,12 @@ const styles = {
     fontSize: "1.2rem",
     padding: "16px 32px",
     borderRadius: "10px",
-    backgroundColor: "#3498db",
-    color: "#fff",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    color: "#6a1b9a",
     cursor: "pointer",
     fontWeight: "600",
     textAlign: "center",
-    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.05)",
+    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
     transition: "transform 0.3s ease, background-color 0.3s ease",
   },
 };

@@ -7,6 +7,7 @@ import ConcreteScreen from "./components/ConcreteScreen"; // Ensure this is the 
 import PrepScreen from "./components/PrepScreen";
 import SpeechScreen from "./components/SpeechScreen";
 import SpeechStats from "./components/SpeechStats";
+import AbstractScreen from "./components/AbstractScreen";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/topics" element={<TopicsScreen />} />
         <Route path="/quote" element={<QuoteScreen />} /> {/* Ensure this is correct */}
         <Route path="/concrete" element={<ConcreteScreen />} /> {/* Ensure this is correct */}
+        <Route path="/abstract" element={<AbstractScreen />} />
         <Route path="/prep/:topic" element={<PrepScreen />} />
         <Route path="/speech" element={<SpeechScreen />} />
         <Route path="/speech-stats" element={<SpeechStats />} />

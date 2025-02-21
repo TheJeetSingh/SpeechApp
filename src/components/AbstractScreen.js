@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import concreteTopics from "../data/concrete";
+import abstractTopics from "../data/abstract";
 
-function ConcreteScreen() {
+function AbstractScreen() {
   const navigate = useNavigate();
   const [topicsList, setTopicsList] = useState([]);
   const [timer, setTimer] = useState(15);
   const [isTimerActive, setIsTimerActive] = useState(true);
 
-  const getRandomConcreteTopics = () => {
+  const getRandomAbstractTopics = () => {
     const randomTopics = [];
-    const shuffled = [...concreteTopics].sort(() => Math.random() - 0.5);
+    const shuffled = [...abstractTopics].sort(() => Math.random() - 0.5);
     for (let i = 0; i < 3; i++) randomTopics.push(shuffled[i]);
     setTopicsList(randomTopics);
     setTimer(15);
     setIsTimerActive(true);
   };
 
-  const handleConcreteSelect = (topic) => {
+  const handleAbstractSelect = (topic) => {
     navigate(`/prep/${topic}`, { state: { topicName: topic } });
   };
 
   useEffect(() => {
-    getRandomConcreteTopics();
+    getRandomAbstractTopics();
   }, []);
 
   useEffect(() => {
@@ -31,21 +31,21 @@ function ConcreteScreen() {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      handleConcreteSelect(topicsList[Math.floor(Math.random() * topicsList.length)]);
+      handleAbstractSelect(topicsList[Math.floor(Math.random() * topicsList.length)]);
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer, topicsList, handleConcreteSelect]);
+  }, [isTimerActive, timer, topicsList, handleAbstractSelect]);
 
   return (
     <div style={styles.container}>
       <div style={styles.timer}>Time Left: {timer}s</div>
-      <h1 style={styles.heading}>Choose a Concrete Topic</h1>
+      <h1 style={styles.heading}>Choose an Abstract Topic</h1>
       <ul style={styles.list}>
         {topicsList.map((topic, index) => (
           <li
             key={index}
             style={styles.listItem}
-            onClick={() => handleConcreteSelect(topic)}
+            onClick={() => handleAbstractSelect(topic)}
           >
             {topic}
           </li>
@@ -106,4 +106,4 @@ const styles = {
   },
 };
 
-export default ConcreteScreen;
+export default AbstractScreen;

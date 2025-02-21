@@ -9,18 +9,25 @@ function TopicsScreen() {
       navigate("/quote");
     } else if (topicType === "concrete") {
       navigate("/concrete");
+    } else if (topicType === "abstract") {
+      navigate("/abstract");
     }
   };
 
   return (
     <div style={styles.container}>
-      <h1>Choose a Topic</h1>
-      <button style={styles.button} onClick={() => handleTopicSelect("quotes")}>
-        Quotes
-      </button>
-      <button style={styles.button} onClick={() => handleTopicSelect("concrete")}>
-        Concrete Topics
-      </button>
+      <h1 style={styles.heading}>Choose a Topic</h1>
+      <div style={styles.buttonContainer}>
+        <button style={styles.button} onClick={() => handleTopicSelect("quotes")}>
+          Quotes
+        </button>
+        <button style={styles.button} onClick={() => handleTopicSelect("concrete")}>
+          Concrete
+        </button>
+        <button style={styles.button} onClick={() => handleTopicSelect("abstract")}>
+          Abstract
+        </button>
+      </div>
     </div>
   );
 }
@@ -32,87 +39,36 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundColor: "#ecf0f1",
-    padding: "40px 20px",
-    borderRadius: "20px",
-    boxShadow: "0 6px 15px rgba(0, 0, 0, 0.1)",
+    background: "linear-gradient(to bottom right, #6a1b9a, #ffeb3b)",
+    color: "#fff",
     textAlign: "center",
-    fontFamily: "Roboto, Arial, sans-serif",
-    maxWidth: "900px",
-    margin: "auto",
+    fontFamily: "Roboto, sans-serif",
+    padding: "20px",
   },
   heading: {
-    fontSize: "2.5rem",
-    fontWeight: "800",
-    color: "#2c3e50",
-    marginBottom: "25px",
-    letterSpacing: "1.5px",
-  },
-  subHeading: {
-    fontSize: "1.5rem",
-    color: "#7f8c8d",
-    marginBottom: "40px",
-    fontWeight: "500",
-    lineHeight: "1.5",
-  },
-  topicsContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-    gap: "25px",
-    width: "100%",
-    marginBottom: "40px",
-  },
-  topicCard: {
-    backgroundColor: "#3498db",
-    color: "#fff",
-    padding: "25px",
-    borderRadius: "15px",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-    cursor: "pointer",
-    transition: "transform 0.3s ease, background-color 0.3s ease",
-    textAlign: "center",
+    fontSize: "3rem",
     fontWeight: "700",
-    fontSize: "1.4rem",
+    marginBottom: "40px",
+    letterSpacing: "2px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+  },
+  buttonContainer: {
     display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "200px",
-    boxSizing: "border-box",
-    overflow: "hidden",
-  },
-  topicCardHovered: {
-    transform: "scale(1.05)",
-    backgroundColor: "#2980b9",
-  },
-  topicName: {
-    fontSize: "1.6rem",
-    fontWeight: "700",
-    color: "#fff",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  },
-  footer: {
-    marginTop: "35px",
+    flexDirection: "column",
+    gap: "20px",
   },
   button: {
-    fontSize: "1.4rem",
-    padding: "14px 35px",
-    borderRadius: "50px",
-    backgroundColor: "#3498db",
-    color: "#fff",
-    fontWeight: "700",
-    cursor: "pointer",
+    padding: "16px 36px",
+    fontSize: "1.2rem",
+    fontWeight: "600",
     border: "none",
-    boxShadow: "0 6px 18px rgba(0, 0, 0, 0.1)",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
-    outline: "none",
-    width: "auto",
-    margin: "10px",
-  },
-  buttonHover: {
-    backgroundColor: "#2980b9",
-    transform: "scale(1.05)",
+    borderRadius: "30px",
+    background: "#ffeb3b",
+    color: "#6a1b9a",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
+    width: "200px",
   },
 };
 

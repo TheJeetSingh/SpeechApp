@@ -15,6 +15,7 @@ const PrepScreen = () => {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
+      navigate("/speech");
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer]);
