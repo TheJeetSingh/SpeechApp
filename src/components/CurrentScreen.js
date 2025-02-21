@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY
-const NEWS_API_URL = `https://newsapi.org/v2/top-headlines?country=us&category=general&apiKey=${REACT_APP_API_KEY}`;
+import API_BASE_URL from "../config"; // Import the base API URL
 
 const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
@@ -13,17 +11,22 @@ const CurrentScreen = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch(NEWS_API_URL);
+        const response = await fetch(`${API_BASE_URL}/api/news`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
         if (data.articles) {
-          // Shuffle the articles and get 3 random ones
           const shuffledArticles = data.articles.sort(() => 0.5 - Math.random());
-          setArticles(shuffledArticles.slice(0, 3)); // Limit to 3 random articles
+          setArticles(shuffledArticles.slice(0, 3)); // Pick 3 random articles
         }
       } catch (error) {
         console.error("Error fetching news:", error);
       }
     };
+
     fetchArticles();
   }, []);
 
@@ -40,7 +43,6 @@ const CurrentScreen = () => {
   }, [isTimerActive, timer, articles]);
 
   const handleTopicSelect = (title) => {
-    // Navigate directly to /prep/${title} (making sure to encode the topic to avoid issues with spaces)
     navigate(`/prep/${encodeURIComponent(title)}`);
   };
 
@@ -48,13 +50,21 @@ const CurrentScreen = () => {
     <div style={styles.container}>
       <div style={styles.timer}>Time Left: {timer}s</div>
       <h1 style={styles.heading}>Current Events Topics</h1>
-      <ul style={styles.list}>
-        {articles.map((article, index) => (
-          <li key={index} style={styles.listItem} onClick={() => handleTopicSelect(article.title)}>
-            {article.title}
-          </li>
-        ))}
-      </ul>
+      {articles.length > 0 ? (
+        <ul style={styles.list}>
+          {articles.map((article, index) => (
+            <li
+              key={index}
+              style={styles.listItem}
+              onClick={() => handleTopicSelect(article.title)}
+            >
+              {article.title}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Loading news...</p>
+      )}
     </div>
   );
 };
