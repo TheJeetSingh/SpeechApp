@@ -13,21 +13,21 @@ function SpeechStats() {
 
   // Rating based on duration (simple example)
   const getRating = (time) => {
-    if (time < 30) return "Needs improvement";
+    if (time < 30) return "Needs Improvement";
     if (time >= 30 && time <= 60) return "Good";
     return "Excellent";
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>Speech Stats</h1>
+      <h1 style={styles.heading}>Speech Statistics</h1>
       <div style={styles.contentContainer}>
-        <h2 style={styles.subHeading}>Your Speech Duration: {duration} seconds</h2>
+        <h2 style={styles.subHeading}>Duration: {duration} seconds</h2>
         <h3 style={styles.rating}>Rating: {getRating(duration)}</h3>
       </div>
       <div style={styles.footer}>
         <button style={styles.goBackButton} onClick={handleGoBack}>
-          Go Back to Home
+          Back to Home
         </button>
       </div>
     </div>
@@ -41,30 +41,40 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundColor: "#f7f8f9",
+    background: "linear-gradient(135deg, #8E2DE2, #4A00E0)",
     padding: "40px",
     borderRadius: "15px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
     textAlign: "center",
-    fontFamily: "Roboto, sans-serif",
+    fontFamily: "Inter, sans-serif",
+    color: "#ffffff",
   },
   heading: {
-    fontSize: "2.5rem",
+    fontSize: "2.8rem",
     fontWeight: "700",
-    color: "#2c3e50",
+    letterSpacing: "1px",
     marginBottom: "20px",
   },
+  contentContainer: {
+    background: "rgba(255, 255, 255, 0.15)",
+    padding: "20px 40px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 10px rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(8px)",
+  },
   subHeading: {
-    fontSize: "1.5rem",
+    fontSize: "1.8rem",
     fontWeight: "600",
-    color: "#34495e",
     marginBottom: "10px",
   },
   rating: {
     fontSize: "1.5rem",
-    fontWeight: "600",
-    color: "#2c3e50",
-    marginTop: "20px",
+    fontWeight: "700",
+    padding: "10px 20px",
+    background: "rgba(255, 255, 255, 0.2)",
+    borderRadius: "10px",
+    boxShadow: "0 3px 8px rgba(255, 255, 255, 0.2)",
+    marginTop: "10px",
   },
   footer: {
     display: "flex",
@@ -74,15 +84,16 @@ const styles = {
   },
   goBackButton: {
     fontSize: "1.3rem",
-    padding: "12px 30px",
+    padding: "14px 35px",
     borderRadius: "30px",
-    backgroundColor: "#3498db",
+    background: "rgba(0, 255, 127, 0.8)",
     color: "#fff",
     fontWeight: "600",
     cursor: "pointer",
     border: "none",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
+    boxShadow: "0 6px 20px rgba(0, 255, 127, 0.4)",
+    transition: "0.3s ease",
+    backdropFilter: "blur(5px)",
   },
 };
 

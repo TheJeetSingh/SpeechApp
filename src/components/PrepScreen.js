@@ -4,30 +4,25 @@ import { useLocation, useNavigate } from "react-router-dom";
 const PrepScreen = () => {
   const location = useLocation();
   const { topicName, quoteText } = location.state || {};
-  const [timer, setTimer] = useState(120); // 1-minute timer for prep time
+  const [timer, setTimer] = useState(120); // 2-minute timer for prep time
   const [isTimerActive, setIsTimerActive] = useState(true);
   const navigate = useNavigate();
 
-  // Timer logic for prep time countdown
+  // Timer countdown logic
   useEffect(() => {
     let interval;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/speech");
+      navigate("/speech", { state: { topicName: topicName || quoteText } });
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer]);
+  }, [isTimerActive, timer, navigate, topicName, quoteText]);
 
-  // Handle when the user clicks to start the speech
+  // Handle when the user clicks to start the speech manually
   const handleStartSpeaking = () => {
-    // Navigate to SpeechScreen and pass the topic or quote
-    navigate("/speech", {
-      state: {
-        topicName: topicName || quoteText,
-      },
-    });
+    navigate("/speech", { state: { topicName: topicName || quoteText } });
   };
 
   return (
@@ -41,7 +36,7 @@ const PrepScreen = () => {
         <div style={styles.contentBox}>
           {topicName ? (
             <>
-              <h2 style={styles.subHeading}>Concrete Topic:</h2>
+              <h2 style={styles.subHeading}>Topic:</h2>
               <p style={styles.contentText}>{topicName}</p>
             </>
           ) : (
@@ -68,82 +63,83 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundColor: "#f7f8f9",
+    background: "linear-gradient(135deg, #6a11cb, #2575fc)",
     padding: "40px",
-    borderRadius: "15px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', sans-serif",
+    color: "#fff",
     textAlign: "center",
-    fontFamily: "Roboto, sans-serif",
   },
   timerContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    marginBottom: "30px",
+    marginBottom: "40px",
   },
   timer: {
-    fontSize: "2rem",
-    fontWeight: "600",
-    color: "#e74c3c",
-    backgroundColor: "#fff",
-    padding: "12px 24px",
-    borderRadius: "30px",
-    marginBottom: "10px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    fontSize: "2.5rem",
+    fontWeight: "700",
+    color: "#fff",
+    background: "rgba(255, 215, 0, 0.9)", // Gold for visibility
+    padding: "16px 32px",
+    borderRadius: "50px",
+    boxShadow: "0 4px 15px rgba(255, 215, 0, 0.3)",
   },
   timerLabel: {
-    fontSize: "1.2rem",
+    fontSize: "1.1rem",
     fontWeight: "500",
-    color: "#7f8c8d",
+    color: "#ddd",
+    letterSpacing: "0.5px",
   },
   contentContainer: {
     marginBottom: "40px",
+    maxWidth: "600px",
+    width: "100%",
   },
   heading: {
-    fontSize: "2.5rem",
-    fontWeight: "700",
-    color: "#2c3e50",
-    marginBottom: "20px",
+    fontSize: "2.8rem",
+    fontWeight: "800",
+    marginBottom: "24px",
+    letterSpacing: "-0.5px",
   },
   subHeading: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    color: "#34495e",
-    marginBottom: "10px",
+    fontSize: "1.6rem",
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: "16px",
   },
   contentText: {
-    fontSize: "1.2rem",
-    color: "#2c3e50",
-    padding: "10px",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-    margin: "10px 0",
+    fontSize: "1.3rem",
+    padding: "16px",
+    background: "rgba(255, 255, 255, 0.2)", // Frosted glass effect
+    borderRadius: "12px",
+    boxShadow: "0 4px 20px rgba(255, 255, 255, 0.1)",
+    margin: "16px 0",
     textAlign: "center",
+    lineHeight: "1.6",
   },
   contentBox: {
-    backgroundColor: "#ecf0f1",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    margin: "10px 0",
+    background: "rgba(255, 255, 255, 0.15)",
+    padding: "24px",
+    borderRadius: "16px",
+    boxShadow: "0 4px 20px rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(8px)",
   },
   footer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "30px",
+    marginTop: "40px",
   },
   startButton: {
-    fontSize: "1.3rem",
-    padding: "12px 30px",
-    borderRadius: "30px",
-    backgroundColor: "#3498db",
-    color: "#fff",
-    fontWeight: "600",
+    fontSize: "1.4rem",
+    padding: "16px 40px",
+    borderRadius: "50px",
+    background: "#FFD700", // Gold button
+    color: "#000",
+    fontWeight: "700",
     cursor: "pointer",
     border: "none",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 4px 15px rgba(255, 215, 0, 0.3)",
     transition: "background-color 0.3s ease, transform 0.3s ease",
   },
 };

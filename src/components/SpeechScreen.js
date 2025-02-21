@@ -34,10 +34,10 @@ function SpeechScreen() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>Speech Screen</h1>
-      <div style={styles.contentContainer}>
+      <h1 style={styles.heading}>Speech Timer</h1>
+      <div style={styles.timerContainer}>
         <h2 style={styles.subHeading}>Elapsed Time:</h2>
-        <p style={styles.contentText}>{formatTime(elapsedTime)}</p>
+        <p style={styles.timer}>{formatTime(elapsedTime)}</p>
       </div>
       <div style={styles.footer}>
         {!startTime ? (
@@ -61,63 +61,72 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundColor: "#f7f8f9",
+    background: "linear-gradient(135deg, #8E2DE2, #4A00E0)",
     padding: "40px",
     borderRadius: "15px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
     textAlign: "center",
-    fontFamily: "Roboto, sans-serif",
+    fontFamily: "Inter, sans-serif",
+    color: "#ffffff",
   },
   heading: {
-    fontSize: "2.5rem",
+    fontSize: "2.8rem",
     fontWeight: "700",
-    color: "#2c3e50",
+    letterSpacing: "1px",
     marginBottom: "20px",
+  },
+  timerContainer: {
+    background: "rgba(255, 255, 255, 0.15)",
+    padding: "20px 40px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 10px rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(8px)",
   },
   subHeading: {
     fontSize: "1.5rem",
     fontWeight: "600",
-    color: "#34495e",
     marginBottom: "10px",
   },
-  contentText: {
-    fontSize: "1.2rem",
-    color: "#2c3e50",
-    backgroundColor: "#fff",
-    padding: "10px",
-    borderRadius: "8px",
-    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-    margin: "10px 0",
+  timer: {
+    fontSize: "2rem",
+    fontWeight: "700",
+    padding: "10px 20px",
+    background: "rgba(255, 255, 255, 0.2)",
+    borderRadius: "10px",
+    boxShadow: "0 3px 8px rgba(255, 255, 255, 0.2)",
   },
   footer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     marginTop: "30px",
+    gap: "20px",
   },
   startButton: {
     fontSize: "1.3rem",
-    padding: "12px 30px",
+    padding: "14px 35px",
     borderRadius: "30px",
-    backgroundColor: "#3498db",
+    background: "rgba(0, 255, 127, 0.8)",
     color: "#fff",
     fontWeight: "600",
     cursor: "pointer",
     border: "none",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
+    boxShadow: "0 6px 20px rgba(0, 255, 127, 0.4)",
+    transition: "0.3s ease",
+    backdropFilter: "blur(5px)",
   },
   endButton: {
     fontSize: "1.3rem",
-    padding: "12px 30px",
+    padding: "14px 35px",
     borderRadius: "30px",
-    backgroundColor: "#e74c3c",
+    background: "rgba(255, 69, 58, 0.8)",
     color: "#fff",
     fontWeight: "600",
     cursor: "pointer",
     border: "none",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
+    boxShadow: "0 6px 20px rgba(255, 69, 58, 0.4)",
+    transition: "0.3s ease",
+    backdropFilter: "blur(5px)",
   },
 };
 
