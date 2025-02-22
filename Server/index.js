@@ -9,8 +9,22 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5001;
 
-app.use(cors({ origin: "*" })); // Adjust origin for security if needed
+const corsOptions = {
+  origin: 'https://speech-app-delta.vercel.app', // Replace with your frontend app's URL
+  methods: ['GET'],
+  allowedHeaders: ['Content-Type'],
+};
 
+const cors = require('cors');
+
+// Configure CORS
+app.use(
+  cors({
+    origin: ['https://speech-app-delta.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // specify allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // specify allowed headers
+  })
+);
 
 // Create a custom Axios instance that ignores SSL verification
 const axiosInstance = axios.create({
