@@ -4,13 +4,20 @@ import { useNavigate } from "react-router-dom";
 function SpeechScreen() {
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0); // Time in seconds
+  const [showPopup, setShowPopup] = useState(false); // Controls popup visibility
   const navigate = useNavigate();
 
   useEffect(() => {
     let interval;
     if (startTime) {
       interval = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+        const time = Math.floor((Date.now() - startTime) / 1000);
+        setElapsedTime(time);
+
+        // Show popup if time exceeds 5 minutes and 30 seconds (330 seconds)
+        if (time > 330) {
+          setShowPopup(true);
+        }
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -18,6 +25,7 @@ function SpeechScreen() {
 
   const handleStartSpeech = () => {
     setStartTime(Date.now());
+    setShowPopup(false); // Reset popup visibility when starting a new speech
   };
 
   const handleEndSpeech = () => {
@@ -32,12 +40,22 @@ function SpeechScreen() {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
+  // Check if the elapsed time exceeds 5 minutes and 30 seconds (330 seconds)
+  const isTimeExceeded = elapsedTime > 330;
+
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Speech Timer</h1>
       <div style={styles.timerContainer}>
         <h2 style={styles.subHeading}>Elapsed Time:</h2>
-        <p style={styles.timer}>{formatTime(elapsedTime)}</p>
+        <p
+          style={{
+            ...styles.timer,
+            color: isTimeExceeded ? "#ff4444" : "#ffffff", // Change text color to red if time exceeds
+          }}
+        >
+          {formatTime(elapsedTime)}
+        </p>
       </div>
       <div style={styles.footer}>
         {!startTime ? (
@@ -50,6 +68,15 @@ function SpeechScreen() {
           </button>
         )}
       </div>
+
+      {/* Popup for exceeding time */}
+      {showPopup && (
+        <div style={styles.popup}>
+          <p style={styles.popupText}>
+            You are above the grace period! Try to finish soon!
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -68,6 +95,7 @@ const styles = {
     textAlign: "center",
     fontFamily: "Inter, sans-serif",
     color: "#ffffff",
+    position: "relative", // Needed for positioning the popup
   },
   heading: {
     fontSize: "2.8rem",
@@ -94,6 +122,7 @@ const styles = {
     background: "rgba(255, 255, 255, 0.2)",
     borderRadius: "10px",
     boxShadow: "0 3px 8px rgba(255, 255, 255, 0.2)",
+    transition: "color 0.3s ease", // Smooth transition for color change
   },
   footer: {
     display: "flex",
@@ -127,6 +156,23 @@ const styles = {
     boxShadow: "0 6px 20px rgba(255, 69, 58, 0.4)",
     transition: "0.3s ease",
     backdropFilter: "blur(5px)",
+  },
+  popup: {
+    position: "absolute",
+    top: "20px",
+    right: "20px",
+    background: "rgba(255, 69, 58, 0.9)",
+    padding: "15px 25px",
+    borderRadius: "10px",
+    boxShadow: "0 4px 15px rgba(255, 69, 58, 0.3)",
+    backdropFilter: "blur(5px)",
+    animation: "fadeIn 0.5s ease",
+  },
+  popupText: {
+    fontSize: "1rem",
+    fontWeight: "500",
+    color: "#ffffff",
+    margin: "0",
   },
 };
 
