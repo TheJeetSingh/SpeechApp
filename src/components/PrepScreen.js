@@ -32,14 +32,14 @@ const PrepScreen = () => {
       }, 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/speech", { state: { topicName } }); // Move to SpeechScreen
+      navigate("/speech", { state: { topicName, type: "Impromptu" } }); // Pass "Impromptu" tag
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer, navigate, topicName]);
 
   // Manually start speech
   const handleStartSpeaking = () => {
-    navigate("/speech", { state: { topicName } });
+    navigate("/speech", { state: { topicName, type: "Impromptu" } }); // Pass "Impromptu" tag
   };
 
   return (

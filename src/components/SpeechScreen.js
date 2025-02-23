@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function SpeechScreen() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0); // Time in seconds
   const [showPopup, setShowPopup] = useState(false); // Controls popup visibility
-  const navigate = useNavigate();
+
+  // Retrieve the type from location.state
+  const type = location.state?.type || "Unknown";
 
   useEffect(() => {
     let interval;
@@ -14,11 +18,19 @@ function SpeechScreen() {
         const time = Math.floor((Date.now() - startTime) / 1000);
         setElapsedTime(time);
 
-        // Show popup if time exceeds 5 minutes and 30 seconds (330 seconds)
+        // Show popup based on the type
+        if (type === "Impromptu" && time > 1) {
+          setShowPopup(true); // 5 minutes and 30 seconds for Impromptu
+        } else if (
+          (type === "Interp" || type === "Original") &&
+          time > 1
+        ) {
+          setShowPopup(true); // 10 minutes and 30 seconds for Interp/Original
+        }
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [startTime]);
+  }, [startTime, type]);
 
   const handleStartSpeech = () => {
     setStartTime(Date.now());
@@ -26,7 +38,7 @@ function SpeechScreen() {
   };
 
   const handleEndSpeech = () => {
-    navigate("/")
+    navigate("/");
   };
 
   const formatTime = (seconds) => {
@@ -35,22 +47,12 @@ function SpeechScreen() {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  // Check if the elapsed time exceeds 5 minutes and 30 seconds (330 seconds)
-  const isTimeExceeded = elapsedTime > 330;
-
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Get Ready To Speak!</h1>
       <div style={styles.timerContainer}>
         <h2 style={styles.subHeading}>Elapsed Time:</h2>
-        <p
-          style={{
-            ...styles.timer,
-            color: isTimeExceeded ? "#ff4444" : "#ffffff", // Change text color to red if time exceeds
-          }}
-        >
-          {formatTime(elapsedTime)}
-        </p>
+        <p style={styles.timer}>{formatTime(elapsedTime)}</p>
       </div>
       <div style={styles.footer}>
         {!startTime ? (
@@ -64,6 +66,19 @@ function SpeechScreen() {
         )}
       </div>
 
+      {/* Display the type */}
+      <p style={styles.typeText}>Type: {type}</p>
+
+      {/* Popup for exceeding time */}
+      {showPopup && (
+        <div style={styles.popup}>
+          <p style={styles.popupText}>
+            {type === "Impromptu"
+              ? "You are above the grace period for Impromptu! Try to finish soon!"
+              : "You are above the grace period! Try to finish soon!"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -143,6 +158,11 @@ const styles = {
     boxShadow: "0 6px 20px rgba(255, 69, 58, 0.4)",
     transition: "0.3s ease",
     backdropFilter: "blur(5px)",
+  },
+  typeText: {
+    fontSize: "1.2rem",
+    fontWeight: "500",
+    marginTop: "20px",
   },
   popup: {
     position: "absolute",

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 function HomeScreen() {
   const navigate = useNavigate();
   const [showFeedback, setShowFeedback] = useState(false);
@@ -12,19 +11,38 @@ function HomeScreen() {
     window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSe4OOpOy9YXIis2tJIfMBpcQ6yIQQetQ9gm91YgdCt6dbpzbw/viewform";
   };
 
+  const handleNavigate = (type) => {
+    if (type === "Impromptu") {
+      navigate("/topics"); // Navigate to the topics screen
+    } else if (type === "Extemp") {
+      navigate("/construction"); // Navigate to the construction screen
+    } else {
+      navigate("/speech", { state: { type } }); // Pass the speech type as state
+    }
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Welcome to Speech App</h1>
-      <button style={styles.button} onClick={() => navigate("/topics")}>
+      <button style={styles.button} onClick={() => handleNavigate("Impromptu")}>
         Impromptu
       </button>
-      <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/speech")}>
+      <button
+        style={{ ...styles.button, marginTop: "20px" }}
+        onClick={() => handleNavigate("Interp")} // Pass "Interp"
+      >
         Interp
       </button>
-      <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/speech")}>
+      <button
+        style={{ ...styles.button, marginTop: "20px" }}
+        onClick={() => handleNavigate("Original")} // Pass "Original"
+      >
         Original
       </button>
-      <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/construction")}>
+      <button
+        style={{ ...styles.button, marginTop: "20px" }}
+        onClick={() => handleNavigate("Extemp")} // Pass "Extemp"
+      >
         Extemp
       </button>
 
@@ -48,14 +66,18 @@ function HomeScreen() {
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <h2 style={styles.modalHeading}>Feedback</h2>
-            <textarea 
-              style={styles.textarea} 
-              value={feedback} 
-              onChange={(e) => setFeedback(e.target.value)} 
+            <textarea
+              style={styles.textarea}
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
               placeholder="Share your thoughts..."
             ></textarea>
-            <button style={styles.submitButton} onClick={handleSubmitFeedback}>Submit</button>
-            <button style={styles.closeButton} onClick={() => setShowFeedback(false)}>Close</button>
+            <button style={styles.submitButton} onClick={handleSubmitFeedback}>
+              Submit
+            </button>
+            <button style={styles.closeButton} onClick={() => setShowFeedback(false)}>
+              Close
+            </button>
           </div>
         </div>
       )}
