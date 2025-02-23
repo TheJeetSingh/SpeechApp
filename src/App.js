@@ -14,6 +14,7 @@ import { Analytics } from "@vercel/analytics/react"
 function App() {
   return (
     <Router>
+      <Analytics />
       <Routes>
         <Route path="/" element={<HomeScreen />} />
         <Route path="/topics" element={<TopicsScreen />} />
