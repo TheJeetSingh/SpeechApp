@@ -13,6 +13,12 @@ function HomeScreen() {
       <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/speech")}>
         Interp
       </button>
+      <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/speech")}>
+        Original
+      </button>
+      <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/")}>
+        Extemp(Coming Soon)
+      </button>
     </div>
   );
 }
