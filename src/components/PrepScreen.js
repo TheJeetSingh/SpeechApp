@@ -9,11 +9,27 @@ const PrepScreen = () => {
 
   const [timer, setTimer] = useState(120); // 2-minute prep time
   const [isTimerActive, setIsTimerActive] = useState(true);
+  const [currentBanner, setCurrentBanner] = useState("");
+
+  // Prep time banners
+  const prepBanners = [
+    "Grab a piece of paper to jot down ideas",
+    "I like to structure my speeches with Anecdote, Thesis, Roadmap, Examples 1 - 3, and Call to Action",
+    "Practice your opening line to grab attention!",
+    "Use examples or stories to make your points relatable.",
+    "Time yourself to ensure your speech fits within the time limit.",
+  ];
 
   useEffect(() => {
     let interval;
     if (isTimerActive && timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+        // Rotate banners every 20 seconds
+        if (timer % 20 === 0) {
+          setCurrentBanner(prepBanners[(120 - timer) / 20]);
+        }
+      }, 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
       navigate("/speech", { state: { topicName } }); // Move to SpeechScreen
@@ -47,6 +63,12 @@ const PrepScreen = () => {
           )}
         </div>
       </div>
+      {/* Helpful Banner */}
+      {currentBanner && (
+        <div style={styles.banner}>
+          <p style={styles.bannerText}>{currentBanner}</p>
+        </div>
+      )}
       <div style={styles.footer}>
         <button style={styles.startButton} onClick={handleStartSpeaking}>
           Start Speaking!
@@ -56,7 +78,7 @@ const PrepScreen = () => {
   );
 };
 
-// Styles remain unchanged
+// Updated Styles
 const styles = {
   container: {
     display: "flex",
@@ -142,6 +164,24 @@ const styles = {
     border: "none",
     boxShadow: "0 4px 15px rgba(255, 215, 0, 0.3)",
     transition: "background-color 0.3s ease, transform 0.3s ease",
+  },
+  banner: {
+    position: "fixed",
+    bottom: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "rgba(255, 255, 255, 0.9)",
+    padding: "12px 24px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    backdropFilter: "blur(5px)",
+    animation: "fadeIn 0.5s ease",
+  },
+  bannerText: {
+    fontSize: "1rem",
+    fontWeight: "500",
+    color: "#333",
+    margin: "0",
   },
 };
 

@@ -15,9 +15,6 @@ function SpeechScreen() {
         setElapsedTime(time);
 
         // Show popup if time exceeds 5 minutes and 30 seconds (330 seconds)
-        if (time > 330) {
-          setShowPopup(true);
-        }
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -29,9 +26,7 @@ function SpeechScreen() {
   };
 
   const handleEndSpeech = () => {
-    navigate("/speech-stats", {
-      state: { duration: elapsedTime }, // Pass the duration in seconds
-    });
+    navigate("/")
   };
 
   const formatTime = (seconds) => {

@@ -8,7 +8,10 @@ function HomeScreen() {
     <div style={styles.container}>
       <h1 style={styles.heading}>Welcome to Impromptu App</h1>
       <button style={styles.button} onClick={() => navigate("/topics")}>
-        Choose Your Topic
+        Impromptu
+      </button>
+      <button style={{ ...styles.button, marginTop: "20px" }} onClick={() => navigate("/speech")}>
+        Interp
       </button>
     </div>
   );
