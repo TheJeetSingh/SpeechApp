@@ -40,7 +40,7 @@ function SpeechScreen() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>Speech Timer</h1>
+      <h1 style={styles.heading}>Get Ready To Speak!</h1>
       <div style={styles.timerContainer}>
         <h2 style={styles.subHeading}>Elapsed Time:</h2>
         <p
@@ -64,14 +64,6 @@ function SpeechScreen() {
         )}
       </div>
 
-      {/* Popup for exceeding time */}
-      {showPopup && (
-        <div style={styles.popup}>
-          <p style={styles.popupText}>
-            You are above the grace period! Try to finish soon!
-          </p>
-        </div>
-      )}
     </div>
   );
 }

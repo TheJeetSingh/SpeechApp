@@ -8,6 +8,7 @@ import PrepScreen from "./components/PrepScreen";
 import SpeechScreen from "./components/SpeechScreen";
 import AbstractScreen from "./components/AbstractScreen";
 import CurrentScreen from "./components/CurrentScreen";
+import ConstructionScreen from "./components/ConstructionScreen";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/prep/:topic" element={<PrepScreen />} />
         <Route path="/speech" element={<SpeechScreen />} />
         <Route path="/current" element={<CurrentScreen />} />
+        <Route path="/construction" element={<ConstructionScreen />} />
       </Routes>
     </Router>
   );
