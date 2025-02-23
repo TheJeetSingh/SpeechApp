@@ -6,7 +6,7 @@ function HomeScreen() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>Welcome to Impromptu App</h1>
+      <h1 style={styles.heading}>Welcome to Speech App</h1>
       <button style={styles.button} onClick={() => navigate("/topics")}>
         Impromptu
       </button>
