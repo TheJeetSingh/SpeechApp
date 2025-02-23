@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react"
 
 function HomeScreen() {
   const navigate = useNavigate();
