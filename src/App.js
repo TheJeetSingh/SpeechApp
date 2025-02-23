@@ -9,6 +9,7 @@ import SpeechScreen from "./components/SpeechScreen";
 import AbstractScreen from "./components/AbstractScreen";
 import CurrentScreen from "./components/CurrentScreen";
 import ConstructionScreen from "./components/ConstructionScreen";
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   return (
