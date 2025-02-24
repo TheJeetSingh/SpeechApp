@@ -15,9 +15,15 @@ const PrepScreen = () => {
   const prepBanners = [
     "Grab a piece of paper to jot down ideas",
     "I like to structure my speeches with Anecdote, Thesis, Roadmap, Examples 1 - 3, and Call to Action",
-    "Practice your opening line to grab attention!",
-    "Use examples or stories to make your points relatable.",
-    "Time yourself to ensure your speech fits within the time limit.",
+    "Judges really love an interesting anecdote, especially when they're funny",
+    "Remember your delivery matters too! Maybe more than your actual words",
+    "Time matters! Make sure you have enough to say but not too much!",
+    "Keep going, use your entire prep time.",
+    "Don't be too nervous, studies show we perform worse under pressure",
+    "Remember certain hand gestures can help emphasize your points but not too many",
+    "We're nearing the end of prep time, keep brainstorming",
+    "Remember to include a call to action. Why does your speech matter?",
+    "Lock in. You're going to crush it."
   ];
 
   useEffect(() => {
@@ -25,9 +31,9 @@ const PrepScreen = () => {
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
-        // Rotate banners every 20 seconds
-        if (timer % 20 === 0) {
-          setCurrentBanner(prepBanners[(120 - timer) / 20]);
+        // Rotate banners every 10 seconds
+        if (timer % 10 === 0) {
+          setCurrentBanner(prepBanners[(120 - timer) / 10]);
         }
       }, 1000);
     } else if (timer === 0) {
@@ -44,6 +50,13 @@ const PrepScreen = () => {
 
   return (
     <div style={styles.container}>
+      {/* Helpful Banner at the top */}
+      {currentBanner && (
+        <div style={styles.banner}>
+          <p style={styles.bannerText}>{currentBanner}</p>
+        </div>
+      )}
+
       <div style={styles.timerContainer}>
         <div style={styles.timer}>Prep Time: {timer}s</div>
         <div style={styles.timerLabel}>
@@ -63,12 +76,6 @@ const PrepScreen = () => {
           )}
         </div>
       </div>
-      {/* Helpful Banner */}
-      {currentBanner && (
-        <div style={styles.banner}>
-          <p style={styles.bannerText}>{currentBanner}</p>
-        </div>
-      )}
       <div style={styles.footer}>
         <button style={styles.startButton} onClick={handleStartSpeaking}>
           Start Speaking!
@@ -167,7 +174,7 @@ const styles = {
   },
   banner: {
     position: "fixed",
-    bottom: "20px",
+    top: "20px", // Position at the top
     left: "50%",
     transform: "translateX(-50%)",
     background: "rgba(255, 255, 255, 0.9)",
