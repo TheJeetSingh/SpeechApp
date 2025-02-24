@@ -19,11 +19,11 @@ function SpeechScreen() {
         setElapsedTime(time);
 
         // Show popup based on the type
-        if (type === "Impromptu" && time > 1) {
+        if (type === "Impromptu" && time > 330) {
           setShowPopup(true); // 5 minutes and 30 seconds for Impromptu
         } else if (
           (type === "Interp" || type === "Original") &&
-          time > 1
+          time > 630
         ) {
           setShowPopup(true); // 10 minutes and 30 seconds for Interp/Original
         }
