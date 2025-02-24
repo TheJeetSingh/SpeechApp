@@ -50,13 +50,6 @@ const PrepScreen = () => {
 
   return (
     <div style={styles.container}>
-      {/* Helpful Banner at the top */}
-      {currentBanner && (
-        <div style={styles.banner}>
-          <p style={styles.bannerText}>{currentBanner}</p>
-        </div>
-      )}
-
       <div style={styles.timerContainer}>
         <div style={styles.timer}>Prep Time: {timer}s</div>
         <div style={styles.timerLabel}>
@@ -65,6 +58,12 @@ const PrepScreen = () => {
       </div>
       <div style={styles.contentContainer}>
         <h1 style={styles.heading}>Prepare Your Speech</h1>
+        {/* Helpful Banner placed here */}
+        {currentBanner && (
+          <div style={styles.banner}>
+            <p style={styles.bannerText}>{currentBanner}</p>
+          </div>
+        )}
         <div style={styles.contentBox}>
           {topicName ? (
             <>
@@ -140,7 +139,7 @@ const styles = {
   contentText: {
     fontSize: "1.3rem",
     padding: "16px",
-    background: "rgba(255, 255, 255, 0.2)", // Frosted glass effect
+    background: "rgba(255, 255, 255, 0.2)",
     borderRadius: "12px",
     boxShadow: "0 4px 20px rgba(255, 255, 255, 0.1)",
     margin: "16px 0",
@@ -164,7 +163,7 @@ const styles = {
     fontSize: "1.4rem",
     padding: "16px 40px",
     borderRadius: "50px",
-    background: "#FFD700", // Gold button
+    background: "#FFD700",
     color: "#000",
     fontWeight: "700",
     cursor: "pointer",
@@ -173,10 +172,6 @@ const styles = {
     transition: "background-color 0.3s ease, transform 0.3s ease",
   },
   banner: {
-    position: "fixed",
-    top: "20px", // Position at the top
-    left: "50%",
-    transform: "translateX(-50%)",
     background: "rgba(255, 255, 255, 0.9)",
     padding: "12px 24px",
     borderRadius: "8px",
