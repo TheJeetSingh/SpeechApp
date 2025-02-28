@@ -42,7 +42,7 @@ function Modal({ isOpen, onClose, onConfirm }) {
 function Header({ onFeedbackClick }) {
   return (
     <div style={styles.header}>
-      <h1 style={styles.headerTitle}>Speech App</h1>
+      <h1 style={styles.headerTitle}>ARTICULATE</h1>
       <motion.button
         style={styles.feedbackButton}
         whileHover={{ scale: 1.1 }}
