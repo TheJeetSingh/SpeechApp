@@ -1,90 +1,144 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 
-function HomeScreen() {
-  const navigate = useNavigate();
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedback, setFeedback] = useState("");
-
-  const handleSubmitFeedback = () => {
-    // Redirect to the Google Form
-    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSe4OOpOy9YXIis2tJIfMBpcQ6yIQQetQ9gm91YgdCt6dbpzbw/viewform";
-  };
-
-  const handleNavigate = (type) => {
-    if (type === "Impromptu") {
-      navigate("/topics"); // Navigate to the topics screen
-    } else if (type === "Extemp") {
-      navigate("/construction"); // Navigate to the construction screen
-    } else {
-      navigate("/speech", { state: { type } }); // Pass the speech type as state
-    }
-  };
+// Modal Component
+function Modal({ isOpen, onClose, onConfirm }) {
+  if (!isOpen) return null;
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Welcome to Speech App</h1>
-      <button style={styles.button} onClick={() => handleNavigate("Impromptu")}>
-        Impromptu
-      </button>
-      <button
-        style={{ ...styles.button, marginTop: "20px" }}
-        onClick={() => handleNavigate("Interp")} // Pass "Interp"
+    <motion.div
+      style={styles.modalOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        style={styles.modalContent}
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -50, opacity: 0 }}
       >
-        Interp
-      </button>
-      <button
-        style={{ ...styles.button, marginTop: "20px" }}
-        onClick={() => handleNavigate("Original")} // Pass "Original"
-      >
-        Original
-      </button>
-      <button
-        style={{ ...styles.button, marginTop: "20px" }}
-        onClick={() => handleNavigate("Extemp")} // Pass "Extemp"
-      >
-        Extemp
-      </button>
+        <h2 style={styles.modalTitle}>Feedback</h2>
+        <p style={styles.modalText}>
+          Is the problem really urgent and not a matter of your own input? If so, text me at 650-480-0879.
+        </p>
+        <div style={styles.modalButtons}>
+          <button style={styles.modalButton} onClick={onConfirm}>
+            Continue
+          </button>
+          <button style={styles.modalButtonCancel} onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
-      {/* Small button in the top-right corner */}
-      <button
-        style={{
-          ...styles.button,
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          fontSize: "0.8rem", // Smaller button
-          padding: "8px 16px", // Smaller padding
-          background: "#ff5722",
-        }}
-        onClick={handleSubmitFeedback}
+// Header Component
+function Header({ onFeedbackClick }) {
+  return (
+    <div style={styles.header}>
+      <h1 style={styles.headerTitle}>Speech App</h1>
+      <motion.button
+        style={styles.feedbackButton}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onFeedbackClick}
       >
         Give Feedback
-      </button>
-
-      {showFeedback && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h2 style={styles.modalHeading}>Feedback</h2>
-            <textarea
-              style={styles.textarea}
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Share your thoughts..."
-            ></textarea>
-            <button style={styles.submitButton} onClick={handleSubmitFeedback}>
-              Submit
-            </button>
-            <button style={styles.closeButton} onClick={() => setShowFeedback(false)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      </motion.button>
     </div>
   );
 }
 
+// HomeScreen Component
+function HomeScreen() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNavigate = (type) => {
+    if (type === "Impromptu") {
+      navigate("/topics");
+    } else if (type === "Extemp") {
+      navigate("/construction");
+    } else {
+      navigate("/speech", { state: { type } });
+    }
+  };
+
+  const handleFeedbackClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setIsModalOpen(false);
+    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSe4OOpOy9YXIis2tJIfMBpcQ6yIQQetQ9gm91YgdCt6dbpzbw/viewform?usp=dialog"; // Redirect to the Google Form
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <div style={styles.container}>
+      <Header onFeedbackClick={handleFeedbackClick} />
+      <motion.h1
+        style={styles.heading}
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        Welcome to Speech App
+      </motion.h1>
+      <div style={styles.buttonContainer}>
+        {[
+          { type: "Impromptu", desc: "Quick thinking, spontaneous speeches. 2 minutes" },
+          { type: "Interp", desc: "Perform your own interpretation of a piece." },
+          { type: "Original", desc: "Craft and present original content." },
+          { type: "Extemp", desc: "Speak on current events with depth." },
+        ].map(({ type, desc }) => (
+          <div key={type} style={styles.buttonWrapper}>
+            <motion.button
+              data-tooltip-id={type}
+              data-tooltip-content={desc}
+              style={styles.button}
+              onClick={() => handleNavigate(type)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {type}
+            </motion.button>
+            <Tooltip id={type} place="top" effect="solid" style={styles.tooltip} />
+          </div>
+        ))}
+      </div>
+      <Footer />
+      <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
+    </div>
+  );
+}
+
+// Footer Component
+function Footer() {
+  return (
+    <footer style={styles.footer}>
+      <a
+        href="https://github.com/TheJeetSingh/SpeechApp/tree/master"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={styles.githubButton}
+      >
+        Check out the code on GitHub
+      </a>
+    </footer>
+  );
+}
+
+// Styles
 const styles = {
   container: {
     display: "flex",
@@ -92,78 +146,164 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    background: "linear-gradient(to bottom right, #6a1b9a, #ffeb3b)",
+    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
     color: "#fff",
     textAlign: "center",
-    fontFamily: "Roboto, sans-serif",
-    position: "relative", // Needed for absolute positioning of the button
+    fontFamily: "'Poppins', sans-serif",
+    position: "relative",
   },
-  heading: {
-    fontSize: "3rem",
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 20px",
+    background: "#1e3c72",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    width: "100%",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    zIndex: 4000,
+  },
+  headerTitle: {
+    fontSize: "1.8rem",
     fontWeight: "700",
-    marginBottom: "40px",
-    letterSpacing: "2px",
+    color: "#fff",
+    margin: 0,
   },
-  button: {
-    padding: "16px 36px",
-    fontSize: "1.1rem",
+  feedbackButton: {
+    padding: "8px 16px",
+    fontSize: "1rem",
     fontWeight: "600",
     border: "none",
-    borderRadius: "30px",
-    background: "#ffeb3b",
-    color: "#6a1b9a",
+    borderRadius: "8px",
+    background: "#C70039",
+    color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    marginRight: "20px",
+  },
+  heading: {
+    fontSize: "3.5rem",
+    fontWeight: "700",
+    marginBottom: "20px",
+    letterSpacing: "1px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    marginTop: "100px",
+  },
+  buttonContainer: {
+    display: "flex", // Use flexbox for a row layout
+    justifyContent: "center", // Center the buttons
+    gap: "20px", // Add space between buttons
+    marginBottom: "20px",
+  },
+  buttonWrapper: {
+    display: "inline-block", // Keep the buttons in the same row
+  },
+  
+  button: {
+    padding: "12px 24px",
+    fontSize: "1.2rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "linear-gradient(135deg, #d1d1d1, #ffffff)", // Light gray to white gradient
+    color: "#333", // Dark text color for professionalism
+    cursor: "pointer",
+    transition: "all 0.3s ease", // Smooth transition
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+  },   
+  
+  tooltip: {
+    fontSize: "0.9rem",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    background: "#333",
+    color: "#fff",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
   },
   modalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0, 0, 0, 0.5)",
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1000,
   },
-  modal: {
+  modalContent: {
     background: "#fff",
     padding: "20px",
     borderRadius: "10px",
-    textAlign: "center",
-    color: "#000",
-    width: "300px",
-  },
-  modalHeading: {
-    fontSize: "1.5rem",
-    marginBottom: "10px",
-  },
-  textarea: {
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    maxWidth: "400px",
     width: "100%",
-    height: "80px",
-    padding: "10px",
-    fontSize: "1rem",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-    resize: "none",
+    textAlign: "center",
+  },
+  modalTitle: {
+    fontSize: "1.5rem",
+    fontWeight: "700",
     marginBottom: "10px",
+    color: "#333",
   },
-  submitButton: {
+  modalText: {
+    fontSize: "1rem",
+    color: "#555",
+    marginBottom: "20px",
+  },
+  modalButtons: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px",
+  },
+  modalButton: {
     padding: "10px 20px",
-    background: "#6a1b9a",
+    fontSize: "1rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "#C70039",
     color: "#fff",
-    border: "none",
-    borderRadius: "5px",
     cursor: "pointer",
-    marginRight: "10px",
+    transition: "all 0.3s ease",
   },
-  closeButton: {
+  modalButtonCancel: {
     padding: "10px 20px",
-    background: "#ccc",
+    fontSize: "1rem",
+    fontWeight: "600",
     border: "none",
-    borderRadius: "5px",
+    borderRadius: "8px",
+    background: "#ccc",
+    color: "#333",
     cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
+  footer: {
+    position: "fixed",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    padding: "10px 0",
+    background: "#1e3c72",
+    textAlign: "center",
+    boxShadow: "0px -4px 10px rgba(0, 0, 0, 0.2)",
+  },
+  githubButton: {
+    padding: "12px 24px",
+    fontSize: "1rem",
+    fontWeight: "600",
+    background: "#00c853", // Green button background color
+    color: "#fff",
+    textDecoration: "none",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
   },
 };
 
