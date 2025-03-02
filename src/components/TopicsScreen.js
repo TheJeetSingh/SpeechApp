@@ -1,40 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 function TopicsScreen() {
   const navigate = useNavigate();
-  const [text, setText] = useState(""); // State for typing effect
-  const [isDeleting, setIsDeleting] = useState(false); // Track if it's deleting
-  const [loopIndex, setLoopIndex] = useState(0); // Keep track of the typing loops
-  const headingText = "Choose a Topic"; // The text that will be typed
-
-  useEffect(() => {
-    let index = 0;
-    const typingSpeed = 150; // Speed of typing effect
-    const deletingSpeed = 80; // Speed of deleting effect
-    const loopInterval = 2000; // Time before resetting the typing effect
-
-    const typeWriterEffect = setInterval(() => {
-      if (isDeleting) {
-        if (index > 0) {
-          setText((prev) => prev.slice(0, prev.length - 1)); // Delete one character
-          index--;
-        } else {
-          setIsDeleting(false);
-          setLoopIndex((prev) => prev + 1); // Increment loop counter to restart typing after delete
-        }
-      } else {
-        if (index < headingText.length) {
-          setText((prev) => prev + headingText.charAt(index)); // Type one character
-          index++;
-        } else {
-          setIsDeleting(true); // Start deleting after text is typed out
-        }
-      }
-    }, isDeleting ? deletingSpeed : typingSpeed); // Adjust speed depending on whether we're typing or deleting
-
-    return () => clearInterval(typeWriterEffect);
-  }, [isDeleting, loopIndex]);
+  const headingText = "Choose a Topic"; // The text that will be displayed
 
   const handleTopicSelect = (topicType) => {
     switch (topicType) {
@@ -57,7 +26,7 @@ function TopicsScreen() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>{text}</h1>
+      <h1 style={styles.heading}>{headingText}</h1>
       <div style={styles.buttonContainer}>
         {["quotes", "concrete", "abstract", "current"].map((topic) => (
           <button
