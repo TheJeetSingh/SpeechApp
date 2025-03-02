@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Tooltip } from "react-tooltip";
-import { FaRocket } from "react-icons/fa"; // Icon example
-import "react-tooltip/dist/react-tooltip.css";
 
 // Modal Component
 function Modal({ isOpen, onClose, onConfirm }) {
@@ -111,7 +109,7 @@ function HomeScreen() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <FaRocket /> {type}
+              {type}
             </motion.button>
             <Tooltip id={type} place="top" effect="solid" style={styles.tooltip} />
           </div>
