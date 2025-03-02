@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Tooltip } from "react-tooltip";
+import { FaRocket } from 'react-icons/fa'; // Icon example
+import { gsap } from 'gsap'; // GSAP for more advanced animations
 import "react-tooltip/dist/react-tooltip.css";
 
 // Modal Component
@@ -83,10 +85,35 @@ function HomeScreen() {
     setIsModalOpen(false);
   };
 
+  // Color change effect with GSAP
+  useEffect(() => {
+    const colorTimeline = gsap.timeline({ repeat: -1, yoyo: true });
+
+    colorTimeline.to(".color-change", {
+      color: "#FF6347", // Tomato color
+      duration: 2,
+      ease: "power1.inOut",
+    });
+
+    colorTimeline.to(".color-change", {
+      color: "#32CD32", // Lime green
+      duration: 2,
+      ease: "power1.inOut",
+    });
+
+    colorTimeline.to(".color-change", {
+      color: "#1E90FF", // Dodger blue
+      duration: 2,
+      ease: "power1.inOut",
+    });
+
+  }, []);
+
   return (
     <div style={styles.container}>
       <Header onFeedbackClick={handleFeedbackClick} />
       <motion.h1
+        className="color-change"
         style={styles.heading}
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -109,8 +136,10 @@ function HomeScreen() {
               onClick={() => handleNavigate(type)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1 }}
             >
-              {type}
+              <FaRocket /> {type}
             </motion.button>
             <Tooltip id={type} place="top" effect="solid" style={styles.tooltip} />
           </div>
