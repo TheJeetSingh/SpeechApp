@@ -2,29 +2,28 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const PrepScreen = () => {
+const ExtempPrepScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { topic } = useParams();
   const topicName = location.state?.topicName || topic;
 
-  const [timer, setTimer] = useState(120); // 2-minute prep time
+  const [timer, setTimer] = useState(1800); // 30-minute prep time (1800 seconds)
   const [isTimerActive, setIsTimerActive] = useState(true);
   const [currentBanner, setCurrentBanner] = useState("");
 
-  // Prep time banners
+  // Extemp prep time banners
   const prepBanners = [
-    "Grab a piece of paper to jot down ideas",
-    "I like to structure my speeches with Anecdote, Thesis, Roadmap, Examples 1 - 3, and Call to Action",
-    "Judges really love an interesting anecdote, especially when they're funny",
-    "Remember your delivery matters too! Maybe more than your actual words",
-    "Time matters! Make sure you have enough to say but not too much!",
-    "Keep going, use your entire prep time.",
-    "Don't be too nervous, studies show we perform worse under pressure",
-    "Remember certain hand gestures can help emphasize your points but not too many",
-    "We're nearing the end of prep time, keep brainstorming",
-    "Remember to include a call to action. Why does your speech matter?",
-    "Lock in. You're going to crush it."
+    "Take a deep breath and focus on your topic",
+    "Organize your speech with Introduction, Body, and Conclusion",
+    "Jot down the most important points to emphasize",
+    "Use examples and quotes to support your arguments",
+    "Don't forget to mention current events if possible",
+    "Time your speech during practice to stay on track",
+    "Consider counterarguments and how you'll address them",
+    "A good conclusion ties everything together effectively",
+    "Keep your audience in mind as you speak",
+    "You’ve got this! Time to put it all together."
   ];
 
   useEffect(() => {
@@ -34,19 +33,18 @@ const PrepScreen = () => {
         setTimer((prev) => prev - 1);
         // Rotate banners every 10 seconds
         if (timer % 10 === 0) {
-          setCurrentBanner(prepBanners[(120 - timer) / 10]);
+          setCurrentBanner(prepBanners[(1800 - timer) / 180]);
         }
       }, 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/speech", { state: { topicName, type: "Impromptu" } }); // Pass "Impromptu" tag
+      navigate("/speech", { state: { topicName, type: "Extemp" } }); // Redirect to /speech after prep
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer, navigate, topicName]);
 
-  // Manually start speech
   const handleStartSpeaking = () => {
-    navigate("/speech", { state: { topicName, type: "Impromptu" } }); // Pass "Impromptu" tag
+    navigate("/speech", { state: { topicName, type: "Extemp" } }); // Manually start speech
   };
 
   return (
@@ -65,7 +63,7 @@ const PrepScreen = () => {
       </motion.h1>
 
       <div style={styles.timerContainer}>
-        <div style={styles.timer}>Prep Time: {timer}s</div>
+        <div style={styles.timer}>Prep Time: {Math.floor(timer / 60)}:{timer % 60}</div>
         <div style={styles.timerLabel}>
           Get ready to present your topic: <strong>{topicName || "No topic selected"}</strong>
         </div>
@@ -98,7 +96,7 @@ const PrepScreen = () => {
   );
 };
 
-// Styles to match HomeScreen, using only blue and white
+// Styles to match PrepScreen, using only blue and white
 const styles = {
   container: {
     display: "flex",
@@ -223,4 +221,4 @@ const styles = {
   },
 };
 
-export default PrepScreen;
+export default ExtempPrepScreen;

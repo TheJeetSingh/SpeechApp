@@ -9,6 +9,9 @@ import SpeechScreen from "./components/SpeechScreen";
 import AbstractScreen from "./components/AbstractScreen";
 import CurrentScreen from "./components/CurrentScreen";
 import ConstructionScreen from "./components/ConstructionScreen";
+import BetaDev from "./components/BetaDev";
+import ExtempScreen from "./components/ExtempScreen";
+import ExtempPrepScreen from "./components/ExtempPrepScreen";
 import { Analytics } from "@vercel/analytics/react"
 
 function App() {
@@ -25,6 +28,9 @@ function App() {
         <Route path="/speech" element={<SpeechScreen />} />
         <Route path="/current" element={<CurrentScreen />} />
         <Route path="/construction" element={<ConstructionScreen />} />
+        <Route path="/beta" element={<BetaDev />} />
+        <Route path="/extemp" element={<ExtempScreen />} />
+        <Route path="/extempPrep" element={<ExtempPrepScreen />} />
       </Routes>
     </Router>
   );

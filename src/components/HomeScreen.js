@@ -63,7 +63,7 @@ function HomeScreen() {
     if (type === "Impromptu") {
       navigate("/topics");
     } else if (type === "Extemp") {
-      navigate("/construction");
+      navigate("/beta");
     } else {
       navigate("/speech", { state: { type } });
     }

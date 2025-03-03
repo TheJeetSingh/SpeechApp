@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 function SpeechScreen() {
   const location = useLocation();
@@ -26,6 +27,8 @@ function SpeechScreen() {
           time > 630
         ) {
           setShowPopup(true); // 10 minutes and 30 seconds for Interp/Original
+        } else if (type === "Extemp" && time > 450) {
+          setShowPopup(true); // 7 minutes and 30 seconds for Extemp
         }
       }, 1000);
     }
@@ -49,20 +52,40 @@ function SpeechScreen() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>Get Ready To Speak!</h1>
+      <header style={styles.header}>
+        <h1 style={styles.headerTitle}>ARTICULATE</h1>
+      </header>
+      <motion.h1
+        style={styles.heading}
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        Get Ready To Speak!
+      </motion.h1>
       <div style={styles.timerContainer}>
         <h2 style={styles.subHeading}>Elapsed Time:</h2>
         <p style={styles.timer}>{formatTime(elapsedTime)}</p>
       </div>
       <div style={styles.footer}>
         {!startTime ? (
-          <button style={styles.startButton} onClick={handleStartSpeech}>
+          <motion.button
+            style={styles.startButton}
+            onClick={handleStartSpeech}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
             Start Speech
-          </button>
+          </motion.button>
         ) : (
-          <button style={styles.endButton} onClick={handleEndSpeech}>
+          <motion.button
+            style={styles.endButton}
+            onClick={handleEndSpeech}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
             End Speech
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -71,13 +94,20 @@ function SpeechScreen() {
 
       {/* Popup for exceeding time */}
       {showPopup && (
-        <div style={styles.popup}>
+        <motion.div
+          style={styles.popup}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <p style={styles.popupText}>
             {type === "Impromptu"
               ? "You are above the grace period for Impromptu! Try to finish soon!"
+              : type === "Extemp"
+              ? "You are above the grace period for Extemp! Try to finish soon!"
               : "You are above the grace period! Try to finish soon!"}
           </p>
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -90,20 +120,41 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #8E2DE2, #4A00E0)",
+    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
     padding: "40px",
     borderRadius: "15px",
     boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
     textAlign: "center",
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "'Poppins', sans-serif",
     color: "#ffffff",
     position: "relative", // Needed for positioning the popup
   },
-  heading: {
-    fontSize: "2.8rem",
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 20px",
+    background: "#1e3c72",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    width: "100%",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    zIndex: 4000,
+  },
+  headerTitle: {
+    fontSize: "1.8rem",
     fontWeight: "700",
-    letterSpacing: "1px",
+    color: "#fff",
+    margin: 0,
+  },
+  heading: {
+    fontSize: "3.5rem",
+    fontWeight: "700",
     marginBottom: "20px",
+    letterSpacing: "1px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    marginTop: "100px",
   },
   timerContainer: {
     background: "rgba(255, 255, 255, 0.15)",
@@ -124,7 +175,6 @@ const styles = {
     background: "rgba(255, 255, 255, 0.2)",
     borderRadius: "10px",
     boxShadow: "0 3px 8px rgba(255, 255, 255, 0.2)",
-    transition: "color 0.3s ease", // Smooth transition for color change
   },
   footer: {
     display: "flex",
@@ -144,7 +194,6 @@ const styles = {
     border: "none",
     boxShadow: "0 6px 20px rgba(0, 255, 127, 0.4)",
     transition: "0.3s ease",
-    backdropFilter: "blur(5px)",
   },
   endButton: {
     fontSize: "1.3rem",
@@ -157,7 +206,6 @@ const styles = {
     border: "none",
     boxShadow: "0 6px 20px rgba(255, 69, 58, 0.4)",
     transition: "0.3s ease",
-    backdropFilter: "blur(5px)",
   },
   typeText: {
     fontSize: "1.2rem",
@@ -166,14 +214,13 @@ const styles = {
   },
   popup: {
     position: "absolute",
-    top: "20px",
+    top: "80px", // Adjusted the popup's vertical position
     right: "20px",
     background: "rgba(255, 69, 58, 0.9)",
     padding: "15px 25px",
     borderRadius: "10px",
     boxShadow: "0 4px 15px rgba(255, 69, 58, 0.3)",
     backdropFilter: "blur(5px)",
-    animation: "fadeIn 0.5s ease",
   },
   popupText: {
     fontSize: "1rem",

@@ -2,72 +2,66 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config"; // Import the base API URL
 
-const CurrentScreen = () => {
-  const [articles, setArticles] = useState([]);
+const ExtempScreen = () => {
+  const [topic, setTopic] = useState(null);
   const [timer, setTimer] = useState(15);
   const [isTimerActive, setIsTimerActive] = useState(true);
   const navigate = useNavigate();
 
+  // Fetching a random news topic
   useEffect(() => {
-    const fetchArticles = async () => {
+    const fetchTopic = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/news`);
-
+        const response = await fetch(`${API_BASE_URL}/api/news?category=national,international`);
+        
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const data = await response.json();
-        if (data.articles) {
-          // Randomly select 3 articles from the fetched list
-          const randomArticles = getRandomArticles(data.articles, 3);
-          setArticles(randomArticles);
+        if (data.articles && data.articles.length > 0) {
+          // Shuffle the articles and select a random one
+          const randomTopic = data.articles[Math.floor(Math.random() * data.articles.length)];
+          
+          if (randomTopic) {
+            setTopic(randomTopic.title);
+          }
         }
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching news topic:", error);
       }
     };
 
-    fetchArticles();
+    fetchTopic();
   }, []);
 
-  const getRandomArticles = (articles, count) => {
-    const randomArticles = [];
-    while (randomArticles.length < count) {
-      const randomIndex = Math.floor(Math.random() * articles.length);
-      if (!randomArticles.includes(articles[randomIndex])) {
-        randomArticles.push(articles[randomIndex]);
-      }
-    }
-    return randomArticles;
-  };
-
+  // Timer countdown and redirection after timer ends
   useEffect(() => {
     let interval;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    } else if (timer === 0) {
+    } else if (timer === 0 && topic) {
       setIsTimerActive(false);
-      navigate(`/prep/${articles[0]?.title}`, { state: { topicName: articles[0]?.title } });
+      navigate("/extempPrep", { state: { topicName: topic } }); // Passing topic to ExtempPrepScreen
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer, articles, navigate]);
+  }, [isTimerActive, timer, topic, navigate]);
+
+  const handleTopicSelect = () => {
+    navigate("/extempPrep", { state: { topicName: topic } }); // Manually start prep screen
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.timer}>Time Left: {timer}s</div>
-      <h1 style={styles.heading}>Current Events</h1>
-      <ul style={styles.list}>
-        {articles.map((article, index) => (
-          <li
-            key={index}
-            style={styles.listItem}
-            onClick={() => navigate(`/prep/${article.title}`, { state: { topicName: article.title } })}
-          >
-            {article.title}
-          </li>
-        ))}
-      </ul>
+      <h1 style={styles.heading}>News Topic</h1>
+      {topic ? (
+        <div style={styles.topicBox} onClick={handleTopicSelect}>
+          {topic}
+        </div>
+      ) : (
+        <p style={styles.loadingText}>Loading topic...</p>
+      )}
     </div>
   );
 };
@@ -103,14 +97,7 @@ const styles = {
     letterSpacing: "1px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
-  list: {
-    listStyle: "none",
-    padding: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-  listItem: {
+  topicBox: {
     fontSize: "1.2rem",
     padding: "16px 32px",
     borderRadius: "10px",
@@ -122,6 +109,12 @@ const styles = {
     boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
     transition: "transform 0.3s ease, background-color 0.3s ease",
   },
+  loadingText: {
+    fontSize: "1.4rem",
+    fontWeight: "500",
+    color: "#fff",
+    marginTop: "20px",
+  },
 };
 
-export default CurrentScreen;
+export default ExtempScreen;
