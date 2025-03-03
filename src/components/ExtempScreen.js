@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config"; // Import the base API URL
 
 const ExtempScreen = () => {
-  const [topic, setTopic] = useState(null);
-  const [timer, setTimer] = useState(15);
+  const [topics, setTopics] = useState([]); // Store two topics
+  const [timer, setTimer] = useState(1800); // 30 minutes in seconds
   const [isTimerActive, setIsTimerActive] = useState(true);
   const navigate = useNavigate();
 
-  // Fetching a random news topic
+  // Fetching two random news topics
   useEffect(() => {
-    const fetchTopic = async () => {
+    const fetchTopics = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/news?category=national,international`);
         
@@ -20,19 +20,17 @@ const ExtempScreen = () => {
 
         const data = await response.json();
         if (data.articles && data.articles.length > 0) {
-          // Shuffle the articles and select a random one
-          const randomTopic = data.articles[Math.floor(Math.random() * data.articles.length)];
-          
-          if (randomTopic) {
-            setTopic(randomTopic.title);
-          }
+          // Shuffle the articles and select two random ones
+          const shuffledArticles = data.articles.sort(() => 0.5 - Math.random());
+          const selectedTopics = shuffledArticles.slice(0, 2).map((article) => article.title);
+          setTopics(selectedTopics);
         }
       } catch (error) {
-        console.error("Error fetching news topic:", error);
+        console.error("Error fetching news topics:", error);
       }
     };
 
-    fetchTopic();
+    fetchTopics();
   }, []);
 
   // Timer countdown and redirection after timer ends
@@ -40,27 +38,43 @@ const ExtempScreen = () => {
     let interval;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    } else if (timer === 0 && topic) {
+    } else if (timer === 0 && topics.length > 0) {
       setIsTimerActive(false);
-      navigate("/extempPrep", { state: { topicName: topic } }); // Passing topic to ExtempPrepScreen
+      // Automatically select the first topic if the timer runs out
+      navigate("/extempPrep", { state: { topicName: topics[0] } });
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer, topic, navigate]);
+  }, [isTimerActive, timer, topics, navigate]);
 
-  const handleTopicSelect = () => {
-    navigate("/extempPrep", { state: { topicName: topic } }); // Manually start prep screen
+  const handleTopicSelect = (selectedTopic) => {
+    navigate("/extempPrep", { state: { topicName: selectedTopic } }); // Manually start prep screen with selected topic
+  };
+
+  // Helper function to format the time as MM:SS
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
   return (
     <div style={styles.container}>
-      <div style={styles.timer}>Time Left: {timer}s</div>
-      <h1 style={styles.heading}>News Topic</h1>
-      {topic ? (
-        <div style={styles.topicBox} onClick={handleTopicSelect}>
-          {topic}
+      <div style={styles.timer}>Time Left: {formatTime(timer)}</div>
+      <h1 style={styles.heading}>Choose a Topic</h1>
+      {topics.length > 0 ? (
+        <div style={styles.topicsContainer}>
+          {topics.map((topic, index) => (
+            <div
+              key={index}
+              style={styles.topicBox}
+              onClick={() => handleTopicSelect(topic)}
+            >
+              {topic}
+            </div>
+          ))}
         </div>
       ) : (
-        <p style={styles.loadingText}>Loading topic...</p>
+        <p style={styles.loadingText}>Loading topics...</p>
       )}
     </div>
   );
@@ -97,6 +111,12 @@ const styles = {
     letterSpacing: "1px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
+  topicsContainer: {
+    display: "flex",
+    gap: "20px",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   topicBox: {
     fontSize: "1.2rem",
     padding: "16px 32px",
@@ -108,6 +128,7 @@ const styles = {
     textAlign: "center",
     boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
     transition: "transform 0.3s ease, background-color 0.3s ease",
+    width: "300px",
   },
   loadingText: {
     fontSize: "1.4rem",
