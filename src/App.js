@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomeScreen from "./components/HomeScreen";
 import TopicsScreen from "./components/TopicsScreen";
 import QuoteScreen from "./components/QuoteScreen";
-import ConcreteScreen from "./components/ConcreteScreen"; // Ensure this is the correct path for concrete
+import ConcreteScreen from "./components/ConcreteScreen";
 import PrepScreen from "./components/PrepScreen";
 import SpeechScreen from "./components/SpeechScreen";
 import AbstractScreen from "./components/AbstractScreen";
@@ -12,7 +12,8 @@ import ConstructionScreen from "./components/ConstructionScreen";
 import BetaDev from "./components/BetaDev";
 import ExtempScreen from "./components/ExtempScreen";
 import ExtempPrepScreen from "./components/ExtempPrepScreen";
-import { Analytics } from "@vercel/analytics/react"
+import LoginScreen from "./components/LoginScreen"; // Import the new LoginScreen
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   return (
@@ -20,9 +21,10 @@ function App() {
       <Analytics />
       <Routes>
         <Route path="/" element={<HomeScreen />} />
+        <Route path="/login" element={<LoginScreen />} /> {/* Add the login route */}
         <Route path="/topics" element={<TopicsScreen />} />
-        <Route path="/quote" element={<QuoteScreen />} /> {/* Ensure this is correct */}
-        <Route path="/concrete" element={<ConcreteScreen />} /> {/* Ensure this is correct */}
+        <Route path="/quote" element={<QuoteScreen />} />
+        <Route path="/concrete" element={<ConcreteScreen />} />
         <Route path="/abstract" element={<AbstractScreen />} />
         <Route path="/prep/:topic" element={<PrepScreen />} />
         <Route path="/speech" element={<SpeechScreen />} />

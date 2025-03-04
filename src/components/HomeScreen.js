@@ -39,17 +39,33 @@ function Modal({ isOpen, onClose, onConfirm }) {
 
 // Header Component
 function Header({ onFeedbackClick }) {
+  const navigate = useNavigate();
+
+  const handleSignInClick = () => {
+    navigate("/login"); // Redirect to the login page
+  };
+
   return (
     <div style={styles.header}>
       <h1 style={styles.headerTitle}>ARTICULATE</h1>
-      <motion.button
-        style={styles.feedbackButton}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={onFeedbackClick}
-      >
-        Give Feedback
-      </motion.button>
+      <div style={styles.headerButtons}>
+        <motion.button
+          style={styles.signInButton}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleSignInClick}
+        >
+          Sign In
+        </motion.button>
+        <motion.button
+          style={styles.feedbackButton}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onFeedbackClick}
+        >
+          Give Feedback
+        </motion.button>
+      </div>
     </div>
   );
 }
@@ -163,12 +179,30 @@ const styles = {
     top: 0,
     left: 0,
     zIndex: 4000,
+    marginLeft: "-17px", // Moves both buttons to the left
   },
   headerTitle: {
     fontSize: "1.8rem",
     fontWeight: "700",
     color: "#fff",
     margin: 0,
+  },
+  headerButtons: {
+    display: "flex",
+    gap: "20px",
+    paddingLeft: "40px", // Keeps space between buttons as before
+  },
+  signInButton: {
+    padding: "8px 16px",
+    fontSize: "1rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "#00c853",
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
   },
   feedbackButton: {
     padding: "8px 16px",
@@ -181,7 +215,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    marginRight: "20px",
   },
   heading: {
     fontSize: "3.5rem",
