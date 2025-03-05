@@ -1,40 +1,112 @@
 const express = require("express");
-const axios = require("axios");
-const dotenv = require("dotenv");
 const cors = require("cors");
-const https = require("https");
-
-dotenv.config();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
+const axios = require("axios");
+require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5001;
 
-app.use(cors({ origin: "*" })); // Adjust origin for security if needed
+// Middleware
+app.use(cors());
+app.use(express.json());
 
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// Create a custom Axios instance that ignores SSL verification
-const axiosInstance = axios.create({
-  httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Ignore SSL certificate issues
+// User Schema
+const UserSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String,
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello from Vercel!');
-});
+const User = mongoose.model("User", UserSchema);
 
-// Set up a route to fetch news data
-app.get("/api/news", async (req, res) => {
+// Secret Key for JWT
+const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+
+// Generate JWT Token
+const generateToken = (user) => {
+  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: "1h" });
+};
+
+// Signup Route
+app.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
   try {
-    const response = await axiosInstance.get(
-      `https://newsapi.org/v2/top-headlines?country=us&apiKey=${process.env.NEWS_API_KEY}`
-    );
-    res.json(response.data); // Send the API data back to the frontend
-  } catch (error) {
-    console.error("Error fetching news:", error);
-    res.status(500).json({ error: "Error fetching news" });
+    if (!name || !email || !password) return res.status(400).json({ message: "All fields required" });
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ name, email, password: hashedPassword });
+
+    const token = generateToken(newUser);
+    res.json({ token, name: newUser.name });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Login Route
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    if (!email || !password) return res.status(400).json({ message: "All fields required" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = generateToken(user);
+    res.json({ token, name: user.name });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
+// Protected Route Example
+app.get("/protected", (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ message: "Access granted", user: decoded });
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
+
+// News API Route
+app.get("/news", async (req, res) => {
+  const API_KEY = process.env.NEWS_API_KEY;
+  const category = req.query.category || "general";
+  
+  try {
+    const response = await axios.get(`https://newsapi.org/v2/top-headlines`, {
+      params: {
+        category,
+        country: "us",
+        apiKey: API_KEY,
+      },
+    });
+
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching news", error: err.message });
+  }
+});
+
+// Start Server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

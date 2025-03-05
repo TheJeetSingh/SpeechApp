@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode"; // Import jwt-decode
 import { motion } from "framer-motion";
 import { Tooltip } from "react-tooltip";
 
@@ -40,23 +41,77 @@ function Modal({ isOpen, onClose, onConfirm }) {
 // Header Component
 function Header({ onFeedbackClick }) {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
 
-  const handleSignInClick = () => {
+  // Check if the user is logged in on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserName(decodedToken.name); // Set the user's name
+      } catch (error) {
+        console.error("Error decoding token", error);
+      }
+    }
+  }, []);
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUserName(""); // Clear the user's name
     navigate("/login"); // Redirect to the login page
+  };
+
+  // Handle name button click (optional)
+  const handleNameClick = () => {
+    // Add functionality here (e.g., navigate to user profile)
+    console.log("Name button clicked");
   };
 
   return (
     <div style={styles.header}>
       <h1 style={styles.headerTitle}>ARTICULATE</h1>
       <div style={styles.headerButtons}>
-        <motion.button
-          style={styles.signInButton}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleSignInClick}
-        >
-          Sign In
-        </motion.button>
+        {userName ? (
+          <>
+            <motion.button
+              style={styles.nameButton}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNameClick} // Optional: Add functionality
+            >
+              {userName}
+            </motion.button>
+            <motion.button
+              style={styles.logoutButton}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+            >
+              Log Out
+            </motion.button>
+          </>
+        ) : (
+          <>
+            <motion.button
+              style={styles.signInButton}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/login")}
+            >
+              Sign In
+            </motion.button>
+            <motion.button
+              style={styles.signUpButton}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/signup")}
+            >
+              Sign Up
+            </motion.button>
+          </>
+        )}
         <motion.button
           style={styles.feedbackButton}
           whileHover={{ scale: 1.1 }}
@@ -73,7 +128,21 @@ function Header({ onFeedbackClick }) {
 // HomeScreen Component
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+
+  // Get userName from JWT token on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserName(decodedToken.name); // Store the name from decoded token
+      } catch (error) {
+        console.error("Error decoding token", error);
+      }
+    }
+  }, []);
 
   const handleNavigate = (type) => {
     if (type === "Impromptu") {
@@ -107,7 +176,7 @@ function HomeScreen() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        Welcome to Speech App
+        Welcome to Speech App{userName ? `, ${userName}` : ""} {/* Display "Welcome to Speech App" and userName if available */}
       </motion.h1>
       <div style={styles.buttonContainer}>
         {[
@@ -204,6 +273,18 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
   },
+  signUpButton: {
+    padding: "8px 16px",
+    fontSize: "1rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "#00bcd4", // A different color to distinguish it from the sign-in button
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+  },
   feedbackButton: {
     padding: "8px 16px",
     fontSize: "1rem",
@@ -211,6 +292,31 @@ const styles = {
     border: "none",
     borderRadius: "8px",
     background: "#C70039",
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+  },
+  nameButton: {
+    padding: "8px 16px",
+    fontSize: "1rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "#4CAF50", // Green background for the name button
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    marginRight: "20px", // Add spacing between the name and logout button
+  },
+  logoutButton: {
+    padding: "8px 16px",
+    fontSize: "1rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "#ff4d4d",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
@@ -259,81 +365,68 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    background: "rgba(0, 0, 0, 0.5)",
     zIndex: 1000,
   },
   modalContent: {
     background: "#fff",
+    borderRadius: "8px",
     padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    width: "80%",
     maxWidth: "400px",
-    width: "100%",
+    margin: "50px auto",
     textAlign: "center",
+    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)",
   },
   modalTitle: {
     fontSize: "1.5rem",
-    fontWeight: "700",
     marginBottom: "10px",
-    color: "#333",
+    fontWeight: "bold",
   },
   modalText: {
     fontSize: "1rem",
-    color: "#555",
     marginBottom: "20px",
   },
   modalButtons: {
     display: "flex",
     justifyContent: "center",
-    gap: "10px",
+    gap: "15px",
   },
   modalButton: {
     padding: "10px 20px",
     fontSize: "1rem",
-    fontWeight: "600",
+    backgroundColor: "#28a745",
     border: "none",
-    borderRadius: "8px",
-    background: "#C70039",
+    borderRadius: "6px",
     color: "#fff",
     cursor: "pointer",
-    transition: "all 0.3s ease",
   },
   modalButtonCancel: {
     padding: "10px 20px",
     fontSize: "1rem",
-    fontWeight: "600",
+    backgroundColor: "#dc3545",
     border: "none",
-    borderRadius: "8px",
-    background: "#ccc",
-    color: "#333",
+    borderRadius: "6px",
+    color: "#fff",
     cursor: "pointer",
-    transition: "all 0.3s ease",
   },
   footer: {
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    padding: "10px 0",
-    background: "#1e3c72",
+    position: "absolute",
+    bottom: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    fontSize: "0.8rem",
+    color: "#fff",
     textAlign: "center",
-    boxShadow: "0px -4px 10px rgba(0, 0, 0, 0.2)",
   },
   githubButton: {
-    padding: "12px 24px",
-    fontSize: "1rem",
-    fontWeight: "600",
-    background: "#00c853",
     color: "#fff",
     textDecoration: "none",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    fontWeight: "bold",
+    padding: "10px 20px",
+    backgroundColor: "#333",
+    borderRadius: "6px",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
   },
 };
 

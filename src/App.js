@@ -13,6 +13,7 @@ import BetaDev from "./components/BetaDev";
 import ExtempScreen from "./components/ExtempScreen";
 import ExtempPrepScreen from "./components/ExtempPrepScreen";
 import LoginScreen from "./components/LoginScreen"; // Import the new LoginScreen
+import SignupScreen from "./components/SignupScreen";
 import { Analytics } from "@vercel/analytics/react";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeScreen />} />
         <Route path="/login" element={<LoginScreen />} /> {/* Add the login route */}
+        <Route path="/signup" element={<SignupScreen />} /> {/* Add the signup route */}
         <Route path="/topics" element={<TopicsScreen />} />
         <Route path="/quote" element={<QuoteScreen />} />
         <Route path="/concrete" element={<ConcreteScreen />} />

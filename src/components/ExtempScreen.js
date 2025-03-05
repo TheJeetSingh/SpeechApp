@@ -4,7 +4,7 @@ import API_BASE_URL from "../config"; // Import the base API URL
 
 const ExtempScreen = () => {
   const [topics, setTopics] = useState([]); // Store two topics
-  const [timer, setTimer] = useState(1800); // 30 minutes in seconds
+  const [timer, setTimer] = useState(60); // 30 minutes in seconds
   const [isTimerActive, setIsTimerActive] = useState(true);
   const navigate = useNavigate();
 
