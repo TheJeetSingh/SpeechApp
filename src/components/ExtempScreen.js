@@ -3,16 +3,33 @@ import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config"; // Import the base API URL
 
 const ExtempScreen = () => {
-  const [topics, setTopics] = useState([]); // Store two topics
-  const [timer, setTimer] = useState(60); // 30 minutes in seconds
+  const [topics, setTopics] = useState([]); // Store topics
+  const [timer, setTimer] = useState(60); // 1 minute countdown in seconds
   const [isTimerActive, setIsTimerActive] = useState(true);
+  const [error, setError] = useState(null); // Store any error message
   const navigate = useNavigate();
 
-  // Fetching two random news topics
+  // Function to filter relevant extemp topics (politics, global affairs, social issues)
+  const filterExtempArticles = (articles) => {
+    const relevantKeywords = [
+      "politics", "election", "government", "international", "global", 
+      "climate change", "healthcare", "education", "equality", 
+      "economy", "trade", "conflict", "reform"
+    ];
+
+    return articles.filter(article =>
+      relevantKeywords.some(keyword => 
+        article.title.toLowerCase().includes(keyword) || 
+        article.description?.toLowerCase().includes(keyword)
+      )
+    );
+  };
+
+  // Fetching news articles and filtering based on extemp-relevant topics
   useEffect(() => {
     const fetchTopics = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/news?category=national,international`);
+        const response = await fetch(`${API_BASE_URL}/api/news?category=general`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -20,13 +37,16 @@ const ExtempScreen = () => {
 
         const data = await response.json();
         if (data.articles && data.articles.length > 0) {
-          // Shuffle the articles and select two random ones
-          const shuffledArticles = data.articles.sort(() => 0.5 - Math.random());
-          const selectedTopics = shuffledArticles.slice(0, 2).map((article) => article.title);
+          // Filter articles related to extemp topics
+          const filteredArticles = filterExtempArticles(data.articles);
+          const selectedTopics = filteredArticles.slice(0, 2).map(article => article.title);
           setTopics(selectedTopics);
+        } else {
+          setError("No relevant articles found.");
         }
       } catch (error) {
         console.error("Error fetching news topics:", error);
+        setError("Failed to fetch news articles. Please try again later.");
       }
     };
 
@@ -60,7 +80,8 @@ const ExtempScreen = () => {
   return (
     <div style={styles.container}>
       <div style={styles.timer}>Time Left: {formatTime(timer)}</div>
-      <h1 style={styles.heading}>Choose a Topic</h1>
+      <h1 style={styles.heading}>Choose a Relevant Topic</h1>
+      {error && <p style={styles.error}>{error}</p>}
       {topics.length > 0 ? (
         <div style={styles.topicsContainer}>
           {topics.map((topic, index) => (
@@ -116,6 +137,7 @@ const styles = {
     gap: "20px",
     justifyContent: "center",
     alignItems: "center",
+    flexWrap: "wrap",
   },
   topicBox: {
     fontSize: "1.2rem",
@@ -129,12 +151,19 @@ const styles = {
     boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
     transition: "transform 0.3s ease, background-color 0.3s ease",
     width: "300px",
+    marginBottom: "20px", // Add margin for better spacing
   },
   loadingText: {
     fontSize: "1.4rem",
     fontWeight: "500",
     color: "#fff",
     marginTop: "20px",
+  },
+  error: {
+    fontSize: "1.4rem",
+    fontWeight: "600",
+    color: "#ff6b6b",
+    marginBottom: "20px",
   },
 };
 
