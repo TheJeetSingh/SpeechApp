@@ -57,7 +57,7 @@ const InBetaScreen = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        🎉 The Developer Has Fixed Whatever You Broke! 🎉
+        🎉 The Developer Has Fixed Extemp! 🎉
       </motion.h1>
       <p style={styles.text}>
         After ages of work, Extemp is finally up and running. Don't break it again! 🚧

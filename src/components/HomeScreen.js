@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // Import jwt-decode
 import { motion } from "framer-motion";
-import { Tooltip } from "react-tooltip";
 
 // Modal Component
 function Modal({ isOpen, onClose, onConfirm }) {
@@ -63,12 +62,6 @@ function Header({ onFeedbackClick }) {
     navigate("/login"); // Redirect to the login page
   };
 
-  // Handle name button click (optional)
-  const handleNameClick = () => {
-    // Add functionality here (e.g., navigate to user profile)
-    console.log("Name button clicked");
-  };
-
   return (
     <div style={styles.header}>
       <h1 style={styles.headerTitle}>ARTICULATE</h1>
@@ -79,7 +72,6 @@ function Header({ onFeedbackClick }) {
               style={styles.nameButton}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleNameClick} // Optional: Add functionality
             >
               {userName}
             </motion.button>
@@ -187,8 +179,6 @@ function HomeScreen() {
         ].map(({ type, desc }) => (
           <div key={type} style={styles.buttonWrapper}>
             <motion.button
-              data-tooltip-id={type}
-              data-tooltip-content={desc}
               style={styles.button}
               onClick={() => handleNavigate(type)}
               whileHover={{ scale: 1.1 }}
@@ -196,31 +186,14 @@ function HomeScreen() {
             >
               {type}
             </motion.button>
-            <Tooltip id={type} place="top" effect="solid" style={styles.tooltip} />
           </div>
         ))}
       </div>
-      <Footer />
       <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
     </div>
   );
 }
 
-// Footer Component
-function Footer() {
-  return (
-    <footer style={styles.footer}>
-      <a
-        href="https://github.com/TheJeetSingh/SpeechApp/tree/master"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={styles.githubButton}
-      >
-        Check out the code on GitHub
-      </a>
-    </footer>
-  );
-}
 
 // Styles
 const styles = {
@@ -235,6 +208,7 @@ const styles = {
     textAlign: "center",
     fontFamily: "'Poppins', sans-serif",
     position: "relative",
+    paddingTop: "100px", // Adjust for header
   },
   header: {
     display: "flex",
@@ -328,12 +302,12 @@ const styles = {
     marginBottom: "20px",
     letterSpacing: "1px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    marginTop: "100px",
   },
   buttonContainer: {
     display: "flex",
+    flexDirection: "column", // This makes the buttons stack vertically
     justifyContent: "center",
-    gap: "20px",
+    gap: "20px", // Space between buttons
     marginBottom: "20px",
   },
   buttonWrapper: {
@@ -350,14 +324,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-  },
-  tooltip: {
-    fontSize: "0.9rem",
-    padding: "8px 12px",
-    borderRadius: "6px",
-    background: "#333",
-    color: "#fff",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
   },
   modalOverlay: {
     position: "fixed",
@@ -409,24 +375,6 @@ const styles = {
     borderRadius: "6px",
     color: "#fff",
     cursor: "pointer",
-  },
-  footer: {
-    position: "absolute",
-    bottom: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    fontSize: "0.8rem",
-    color: "#fff",
-    textAlign: "center",
-  },
-  githubButton: {
-    color: "#fff",
-    textDecoration: "none",
-    fontWeight: "bold",
-    padding: "10px 20px",
-    backgroundColor: "#333",
-    borderRadius: "6px",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
   },
 };
 
