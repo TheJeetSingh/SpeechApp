@@ -314,7 +314,8 @@ const styles = {
     display: "inline-block",
   },
   button: {
-    padding: "12px 24px",
+    width: "250px", // All buttons will have the same width
+    height: "50px", // Fixed height for buttons
     fontSize: "1.2rem",
     fontWeight: "600",
     border: "none",

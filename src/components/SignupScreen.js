@@ -14,7 +14,7 @@ function Signup() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5001/signup", { // Changed to /signup instead of /api/signup
+      const response = await fetch("http://localhost:5001/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -48,6 +48,14 @@ function Signup() {
         <p style={styles.linkText}>
           Already have an account? <span style={styles.link} onClick={() => navigate("/login")}>Log In</span>
         </p>
+        <motion.button
+          style={styles.goBackButton}
+          onClick={() => navigate("/")}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Go Back to Home
+        </motion.button>
       </motion.div>
     </div>
   );
@@ -72,6 +80,18 @@ const styles = {
   errorText: { color: "red", fontSize: "0.9rem" },
   linkText: { fontSize: "0.9rem", color: "#555", marginTop: "15px" },
   link: { color: "#00c853", fontWeight: "600", cursor: "pointer", textDecoration: "underline" },
+  goBackButton: {
+    padding: "12px",
+    fontSize: "1rem",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    background: "#f39c12", // A distinct color for the "Go Back to Home" button
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    marginTop: "15px",
+  },
 };
 
 export default Signup;
