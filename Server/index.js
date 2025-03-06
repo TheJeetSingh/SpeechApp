@@ -37,14 +37,29 @@ const generateToken = (user) => {
   return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: "1h" });
 };
 
+// Root Route (To Check If Backend is Running)
+app.get("/", (req, res) => {
+  res.send("Welcome to the Impromptu App Server!");
+});
+
 // Signup Route
 app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
-  try {
-    if (!name || !email || !password) return res.status(400).json({ message: "All fields required" });
 
+  // Manual input validation
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters long" });
+  }
+
+  try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ name, email, password: hashedPassword });
@@ -59,14 +74,21 @@ app.post("/signup", async (req, res) => {
 // Login Route
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  try {
-    if (!email || !password) return res.status(400).json({ message: "All fields required" });
 
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const token = generateToken(user);
     res.json({ token, name: user.name });
@@ -78,7 +100,9 @@ app.post("/login", async (req, res) => {
 // Protected Route Example
 app.get("/protected", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -88,13 +112,17 @@ app.get("/protected", (req, res) => {
   }
 });
 
-// News API Route
-app.get("/news", async (req, res) => {
+// ✅ Fixed News API Route
+app.get("/api/news", async (req, res) => {
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";
-  
+
+  if (!API_KEY) {
+    return res.status(500).json({ message: "News API key is missing" });
+  }
+
   try {
-    const response = await axios.get(`https://newsapi.org/v2/top-headlines`, {
+    const response = await axios.get("https://newsapi.org/v2/top-headlines", {
       params: {
         category,
         country: "us",
@@ -102,8 +130,13 @@ app.get("/news", async (req, res) => {
       },
     });
 
-    res.json(response.data);
+    if (response.data.articles.length > 0) {
+      res.json({ articles: response.data.articles });
+    } else {
+      res.status(404).json({ message: "No articles found" });
+    }
   } catch (err) {
+    console.error("News API Error:", err.response?.data || err.message);
     res.status(500).json({ message: "Error fetching news", error: err.message });
   }
 });

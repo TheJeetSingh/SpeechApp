@@ -6,25 +6,28 @@ const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
   const [timer, setTimer] = useState(15);
   const [isTimerActive, setIsTimerActive] = useState(true);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/news`);
-
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         const data = await response.json();
-        if (data.articles) {
-          // Randomly select 3 articles from the fetched list
-          const randomArticles = getRandomArticles(data.articles, 3);
-          setArticles(randomArticles);
+        if (data.articles?.length) {
+          setArticles(getRandomArticles(data.articles, 3));
+        } else {
+          setError("No articles found. Please try again later.");
         }
       } catch (error) {
         console.error(error);
+        setError("Failed to fetch news articles. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -32,29 +35,31 @@ const CurrentScreen = () => {
   }, []);
 
   const getRandomArticles = (articles, count) => {
-    const randomArticles = [];
-    while (randomArticles.length < count) {
-      const randomIndex = Math.floor(Math.random() * articles.length);
-      if (!randomArticles.includes(articles[randomIndex])) {
-        randomArticles.push(articles[randomIndex]);
-      }
+    if (articles.length <= count) return articles;
+    const selectedIndexes = new Set();
+    while (selectedIndexes.size < count) {
+      selectedIndexes.add(Math.floor(Math.random() * articles.length));
     }
-    return randomArticles;
+    return Array.from(selectedIndexes).map((index) => articles[index]);
   };
 
   useEffect(() => {
     let interval;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    } else if (timer === 0) {
+    } else if (timer === 0 && articles.length) {
       setIsTimerActive(false);
-      navigate(`/prep/${articles[0]?.title}`, { state: { topicName: articles[0]?.title } });
+      navigate(`/prep/${encodeURIComponent(articles[0].title)}`, {
+        state: { topicName: articles[0].title },
+      });
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer, articles, navigate]);
 
   return (
     <div style={styles.container}>
+      {isLoading && <div style={styles.loading}>Loading...</div>}
+      {error && <div style={styles.error}>{error}</div>}
       <div style={styles.timer}>Time Left: {timer}s</div>
       <h1 style={styles.heading}>Current Events</h1>
       <ul style={styles.list}>
@@ -62,7 +67,11 @@ const CurrentScreen = () => {
           <li
             key={index}
             style={styles.listItem}
-            onClick={() => navigate(`/prep/${article.title}`, { state: { topicName: article.title } })}
+            onClick={() =>
+              navigate(`/prep/${encodeURIComponent(article.title)}`, {
+                state: { topicName: article.title },
+              })
+            }
           >
             {article.title}
           </li>
@@ -121,6 +130,23 @@ const styles = {
     textAlign: "center",
     boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
     transition: "transform 0.3s ease, background-color 0.3s ease",
+    "&:hover": {
+      transform: "scale(1.05)",
+      backgroundColor: "rgba(255, 255, 255, 1)",
+    },
+  },
+  error: {
+    color: "#ff6b6b",
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+    padding: "10px",
+    borderRadius: "5px",
+    marginBottom: "20px",
+    textAlign: "center",
+  },
+  loading: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    color: "#fff",
   },
 };
 
