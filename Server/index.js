@@ -14,10 +14,12 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("MongoDB Connected"))
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // User Schema
@@ -34,7 +36,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, {
+    expiresIn: "1h",
+  });
 };
 
 // Root Route (To Check If Backend is Running)
@@ -52,7 +56,9 @@ app.post("/signup", async (req, res) => {
   }
 
   if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters long" });
   }
 
   try {
@@ -71,16 +77,20 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// Login Route
+// Login Route (Allow Sign-in with Email or Name)
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { identifier, password } = req.body; // 'identifier' can be either email or name
 
-  if (!email || !password) {
+  if (!identifier || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const user = await User.findOne({ email });
+    // Check if the identifier is an email or a name
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { name: identifier }],
+    });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -112,7 +122,7 @@ app.get("/protected", (req, res) => {
   }
 });
 
-// ✅ Fixed News API Route
+// News API Route
 app.get("/api/news", async (req, res) => {
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";
