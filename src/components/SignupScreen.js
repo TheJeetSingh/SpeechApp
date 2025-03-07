@@ -26,7 +26,7 @@ function Signup() {
       if (!response.ok) throw new Error(data.message || "Signup failed");
 
       localStorage.setItem("token", data.token);
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       setError(error.message);
     }
