@@ -9,21 +9,11 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Define your frontend URL (change this to your actual frontend URL)
-const allowedOrigins = ['https://speech-app-delta.vercel.app'];
-
-// CORS middleware
+// CORS Configuration
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests from your frontend origin
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: "https://speech-app-delta.vercel.app", // Frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
