@@ -13,7 +13,7 @@ function LoginScreen() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5001/login", { // Changed to /login instead of /api/login
+      const response = await fetch("https://speech-app-server.vercel.app/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -84,7 +84,7 @@ const styles = {
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
-    background: "#f39c12", // A distinct color for the "Go Back to Home" button
+    background: "#f39c12",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",

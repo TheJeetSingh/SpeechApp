@@ -10,14 +10,19 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "*", // Allow all origins (restrict to your frontend URL in production)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log("MongoDB Connected"))
+})
+  .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // User Schema
@@ -112,7 +117,7 @@ app.get("/protected", (req, res) => {
   }
 });
 
-// ✅ Fixed News API Route
+// News API Route
 app.get("/api/news", async (req, res) => {
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";
