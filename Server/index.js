@@ -67,7 +67,8 @@ app.post("/signup", async (req, res) => {
     const token = generateToken(newUser);
     res.json({ token, name: newUser.name });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "Server error while signing up" });
   }
 });
 
@@ -93,7 +94,8 @@ app.post("/login", async (req, res) => {
     const token = generateToken(user);
     res.json({ token, name: user.name });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "Server error while logging in" });
   }
 });
 
@@ -108,11 +110,12 @@ app.get("/protected", (req, res) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     res.json({ message: "Access granted", user: decoded });
   } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
+    console.error(err);
+    res.status(401).json({ message: "Invalid or expired token" });
   }
 });
 
-// ✅ Fixed News API Route
+// News API Route
 app.get("/api/news", async (req, res) => {
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";

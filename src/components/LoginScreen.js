@@ -13,7 +13,7 @@ function LoginScreen() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5001/login", { // Changed to /login instead of /api/login
+      const response = await fetch("https://speech-app-server.vercel.app/login", { // Updated backend URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
