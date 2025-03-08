@@ -14,16 +14,21 @@ const corsOptions = {
   origin: "https://speech-app-delta.vercel.app", // Frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // Allow credentials (if needed)
+  optionsSuccessStatus: 200, // For legacy browser support
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Enable preflight requests for all routes
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("MongoDB Connected"))
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // User Schema
@@ -40,7 +45,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, {
+    expiresIn: "1h",
+  });
 };
 
 // Root Route (To Check If Backend is Running)
@@ -58,7 +65,9 @@ app.post("/signup", async (req, res) => {
   }
 
   if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters long" });
   }
 
   try {
