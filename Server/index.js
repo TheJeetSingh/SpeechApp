@@ -9,8 +9,24 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
-app.use(cors());
+// Define your frontend URL (change this to your actual frontend URL)
+const allowedOrigins = ['https://speech-app-delta.vercel.app'];
+
+// CORS middleware
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests from your frontend origin
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // MongoDB Connection
