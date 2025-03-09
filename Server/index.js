@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5001;
 
 // Enable CORS for all routes and all origins
 app.use(cors({
-  origin: "*", // Allow all origins
+  origin: ["https://speech-app-delta.vercel.app/login","https://speech-app-delta.vercel.app"], // Allow all origins
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
   allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   credentials: true, // Allow cookies and credentials
@@ -24,7 +24,7 @@ app.use(cors({
 app.use(express.json());
 
 // Handle preflight requests for all routes
-app.options("/login", cors()); // Allow preflight requests for all routes
+app.options("*", cors()); // Allow preflight requests for all routes
 
 // MongoDB Connection
 mongoose
