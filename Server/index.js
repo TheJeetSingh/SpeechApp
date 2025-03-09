@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5001;
 // CORS Configuration
 const allowedOrigins = [
   "http://localhost:3000", // Local development
-  "https://speech-app-delta.vercel.app", // Vercel frontend deployment
+  "https://speech-app-delta.vercel.app/*", // Vercel frontend deployment
 ];
 
 const corsOptions = {
