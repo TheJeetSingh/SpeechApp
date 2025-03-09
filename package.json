@@ -23,6 +23,7 @@
     "lottie-react": "^2.4.1",
     "lottie-web": "^5.12.2",
     "lucide-react": "^0.477.0",
+    "nodemon": "^3.1.9",
     "openai": "^4.86.1",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",

@@ -24,7 +24,7 @@ app.use(cors({
 app.use(express.json());
 
 // Handle preflight requests for all routes
-app.options("*", cors()); // Allow preflight requests for all routes
+app.options("/login", cors()); // Allow preflight requests for all routes
 
 // MongoDB Connection
 mongoose
