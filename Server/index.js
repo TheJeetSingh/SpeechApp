@@ -12,20 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // CORS Configuration
-const allowedOrigins = [
-  "http://localhost:3000", // Local development
-  "https://speech-app-delta.vercel.app/signup",
-  "https://speech-app-delta.vercel.app/login", // Vercel frontend deployment
-];
-
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS policy: Origin not allowed"), false);
-    }
-  },
+  origin: true, // Allow all origins
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
