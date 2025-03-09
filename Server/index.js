@@ -11,17 +11,20 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// CORS Configuration
-const corsOptions = {
-  origin: true, // Allow all origins
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
+// Enable CORS for all routes and all origins
+app.use(cors({
+  origin: "*", // Allow all origins
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  credentials: true, // Allow cookies and credentials
+  optionsSuccessStatus: 200, // Respond with 200 status for preflight requests
+}));
 
-app.use(cors(corsOptions)); // Enable CORS for all routes
-app.use(express.json()); // Parse JSON request bodies
+// Parse JSON request bodies
+app.use(express.json());
+
+// Handle preflight requests for all routes
+app.options("*", cors()); // Allow preflight requests for all routes
 
 // MongoDB Connection
 mongoose
