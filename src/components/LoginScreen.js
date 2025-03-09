@@ -2,25 +2,27 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-function LoginScreen() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await fetch("https://speech-app-server.vercel.app/login", {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      console.log(data); // Debugging log
+      console.log(data);
 
       if (!response.ok) throw new Error(data.message || "Login failed");
 
@@ -152,4 +154,4 @@ const styles = {
   },
 };
 
-export default LoginScreen;
+export default Login;

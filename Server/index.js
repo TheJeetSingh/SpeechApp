@@ -1,3 +1,4 @@
+// Import required modules
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -6,21 +7,32 @@ const mongoose = require("mongoose");
 const axios = require("axios");
 require("dotenv").config();
 
+// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 // CORS Configuration
+const allowedOrigins = [
+  "http://localhost:3000", // Local development
+  "https://speech-app-delta.vercel.app", // Vercel frontend deployment
+];
+
 const corsOptions = {
-  origin: "https://speech-app-delta.vercel.app", // Frontend URL
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS policy: Origin not allowed"), false);
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Allow credentials (if needed)
-  optionsSuccessStatus: 200, // For legacy browser support
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Enable preflight requests for all routes
-app.use(express.json());
+app.use(cors(corsOptions)); // Enable CORS for all routes
+app.use(express.json()); // Parse JSON request bodies
 
 // MongoDB Connection
 mongoose
@@ -49,6 +61,8 @@ const generateToken = (user) => {
     expiresIn: "1h",
   });
 };
+
+// Routes
 
 // Root Route (To Check If Backend is Running)
 app.get("/", (req, res) => {
