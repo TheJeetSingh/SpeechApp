@@ -12,11 +12,13 @@ const PORT = process.env.PORT || 5001;
 
 // Allowed Origins List
 const allowedOrigins = [
-  "http://localhost:3000", 
+  "http://localhost:3000/api/login",
+  "http://localhost:3000/api/signup",
+  "http://localhost:3000/", 
   "https://speech-app-delta.vercel.app",
   "https://speech-app-delta.vercel.app/api/news",
-  "https://speech-app-delta.vercel.app/signup",
-  "https://speech-app-delta.vercel.app/login"
+  "https://speech-app-delta.vercel.app/api/signup",
+  "https://speech-app-delta.vercel.app/api/login"
 ];
 
 // CORS Options
@@ -34,6 +36,7 @@ const corsOptions = {
 
 // Enable CORS with Options
 app.use(cors(corsOptions));
+
 // Parse JSON request bodies
 app.use(express.json());
 
@@ -73,7 +76,7 @@ app.get("/", (req, res) => {
 });
 
 // Signup Route
-app.post("/signup", async (req, res) => {
+app.post("/api/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
   // Manual input validation
@@ -105,7 +108,7 @@ app.post("/signup", async (req, res) => {
 });
 
 // Login Route
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
