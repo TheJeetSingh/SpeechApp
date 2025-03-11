@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 function TopicsScreen() {
   const navigate = useNavigate();
@@ -26,18 +27,25 @@ function TopicsScreen() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>{headingText}</h1>
+      <motion.h1
+        style={styles.heading}
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {headingText}
+      </motion.h1>
       <div style={styles.buttonContainer}>
         {["quotes", "concrete", "abstract", "current"].map((topic) => (
-          <button
+          <motion.button
             key={topic}
             style={styles.button}
             onClick={() => handleTopicSelect(topic)}
-            onMouseOver={(e) => e.target.classList.add("hover")}
-            onMouseOut={(e) => e.target.classList.remove("hover")}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             {topic.charAt(0).toUpperCase() + topic.slice(1).replace("current", "Current Events")}
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>
@@ -50,76 +58,41 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
-    background: "linear-gradient(135deg, #003366, #1a3a5c)", // Deep dark blue gradient
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #1e3c72, #2a5298)", // Same gradient as HomeScreen
     color: "#fff",
     textAlign: "center",
-    fontFamily: "Roboto, sans-serif",
-    margin: "0",
-    padding: "0",
-    overflow: "hidden",
+    fontFamily: "'Poppins', sans-serif",
     position: "relative",
-    animation: "backgroundMove 15s infinite linear", // Slow-moving gradient
+    paddingTop: "100px", // Adjust for header
   },
   heading: {
-    fontSize: "4.5rem",
-    fontWeight: "bold",
-    marginBottom: "80px",
-    letterSpacing: "4px",
-    textTransform: "uppercase",
-    textShadow: "3px 3px 8px rgba(0, 0, 0, 0.4)", // 3D shadow effect
-    color: "#ffffff",
-    animation: "headingEffect 1s ease-in-out infinite, glowEffect 1.5s alternate infinite", // Heading 3D pop effect and glow
-    position: "relative",
+    fontSize: "3.5rem",
+    fontWeight: "700",
+    marginBottom: "40px",
+    letterSpacing: "1px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)", // Consistent shadow
   },
   buttonContainer: {
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gap: "20px",
-    width: "100%",
-    maxWidth: "400px",
+    display: "flex",
+    flexDirection: "column", // Stack buttons vertically
+    justifyContent: "center",
+    gap: "20px", // Space between buttons
+    marginBottom: "20px",
   },
   button: {
-    padding: "18px 45px",
-    fontSize: "1.5rem",
-    fontWeight: "700",
+    width: "250px", // Same width as HomeScreen buttons
+    height: "50px", // Same height as HomeScreen buttons
+    fontSize: "1.2rem",
+    fontWeight: "600",
     border: "none",
-    borderRadius: "35px",
-    background: "#4b5c6b", // Dark greyish blue
-    color: "#fff",
+    borderRadius: "8px",
+    background: "linear-gradient(135deg, #d1d1d1, #ffffff)", // Same gradient as HomeScreen buttons
+    color: "#333",
     cursor: "pointer",
-    boxShadow: "0px 10px 15px rgba(0, 0, 0, 0.2)",
-    textTransform: "uppercase",
-    outline: "none",
-    transition: "all 0.3s ease-in-out",
-    position: "relative",
-    zIndex: 1,
-  },
-  hover: {
-    transform: "translateY(-5px)", // Button lifts up on hover
-    boxShadow: "0px 20px 25px rgba(0, 0, 0, 0.3)", // Stronger shadow on hover
-    background: "#5a6b80", // Slightly lighter greyish blue
+    transition: "all 0.3s ease",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Consistent shadow
   },
 };
-
-// 3D pop effect for the heading
-const headingEffect = `@keyframes headingEffect {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}`;
-
-// Smooth moving background gradient
-const backgroundMove = `@keyframes backgroundMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}`;
-
-// Glow effect for heading
-const glowEffect = `@keyframes glowEffect {
-  0% { text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 128, 255, 0.5); }
-  50% { text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), 0 0 50px rgba(0, 128, 255, 0.7); }
-  100% { text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 128, 255, 0.5); }
-}`;
 
 export default TopicsScreen;
