@@ -1,6 +1,5 @@
-// Import required modules
 const express = require("express");
-const cors = require("cors");
+const cors = require("cors"); // Import cors
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
@@ -11,20 +10,11 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enable CORS for all routes and all origins
-app.use(cors({
-  origin: ["https://speech-app-delta.vercel.app/login","https://speech-app-delta.vercel.app"], // Allow all origins
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-  credentials: true, // Allow cookies and credentials
-  optionsSuccessStatus: 200, // Respond with 200 status for preflight requests
-}));
+// Enable CORS
+app.use(cors());
 
 // Parse JSON request bodies
 app.use(express.json());
-
-// Handle preflight requests for all routes
-app.options("*", cors()); // Allow preflight requests for all routes
 
 // MongoDB Connection
 mongoose
