@@ -22,15 +22,26 @@ function Modal({ isOpen, onClose, onConfirm }) {
       >
         <h2 style={styles.modalTitle}>Feedback</h2>
         <p style={styles.modalText}>
-          Is the problem really urgent and not a matter of your own input? If so, text me at 650-480-0879.
+          Is the problem really urgent and not a matter of your own input? If so, text me at{" "}
+          <strong>650-480-0879</strong>.
         </p>
         <div style={styles.modalButtons}>
-          <button style={styles.modalButton} onClick={onConfirm}>
+          <motion.button
+            style={styles.modalButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onConfirm}
+          >
             Continue
-          </button>
-          <button style={styles.modalButtonCancel} onClick={onClose}>
+          </motion.button>
+          <motion.button
+            style={styles.modalButtonCancel}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onClose}
+          >
             Cancel
-          </button>
+          </motion.button>
         </div>
       </motion.div>
     </motion.div>
@@ -194,7 +205,6 @@ function HomeScreen() {
   );
 }
 
-
 // Styles
 const styles = {
   container: {
@@ -332,50 +342,61 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: "rgba(0, 0, 0, 0.5)",
+    background: "rgba(0, 0, 0, 0.6)",
+    backdropFilter: "blur(5px)", // Adds a blur effect to the background
     zIndex: 1000,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     background: "#fff",
-    borderRadius: "8px",
-    padding: "20px",
-    width: "80%",
-    maxWidth: "400px",
-    margin: "50px auto",
+    borderRadius: "12px",
+    padding: "25px",
+    width: "90%",
+    maxWidth: "450px",
     textAlign: "center",
-    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
   },
   modalTitle: {
-    fontSize: "1.5rem",
-    marginBottom: "10px",
+    fontSize: "1.8rem",
+    marginBottom: "15px",
     fontWeight: "bold",
+    color: "#333",
   },
   modalText: {
     fontSize: "1rem",
-    marginBottom: "20px",
+    marginBottom: "25px",
+    color: "#555",
+    lineHeight: "1.5",
   },
   modalButtons: {
     display: "flex",
     justifyContent: "center",
-    gap: "15px",
+    gap: "20px",
   },
   modalButton: {
-    padding: "10px 20px",
+    padding: "12px 24px",
     fontSize: "1rem",
     backgroundColor: "#28a745",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     color: "#fff",
     cursor: "pointer",
+    transition: "background 0.3s ease",
+    fontWeight: "600",
   },
   modalButtonCancel: {
-    padding: "10px 20px",
+    padding: "12px 24px",
     fontSize: "1rem",
     backgroundColor: "#dc3545",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     color: "#fff",
     cursor: "pointer",
+    transition: "background 0.3s ease",
+    fontWeight: "600",
   },
 };
 
