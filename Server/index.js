@@ -10,9 +10,30 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enable CORS
-app.use(cors());
+// Allowed Origins List
+const allowedOrigins = [
+  "http://localhost:3000", 
+  "https://speech-app-delta.vercel.app",
+  "https://speech-app-delta.vercel.app/api/news",
+  "https://speech-app-delta.vercel.app/signup",
+  "https://speech-app-delta.vercel.app/login"
+];
 
+// CORS Options
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // Allow cookies and authentication headers
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
+
+// Enable CORS with Options
+app.use(cors(corsOptions));
 // Parse JSON request bodies
 app.use(express.json());
 
