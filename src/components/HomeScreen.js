@@ -23,7 +23,7 @@ function Modal({ isOpen, onClose, onConfirm }) {
         <h2 style={styles.modalTitle}>Feedback</h2>
         <p style={styles.modalText}>
           Is the problem really urgent and not a matter of your own input? If so, text me at{" "}
-          <strong>6504800879</strong>.
+          <strong>‪(650) 273-6590‬</strong>.
         </p>
         <div style={styles.modalButtons}>
           <motion.button
