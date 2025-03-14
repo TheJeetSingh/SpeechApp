@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // Import jwt-decode
+import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
 
 // Modal Component
@@ -53,24 +53,22 @@ function Header({ onFeedbackClick }) {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
 
-  // Check if the user is logged in on component mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        setUserName(decodedToken.name); // Set the user's name
+        setUserName(decodedToken.name);
       } catch (error) {
         console.error("Error decoding token", error);
       }
     }
   }, []);
 
-  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setUserName(""); // Clear the user's name
-    navigate("/login"); // Redirect to the login page
+    setUserName("");
+    navigate("/login");
   };
 
   return (
@@ -134,28 +132,17 @@ function HomeScreen() {
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
 
-  // Get userName from JWT token on component mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        setUserName(decodedToken.name); // Store the name from decoded token
+        setUserName(decodedToken.name);
       } catch (error) {
         console.error("Error decoding token", error);
       }
     }
   }, []);
-
-  const handleNavigate = (type) => {
-    if (type === "Impromptu") {
-      navigate("/topics");
-    } else if (type === "Extemp") {
-      navigate("/beta");
-    } else {
-      navigate("/speech", { state: { type } });
-    }
-  };
 
   const handleFeedbackClick = () => {
     setIsModalOpen(true);
@@ -163,43 +150,108 @@ function HomeScreen() {
 
   const handleConfirm = () => {
     setIsModalOpen(false);
-    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSe4OOpOy9YXIis2tJIfMBpcQ6yIQQetQ9gm91YgdCt6dbpzbw/viewform?usp=dialog"; // Redirect to the Google Form
+    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSe4OOpOy9YXIis2tJIfMBpcQ6yIQQetQ9gm91YgdCt6dbpzbw/viewform?usp=dialog";
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
   };
 
+  // Sections for full-page scrolling
+  const sections = [
+    {
+      id: "impromptu",
+      title: "Impromptu",
+      description: "Quick thinking, spontaneous speeches. 2 minutes",
+      background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+      navigateTo: "/topics",
+    },
+    {
+      id: "interp",
+      title: "Interp",
+      description: "Perform your own interpretation of a piece.",
+      background: "linear-gradient(135deg, #6a11cb, #2575fc)",
+      navigateTo: "/speech",
+    },
+    {
+      id: "original",
+      title: "Original",
+      description: "Craft and present original content.",
+      background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
+      navigateTo: "/speech",
+    },
+    {
+      id: "extemp",
+      title: "Extemp",
+      description: "Speak on current events with depth.",
+      background: "linear-gradient(135deg, #00c853, #00e676)",
+      navigateTo: "/beta",
+    },
+  ];
+
   return (
     <div style={styles.container}>
+      {/* Parallax Background */}
+      <div style={styles.parallaxBackground}></div>
       <Header onFeedbackClick={handleFeedbackClick} />
-      <motion.h1
-        style={styles.heading}
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        Welcome to Speech App{userName ? `, ${userName}` : ""} {/* Display "Welcome to Speech App" and userName if available */}
-      </motion.h1>
-      <div style={styles.buttonContainer}>
-        {[
-          { type: "Impromptu", desc: "Quick thinking, spontaneous speeches. 2 minutes" },
-          { type: "Interp", desc: "Perform your own interpretation of a piece." },
-          { type: "Original", desc: "Craft and present original content." },
-          { type: "Extemp", desc: "Speak on current events with depth." },
-        ].map(({ type, desc }) => (
-          <div key={type} style={styles.buttonWrapper}>
-            <motion.button
-              style={styles.button}
-              onClick={() => handleNavigate(type)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+
+      {/* Welcome Screen */}
+      <div style={styles.welcomeScreen}>
+        <motion.h1
+          style={styles.heading}
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          Welcome to Speech App{userName ? `, ${userName}` : ""}
+        </motion.h1>
+        {/* Down Arrow */}
+        <motion.div
+          style={styles.downArrow}
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          ↓
+        </motion.div>
+      </div>
+
+      {/* Full-page sections */}
+      {sections.map((section, index) => (
+        <div
+          key={section.id}
+          id={section.id}
+          style={{ ...styles.fullPageSection, background: section.background }}
+        >
+          <div style={styles.sectionHeader}>
+            <motion.h2
+              style={styles.sectionTitle}
+              initial={{ opacity: 0, y: -50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              {type}
+              {section.title}
+            </motion.h2>
+            {/* Side Arrow Button */}
+            <motion.button
+              style={styles.sideArrowButton}
+              whileHover={{ scale: 1.1, rotate: 45 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(section.navigateTo)}
+            >
+              →
             </motion.button>
           </div>
-        ))}
-      </div>
+          <motion.p
+            style={styles.sectionDescription}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            {section.description}
+          </motion.p>
+        </div>
+      ))}
+
       <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
     </div>
   );
@@ -213,26 +265,37 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
     color: "#fff",
     textAlign: "center",
     fontFamily: "'Poppins', sans-serif",
     position: "relative",
-    paddingTop: "100px", // Adjust for header
+    overflow: "hidden",
+  },
+  parallaxBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+    zIndex: -1,
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "10px 20px",
-    background: "#1e3c72",
+    background: "rgba(30, 60, 114, 0.8)",
+    backdropFilter: "blur(10px)",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
     width: "100%",
     position: "fixed",
     top: 0,
     left: 0,
     zIndex: 4000,
-    marginLeft: "-17px", // Moves both buttons to the left
   },
   headerTitle: {
     fontSize: "1.8rem",
@@ -243,7 +306,6 @@ const styles = {
   headerButtons: {
     display: "flex",
     gap: "20px",
-    paddingLeft: "40px", // Keeps space between buttons as before
   },
   signInButton: {
     padding: "8px 16px",
@@ -251,7 +313,7 @@ const styles = {
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
-    background: "#00c853",
+    background: "linear-gradient(135deg, #00c853, #00e676)",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
@@ -263,7 +325,7 @@ const styles = {
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
-    background: "#00bcd4", // A different color to distinguish it from the sign-in button
+    background: "linear-gradient(135deg, #00bcd4, #00e5ff)",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
@@ -275,7 +337,7 @@ const styles = {
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
-    background: "#C70039",
+    background: "linear-gradient(135deg, #C70039, #ff416c)",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
@@ -287,12 +349,11 @@ const styles = {
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
-    background: "#4CAF50", // Green background for the name button
+    background: "linear-gradient(135deg, #4CAF50, #66bb6a)",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    marginRight: "20px", // Add spacing between the name and logout button
   },
   logoutButton: {
     padding: "8px 16px",
@@ -300,11 +361,21 @@ const styles = {
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
-    background: "#ff4d4d",
+    background: "linear-gradient(135deg, #ff4d4d, #ff6b6b)",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+  },
+  welcomeScreen: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    width: "100%",
+    padding: "20px",
+    textAlign: "center",
   },
   heading: {
     fontSize: "3.5rem",
@@ -313,28 +384,56 @@ const styles = {
     letterSpacing: "1px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
-  buttonContainer: {
+  downArrow: {
+    fontSize: "2rem",
+    marginTop: "20px",
+    cursor: "pointer",
+  },
+  fullPageSection: {
     display: "flex",
-    flexDirection: "column", // This makes the buttons stack vertically
+    flexDirection: "column",
     justifyContent: "center",
-    gap: "20px", // Space between buttons
+    alignItems: "center",
+    minHeight: "100vh",
+    width: "100%",
+    padding: "20px",
+    textAlign: "center",
+    position: "relative",
+  },
+  sectionHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "20px",
+  },
+  sectionTitle: {
+    fontSize: "3rem",
+    fontWeight: "700",
+    marginBottom: "20px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+  },
+  sectionDescription: {
+    fontSize: "1.2rem",
+    maxWidth: "600px",
+    lineHeight: "1.6",
     marginBottom: "20px",
   },
-  buttonWrapper: {
-    display: "inline-block",
-  },
-  button: {
-    width: "250px", // All buttons will have the same width
-    height: "50px", // Fixed height for buttons
-    fontSize: "1.2rem",
+  sideArrowButton: {
+    padding: "12px 24px",
+    fontSize: "2rem",
     fontWeight: "600",
     border: "none",
-    borderRadius: "8px",
-    background: "linear-gradient(135deg, #d1d1d1, #ffffff)",
-    color: "#333",
+    borderRadius: "50%",
+    background: "rgba(255, 255, 255, 0.2)",
+    color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "60px",
+    height: "60px",
   },
   modalOverlay: {
     position: "fixed",
@@ -343,14 +442,14 @@ const styles = {
     right: 0,
     bottom: 0,
     background: "rgba(0, 0, 0, 0.6)",
-    backdropFilter: "blur(5px)", // Adds a blur effect to the background
+    backdropFilter: "blur(5px)",
     zIndex: 1000,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    background: "#fff",
+    background: "rgba(255, 255, 255, 0.9)",
     borderRadius: "12px",
     padding: "25px",
     width: "90%",
