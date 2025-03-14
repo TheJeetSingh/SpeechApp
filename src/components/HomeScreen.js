@@ -305,7 +305,8 @@ const styles = {
   },
   headerButtons: {
     display: "flex",
-    gap: "20px",
+    gap: "10px",
+    flexWrap: "wrap", // Allow buttons to wrap on smaller screens
   },
   signInButton: {
     padding: "8px 16px",
@@ -378,7 +379,7 @@ const styles = {
     textAlign: "center",
   },
   heading: {
-    fontSize: "3.5rem",
+    fontSize: "2.5rem", // Smaller font size for mobile
     fontWeight: "700",
     marginBottom: "20px",
     letterSpacing: "1px",
@@ -403,23 +404,24 @@ const styles = {
   sectionHeader: {
     display: "flex",
     alignItems: "center",
-    gap: "20px",
+    gap: "10px", // Smaller gap for mobile
+    flexDirection: "column", // Stack title and button vertically on mobile
   },
   sectionTitle: {
-    fontSize: "3rem",
+    fontSize: "2rem", // Smaller font size for mobile
     fontWeight: "700",
     marginBottom: "20px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
   sectionDescription: {
-    fontSize: "1.2rem",
-    maxWidth: "600px",
+    fontSize: "1rem", // Smaller font size for mobile
+    maxWidth: "90%", // Adjust width for mobile
     lineHeight: "1.6",
     marginBottom: "20px",
   },
   sideArrowButton: {
     padding: "12px 24px",
-    fontSize: "2rem",
+    fontSize: "1.5rem", // Smaller font size for mobile
     fontWeight: "600",
     border: "none",
     borderRadius: "50%",
@@ -432,8 +434,8 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    width: "60px",
-    height: "60px",
+    width: "50px", // Smaller size for mobile
+    height: "50px", // Smaller size for mobile
   },
   modalOverlay: {
     position: "fixed",
@@ -451,33 +453,33 @@ const styles = {
   modalContent: {
     background: "rgba(255, 255, 255, 0.9)",
     borderRadius: "12px",
-    padding: "25px",
+    padding: "20px",
     width: "90%",
-    maxWidth: "450px",
+    maxWidth: "350px", // Smaller modal for mobile
     textAlign: "center",
     boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.1)",
   },
   modalTitle: {
-    fontSize: "1.8rem",
+    fontSize: "1.5rem", // Smaller font size for mobile
     marginBottom: "15px",
     fontWeight: "bold",
     color: "#333",
   },
   modalText: {
-    fontSize: "1rem",
-    marginBottom: "25px",
+    fontSize: "0.9rem", // Smaller font size for mobile
+    marginBottom: "20px",
     color: "#555",
     lineHeight: "1.5",
   },
   modalButtons: {
     display: "flex",
     justifyContent: "center",
-    gap: "20px",
+    gap: "10px", // Smaller gap for mobile
   },
   modalButton: {
-    padding: "12px 24px",
-    fontSize: "1rem",
+    padding: "10px 20px",
+    fontSize: "0.9rem", // Smaller font size for mobile
     backgroundColor: "#28a745",
     border: "none",
     borderRadius: "8px",
@@ -487,8 +489,8 @@ const styles = {
     fontWeight: "600",
   },
   modalButtonCancel: {
-    padding: "12px 24px",
-    fontSize: "1rem",
+    padding: "10px 20px",
+    fontSize: "0.9rem", // Smaller font size for mobile
     backgroundColor: "#dc3545",
     border: "none",
     borderRadius: "8px",
