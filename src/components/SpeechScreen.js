@@ -4,11 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 import { FiMic, FiStopCircle, FiDownload, FiVideo, FiInfo } from "react-icons/fi";
-import { isMobile } from "react-device-detect";
-
-const getMobileStyles = (baseStyles, mobileStyles) => {
-  return isMobile ? { ...baseStyles, ...mobileStyles } : baseStyles;
-};
 
 // Disclaimer Modal Component
 function DisclaimerModal({ isOpen, onClose, onAccept }) {
@@ -199,12 +194,7 @@ function SpeechScreen() {
 
   return (
     <motion.div
-      style={{
-        ...getMobileStyles(componentStyles.container, {
-          padding: "1rem",
-        }),
-        backgroundColor: "rgba(0, 0, 0, 0.85)",
-      }}
+      style={componentStyles.container}
       variants={animations.container}
       initial="hidden"
       animate="visible"
