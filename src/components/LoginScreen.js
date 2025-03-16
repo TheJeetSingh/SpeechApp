@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import config from "../config"; // Import the config object
+
+const API_URL = "https://speech-app-server.vercel.app"; // Direct URL to your backend
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,22 +15,25 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch(`${config.API_URL}/api/login`, {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       const data = await response.json();
-      console.log(data);
 
       if (!response.ok) throw new Error(data.message || "Login failed");
 
       localStorage.setItem("token", data.token);
       navigate("/");
     } catch (error) {
-      setError(error.message);
+      console.error("Login error:", error);
+      setError(error.message || "Failed to login. Please try again.");
     }
   };
 

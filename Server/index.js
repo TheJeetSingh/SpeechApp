@@ -12,13 +12,8 @@ const PORT = process.env.PORT || 5001;
 
 // Allowed Origins List
 const allowedOrigins = [
-  "http://localhost:3000/api/login",
-  "http://localhost:3000/api/signup",
-  "http://localhost:3000/", 
-  "https://speech-app-delta.vercel.app",
-  "https://speech-app-delta.vercel.app/api/news",
-  "https://speech-app-delta.vercel.app/api/signup",
-  "https://speech-app-delta.vercel.app/api/login"
+  "http://localhost:3000",
+  "https://speech-app-delta.vercel.app"
 ];
 
 // CORS Options
