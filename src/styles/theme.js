@@ -25,7 +25,7 @@ export const colors = {
     dark: '#333333',
   },
   background: {
-    glass: 'rgba(255, 255, 255, 0.1)',
+    glass: 'rgba(255, 255, 255, 0.25)',
     overlay: 'rgba(0, 0, 0, 0.3)',
     card: 'rgba(255, 255, 255, 0.9)',
   }
