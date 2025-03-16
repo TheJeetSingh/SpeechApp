@@ -2,62 +2,42 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
+import { FiArrowRight, FiBook, FiMessageSquare, FiBox, FiGlobe } from "react-icons/fi";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
-import { FiArrowRight } from "react-icons/fi";
 
-function TopicsScreen() {
+const TopicsScreen = () => {
   const navigate = useNavigate();
-  const headingText = "Choose a Topic";
 
-  const topics = [
+  const categories = [
     {
-      type: "quotes",
       title: "Quotes",
-      description: "Practice with famous quotes and sayings",
-      gradient: `linear-gradient(135deg, ${colors.accent.red}, ${colors.accent.red}88)`,
-      icon: "💭"
+      description: "Interpret and discuss meaningful quotes from various sources",
+      icon: <FiMessageSquare size={24} />,
+      path: "/quote",
+      gradient: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.blue})`,
     },
     {
-      type: "concrete",
-      title: "Concrete",
-      description: "Speak about tangible objects",
-      gradient: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.green}88)`,
-      icon: "🎯"
-    },
-    {
-      type: "abstract",
       title: "Abstract",
-      description: "Explore topics that aren't physically graspable",
-      gradient: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.blue}88)`,
-      icon: "🌌"
+      description: "Explore philosophical and conceptual topics",
+      icon: <FiBook size={24} />,
+      path: "/abstract",
+      gradient: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.green})`,
     },
     {
-      type: "current",
+      title: "Concrete",
+      description: "Discuss tangible, real-world subjects",
+      icon: <FiBox size={24} />,
+      path: "/concrete",
+      gradient: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.yellow})`,
+    },
+    {
       title: "Current Events",
-      description: "Discuss the most recent news",
-      gradient: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.purple}88)`,
-      icon: "📰"
-    }
+      description: "Address contemporary issues and news",
+      icon: <FiGlobe size={24} />,
+      path: "/current",
+      gradient: `linear-gradient(135deg, ${colors.accent.red}, ${colors.accent.purple})`,
+    },
   ];
-
-  const handleTopicSelect = (topicType) => {
-    switch (topicType) {
-      case "quotes":
-        navigate("/quote");
-        break;
-      case "concrete":
-        navigate("/concrete");
-        break;
-      case "abstract":
-        navigate("/abstract");
-        break;
-      case "current":
-        navigate("/current");
-        break;
-      default:
-        break;
-    }
-  };
 
   return (
     <motion.div
@@ -78,72 +58,53 @@ function TopicsScreen() {
         <motion.h1
           style={styles.heading}
           variants={animations.heading}
-          animate={{
-            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "linear"
-          }}
         >
-          {headingText}
+          Choose Your Topic Type
         </motion.h1>
 
-        <motion.div
-          style={styles.topicsContainer}
-          variants={animations.content}
-        >
+        <motion.div style={styles.categoriesGrid}>
           <AnimatePresence>
-            {topics.map((topic, index) => (
+            {categories.map((category, index) => (
               <motion.div
-                key={topic.type}
+                key={category.title}
                 style={{
-                  ...styles.topicCard,
-                  background: topic.gradient
+                  ...styles.categoryCard,
+                  background: category.gradient,
                 }}
                 variants={animations.card}
+                custom={index}
                 whileHover="hover"
                 whileTap="tap"
-                onClick={() => handleTopicSelect(topic.type)}
-                custom={index}
+                onClick={() => navigate(category.path)}
                 layout
               >
-                <motion.div
-                  style={styles.topicIcon}
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0],
+                <motion.div 
+                  style={styles.iconContainer}
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.1, 1]
                   }}
-                  transition={{
+                  transition={{ 
                     duration: 2,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: "easeInOut",
+                    delay: index * 0.2
                   }}
                 >
-                  {topic.icon}
+                  {category.icon}
                 </motion.div>
-                <motion.h2 
-                  style={styles.topicTitle}
-                  animate={{
-                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
-                >
-                  {topic.title}
+                <motion.h2 style={styles.cardTitle}>
+                  {category.title}
                 </motion.h2>
-                <motion.p 
-                  style={styles.topicDescription}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  {topic.description}
+                <motion.p style={styles.cardDescription}>
+                  {category.description}
                 </motion.p>
+                <motion.div
+                  style={styles.arrowContainer}
+                  whileHover={{ x: 5 }}
+                >
+                  <FiArrowRight size={20} />
+                </motion.div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -151,62 +112,77 @@ function TopicsScreen() {
       </motion.div>
     </motion.div>
   );
-}
+};
 
 const styles = {
   heading: {
     ...componentStyles.heading,
-    marginBottom: "2rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.secondary.main})`,
+    marginBottom: "1.5rem",
+    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.blue})`,
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
-  },
-  topicsContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "clamp(1rem, 3vw, 2rem)",
     width: "100%",
-    padding: "clamp(0.5rem, 2vw, 1rem)",
+    maxWidth: "800px",
+    margin: "0 auto 1.5rem auto",
   },
-  topicCard: {
+  categoriesGrid: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "1rem",
+    width: "98%",
+    maxWidth: "1400px",
+    margin: "0 auto",
+    padding: "0.5rem",
+  },
+  categoryCard: {
     background: colors.background.glass,
-    padding: "2rem",
-    borderRadius: "15px",
+    padding: "1.25rem",
+    borderRadius: "20px",
     backdropFilter: "blur(10px)",
     border: "1px solid rgba(255, 255, 255, 0.18)",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     cursor: "pointer",
+    position: "relative",
+    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "flex-start",
+    gap: "0.5rem",
     transition: "all 0.3s ease",
+    flex: 1,
+    maxWidth: "300px",
+    minWidth: "220px",
   },
-  topicIcon: {
-    fontSize: "clamp(2rem, 6vw, 3rem)",
-    marginBottom: "1rem",
-    filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))",
+  iconContainer: {
+    color: colors.text.primary,
+    background: "rgba(255, 255, 255, 0.1)",
+    padding: "0.6rem",
+    borderRadius: "10px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  topicTitle: {
-    fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
+  cardTitle: {
+    fontSize: "1.1rem",
     fontWeight: "600",
-    marginBottom: "0.5rem",
     color: colors.text.primary,
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
+    margin: 0,
   },
-  topicDescription: {
-    fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
-    opacity: 0.9,
-    lineHeight: 1.4,
-    maxWidth: "280px",
-    margin: "0 auto",
+  cardDescription: {
+    fontSize: "0.85rem",
+    color: colors.text.secondary,
+    margin: 0,
+    lineHeight: 1.3,
+    flex: 1,
+  },
+  arrowContainer: {
     color: colors.text.primary,
+    display: "flex",
+    alignItems: "center",
+    marginTop: "0.5rem",
+    transition: "transform 0.3s ease",
   },
-  "@media (max-width: 768px)": {
-    topicsContainer: {
-      gridTemplateColumns: "1fr",
-    }
-  }
 };
 
 export default TopicsScreen;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
+import { FiClock, FiMessageSquare, FiArrowRight } from "react-icons/fi";
 import quotes from "../data/quotes";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 
@@ -37,7 +38,11 @@ function QuoteScreen() {
       handleQuoteSelect(quotesList[Math.floor(Math.random() * quotesList.length)]);
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer, quotesList, handleQuoteSelect]);
+  }, [isTimerActive, timer, quotesList]);
+
+  const formatTime = (seconds) => {
+    return seconds.toString().padStart(2, "0");
+  };
 
   return (
     <motion.div
@@ -50,64 +55,169 @@ function QuoteScreen() {
         id="tsparticles"
         options={particlesConfig}
       />
+      
       <motion.div
         style={componentStyles.content}
         variants={animations.content}
       >
-        <motion.div style={componentStyles.timer} variants={animations.content}>
-          Time Left: {timer}s
-        </motion.div>
         <motion.h1
-          style={componentStyles.heading}
+          style={styles.heading}
           variants={animations.heading}
         >
-          Choose a Quote
+          Choose Your Quote
         </motion.h1>
-        <motion.ul
-          style={styles.list}
-          variants={animations.content}
+
+        <motion.div
+          style={styles.timerContainer}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <AnimatePresence>
+          <FiClock size={24} style={styles.clockIcon} />
+          <motion.span 
+            style={{
+              ...styles.timer,
+              color: timer <= 5 ? colors.accent.red : colors.text.primary
+            }}
+          >
+            {formatTime(timer)}s
+          </motion.span>
+        </motion.div>
+
+        <motion.div style={styles.quotesContainer}>
+          <AnimatePresence mode="wait">
             {quotesList.map((quote, index) => (
-              <motion.li
-                key={index}
-                style={styles.listItem}
+              <motion.div
+                key={quote}
+                style={styles.quoteCard}
                 variants={animations.card}
+                custom={index}
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => handleQuoteSelect(quote)}
-                custom={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: { delay: index * 0.2 }
+                }}
+                exit={{ opacity: 0, y: -20 }}
                 layout
               >
-                {quote}
-              </motion.li>
+                <motion.div 
+                  style={styles.quoteIconContainer}
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: index * 0.2
+                  }}
+                >
+                  <FiMessageSquare size={24} />
+                </motion.div>
+                <motion.p style={styles.quoteText}>
+                  {quote}
+                </motion.p>
+                <motion.div
+                  style={styles.arrowContainer}
+                  whileHover={{ x: 5 }}
+                >
+                  <FiArrowRight size={20} />
+                </motion.div>
+              </motion.div>
             ))}
           </AnimatePresence>
-        </motion.ul>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
 }
 
 const styles = {
-  list: {
-    listStyle: "none",
-    padding: 0,
+  heading: {
+    ...componentStyles.heading,
+    marginBottom: "2.5rem",
+    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.purple})`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textAlign: "center",
+    width: "100%",
+    maxWidth: "800px",
+    margin: "0 auto 2.5rem auto",
+  },
+  timerContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "1rem",
+    background: colors.background.glass,
+    padding: "1.5rem 2.5rem",
+    borderRadius: "50px",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    marginBottom: "3rem",
+    width: "fit-content",
+    margin: "0 auto 3rem auto",
+  },
+  clockIcon: {
+    color: colors.text.primary,
+  },
+  timer: {
+    fontSize: "1.8rem",
+    fontWeight: "700",
+    transition: "color 0.3s ease",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+  },
+  quotesContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
-    width: "100%",
+    gap: "2rem",
+    width: "90%",
     maxWidth: "800px",
     margin: "0 auto",
   },
-  listItem: {
-    ...componentStyles.card,
-    fontSize: "1.2rem",
-    padding: "20px 32px",
-    background: `linear-gradient(135deg, ${colors.accent.red}, ${colors.accent.red}88)`,
+  quoteCard: {
+    background: colors.background.glass,
+    padding: "2rem",
+    borderRadius: "20px",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "1.5rem",
+    transition: "all 0.3s ease",
+  },
+  quoteIconContainer: {
     color: colors.text.primary,
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
+    background: "rgba(255, 255, 255, 0.1)",
+    padding: "1rem",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  quoteText: {
+    fontSize: "1.2rem",
+    color: colors.text.primary,
+    margin: 0,
     lineHeight: 1.6,
+    flex: 1,
+  },
+  arrowContainer: {
+    color: colors.text.primary,
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
+    alignSelf: "center",
+    transition: "transform 0.3s ease",
   },
 };
 

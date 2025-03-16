@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import API_BASE_URL from "../config"; // Import the base API URL
+import config from "../config"; // Import the config object
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,10 +14,11 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
+      const response = await fetch(`${config.API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
       const data = await response.json();
