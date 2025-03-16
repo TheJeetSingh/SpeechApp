@@ -32,48 +32,55 @@ const ExtempScreen = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+
         const response = await fetch(`${config.API_URL}${config.NEWS_ENDPOINT}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-          }
+          },
+          credentials: 'omit' // Prevent CORS preflight
         });
 
         // Check if response is ok and content-type is application/json
         const contentType = response.headers.get("content-type");
-        if (!response.ok || !contentType?.includes("application/json")) {
-          setError("Unable to fetch extemp topics. Please try again later.");
-          return;
+        if (!response.ok) {
+          throw new Error(`Failed to fetch topics (${response.status})`);
         }
 
-        let data;
-        try {
-          data = await response.json();
-        } catch (jsonError) {
-          console.error("Failed to parse JSON:", jsonError);
-          setError("Invalid response format. Please try again later.");
-          return;
+        if (!contentType?.includes("application/json")) {
+          throw new Error("Invalid response format from server");
         }
 
-        if (data?.articles?.length) {
-          const processedArticles = data.articles.map(article => ({
-            title: article.title || '',
-            description: article.description || ''
+        const data = await response.json();
+        
+        if (!data?.articles?.length) {
+          throw new Error("No articles available");
+        }
+
+        const processedArticles = data.articles
+          .filter(article => article.title && article.description) // Only keep articles with both title and description
+          .map(article => ({
+            title: article.title.trim(),
+            description: article.description.trim()
           }));
-          // Filter for extemp topics and get 2 random ones
-          const filteredArticles = filterExtempArticles(processedArticles);
-          if (filteredArticles.length > 0) {
-            setArticles(getRandomArticles(filteredArticles, 2));
-          } else {
-            setError("No relevant extemp topics found. Please try again.");
-          }
-        } else {
-          setError("No topics available at the moment. Please try again later.");
+
+        if (processedArticles.length === 0) {
+          throw new Error("No valid articles found");
         }
+
+        // Filter for extemp topics and get 2 random ones
+        const filteredArticles = filterExtempArticles(processedArticles);
+        if (filteredArticles.length === 0) {
+          throw new Error("No relevant extemp topics found");
+        }
+
+        setArticles(getRandomArticles(filteredArticles, 2));
       } catch (error) {
-        console.error("API Error:", error);
-        setError("Failed to load topics. Please check your connection and try again.");
+        console.error("Error fetching news topics:", error);
+        setError(error.message || "Failed to load topics. Please try again.");
       } finally {
         setIsLoading(false);
       }
