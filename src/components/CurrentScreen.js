@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API_BASE_URL from "../config"; // Import the base API URL
+import config from "../config";
 
 const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
@@ -10,22 +10,63 @@ const CurrentScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Fallback topics in case API fails
+  const fallbackTopics = [
+    {
+      title: "Artificial Intelligence Advancements",
+      description: "Recent breakthroughs in AI technology and their impact on society"
+    },
+    {
+      title: "Climate Change Solutions",
+      description: "Latest initiatives and technologies addressing environmental challenges"
+    },
+    {
+      title: "Global Economic Trends",
+      description: "Current economic developments and their worldwide implications"
+    }
+  ];
+
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/news`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        const response = await fetch(`${config.API_URL}${config.NEWS_ENDPOINT}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        });
+
+        // Check if response is ok and content-type is application/json
+        const contentType = response.headers.get("content-type");
+        if (!response.ok || !contentType?.includes("application/json")) {
+          console.error('API Response not valid:', response.status, contentType);
+          setArticles(fallbackTopics);
+          return;
         }
-        const data = await response.json();
-        if (data.articles?.length) {
-          setArticles(getRandomArticles(data.articles, 3));
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error("Failed to parse JSON:", jsonError);
+          setArticles(fallbackTopics);
+          return;
+        }
+
+        if (data?.articles?.length) {
+          const processedArticles = data.articles.map(article => ({
+            title: article.title || '',
+            description: article.description || ''
+          }));
+          setArticles(getRandomArticles(processedArticles, 3));
         } else {
-          setError("No articles found. Please try again later.");
+          console.log("No articles found in response");
+          setArticles(fallbackTopics);
         }
       } catch (error) {
-        console.error(error);
-        setError("Failed to fetch news articles. Please try again later.");
+        console.error("API Error:", error);
+        setArticles(fallbackTopics);
       } finally {
         setIsLoading(false);
       }
