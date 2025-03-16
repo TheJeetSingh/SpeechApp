@@ -317,6 +317,30 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
   },
+  featureCard: {
+    background: 'rgba(42, 82, 152, 0.95)',
+    padding: "2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    marginBottom: "2rem",
+  },
+  feedbackCard: {
+    background: 'rgba(42, 82, 152, 0.95)',
+    padding: "2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    marginBottom: "2rem",
+  },
+  bugCard: {
+    background: 'rgba(42, 82, 152, 0.95)',
+    padding: "2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    marginBottom: "2rem",
+  },
 };
 
 export default BetaScreen;
