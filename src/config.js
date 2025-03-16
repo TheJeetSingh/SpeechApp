@@ -1,3 +1,6 @@
-const API_BASE_URL = "https://speech-app-server.vercel.app";
+const config = {
+  API_URL: process.env.REACT_APP_API_URL || 'https://speech-app-server.vercel.app',
+  NEWS_ENDPOINT: '/api/news'
+};
 
-export default API_BASE_URL;
+export default config;

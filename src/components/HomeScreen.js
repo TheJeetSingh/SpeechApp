@@ -474,7 +474,8 @@ const styles = {
     borderBottom: "1px solid rgba(255, 255, 255, 0.18)",
     '@media (max-width: 768px)': {
       padding: "0.8rem 1rem",
-    },
+      justifyContent: "flex-end"
+    }
   },
   headerTitle: {
     fontSize: "clamp(1.2rem, 5vw, 2rem)",
@@ -499,9 +500,10 @@ const styles = {
     height: "22px",
     cursor: "pointer",
     zIndex: 4001,
+    marginLeft: "auto",
     '@media (max-width: 768px)': {
-      display: "flex",
-    },
+      display: "flex"
+    }
   },
   hamburgerLine: {
     width: "100%",
@@ -514,6 +516,7 @@ const styles = {
     display: "flex",
     gap: "clamp(0.4rem, 1vw, 0.8rem)",
     alignItems: "center",
+    marginRight: "2rem",
     '@media (max-width: 768px)': {
       position: "fixed",
       top: "60px",
@@ -521,15 +524,16 @@ const styles = {
       right: 0,
       flexDirection: "column",
       width: "100%",
+      margin: 0,
       background: "rgba(30, 60, 114, 0.95)",
       padding: "1rem",
       boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
       transform: "translateY(-100%)",
       transition: "transform 0.3s ease",
       "&.open": {
-        transform: "translateY(0)",
-      },
-    },
+        transform: "translateY(0)"
+      }
+    }
   },
   signInButton: {
     padding: "0.5rem 1rem",
