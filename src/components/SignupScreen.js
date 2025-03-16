@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const API_URL = "https://speech-app-server.vercel.app"; // Direct URL to your backend
+// Update API URL to point to the backend server
+const API_URL = "https://speech-app-server.vercel.app";
 
 function Signup() {
   const navigate = useNavigate();
@@ -28,9 +29,16 @@ function Signup() {
         credentials: 'include'
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        throw new Error("Failed to parse server response");
+      }
 
-      if (!response.ok) throw new Error(data.message || "Signup failed");
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
 
       localStorage.setItem("token", data.token);
       navigate("/");
