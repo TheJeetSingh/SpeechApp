@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import API_BASE_URL from "../config"; // Import the base API URL
+
+const API_URL = "https://speech-app-server.vercel.app"; // Direct URL to your backend
 
 function Signup() {
   const navigate = useNavigate();
@@ -17,21 +18,25 @@ function Signup() {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/signup`, {
+      const response = await fetch(`${API_URL}/api/signup`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify(formData),
+        credentials: 'include'
       });
 
       const data = await response.json();
-      console.log(data);
 
       if (!response.ok) throw new Error(data.message || "Signup failed");
 
       localStorage.setItem("token", data.token);
       navigate("/");
     } catch (error) {
-      setError(error.message);
+      console.error("Signup error:", error);
+      setError(error.message || "Failed to sign up. Please try again.");
     }
   };
 
