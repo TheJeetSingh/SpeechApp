@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import Particles from "react-tsparticles";
+import { Engine } from "tsparticles-engine";
+import { FiArrowDown } from "react-icons/fi";
 
 // Modal Component
 function Modal({ isOpen, onClose, onConfirm }) {
@@ -52,6 +55,7 @@ function Modal({ isOpen, onClose, onConfirm }) {
 function Header({ onFeedbackClick }) {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -71,10 +75,19 @@ function Header({ onFeedbackClick }) {
     navigate("/login");
   };
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <div style={styles.header}>
       <h1 style={styles.headerTitle}>ARTICULATE</h1>
-      <div style={styles.headerButtons}>
+      <div style={styles.hamburger} onClick={toggleMenu}>
+        <div style={{ ...styles.hamburgerLine, transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }}></div>
+        <div style={{ ...styles.hamburgerLine, opacity: menuOpen ? 0 : 1 }}></div>
+        <div style={{ ...styles.hamburgerLine, transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></div>
+      </div>
+      <div style={{ ...styles.headerButtons, display: menuOpen || window.innerWidth > 768 ? 'flex' : 'none' }}>
         {userName ? (
           <>
             <motion.button
@@ -131,6 +144,22 @@ function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+  const containerRef = useRef(null);
+
+  // Parallax effect with Framer Motion
+  const { scrollYProgress } = useScroll({ container: containerRef });
+  const y1 = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const y2 = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const y3 = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
+
+  // Initialize particles
+  const particlesInit = async (engine) => {
+    console.log("Particles engine initialized", engine);
+  };
+
+  const particlesLoaded = async (container) => {
+    console.log("Particles loaded", container);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -157,7 +186,13 @@ function HomeScreen() {
     setIsModalOpen(false);
   };
 
-  // Sections for full-page scrolling
+  const scrollToSection = (id) => {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const sections = [
     {
       id: "impromptu",
@@ -165,6 +200,7 @@ function HomeScreen() {
       description: "Quick thinking, spontaneous speeches. 2 minutes",
       background: "linear-gradient(135deg, #1e3c72, #2a5298)",
       navigateTo: "/topics",
+      icon: "⚡️",
     },
     {
       id: "interp",
@@ -172,6 +208,7 @@ function HomeScreen() {
       description: "Perform your own interpretation of a piece.",
       background: "linear-gradient(135deg, #6a11cb, #2575fc)",
       navigateTo: "/speech",
+      icon: "🎭",
     },
     {
       id: "original",
@@ -179,6 +216,7 @@ function HomeScreen() {
       description: "Craft and present original content.",
       background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
       navigateTo: "/speech",
+      icon: "✏️",
     },
     {
       id: "extemp",
@@ -186,13 +224,62 @@ function HomeScreen() {
       description: "Speak on current events with depth.",
       background: "linear-gradient(135deg, #00c853, #00e676)",
       navigateTo: "/beta",
+      icon: "🌎",
     },
   ];
 
   return (
-    <div style={styles.container}>
-      {/* Parallax Background */}
-      <div style={styles.parallaxBackground}></div>
+    <div style={styles.container} ref={containerRef}>
+      {/* Particle Background */}
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        loaded={particlesLoaded}
+        options={{
+          particles: {
+            number: {
+              value: 50,
+            },
+            size: {
+              value: 3,
+            },
+            color: {
+              value: "#ffffff",
+            },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: "#ffffff",
+              opacity: 0.4,
+              width: 1,
+            },
+            move: {
+              enable: true,
+              speed: 2,
+            },
+          },
+          interactivity: {
+            events: {
+              onhover: {
+                enable: true,
+                mode: "repulse",
+              },
+            },
+          },
+        }}
+      />
+
+      {/* Parallax Background Layers */}
+      <motion.div
+        style={{ ...styles.parallaxLayer, y: y1, backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')" }}
+      />
+      <motion.div
+        style={{ ...styles.parallaxLayer, y: y2, backgroundImage: "url('https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')" }}
+      />
+      <motion.div
+        style={{ ...styles.parallaxLayer, y: y3, backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')" }}
+      />
+
       <Header onFeedbackClick={handleFeedbackClick} />
 
       {/* Welcome Screen */}
@@ -205,13 +292,26 @@ function HomeScreen() {
         >
           Welcome to Speech App{userName ? `, ${userName}` : ""}
         </motion.h1>
-        {/* Down Arrow */}
+        <div style={styles.navDots}>
+          {sections.map((section, index) => (
+            <motion.div
+              key={index}
+              style={styles.navDot}
+              whileHover={{ scale: 1.5, backgroundColor: "#fff" }}
+              onClick={() => scrollToSection(section.id)}
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: index * 0.2 }}
+            />
+          ))}
+        </div>
         <motion.div
           style={styles.downArrow}
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
+          onClick={() => scrollToSection(sections[0].id)}
         >
-          ↓
+          <FiArrowDown size={24} />
         </motion.div>
       </div>
 
@@ -222,33 +322,45 @@ function HomeScreen() {
           id={section.id}
           style={{ ...styles.fullPageSection, background: section.background }}
         >
-          <div style={styles.sectionHeader}>
-            <motion.h2
-              style={styles.sectionTitle}
-              initial={{ opacity: 0, y: -50 }}
+          <div style={styles.sectionContent}>
+            <div style={styles.sectionHeader}>
+              <motion.div
+                style={styles.sectionIcon}
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                {section.icon}
+              </motion.div>
+              <motion.h2
+                style={styles.sectionTitle}
+                initial={{ opacity: 0, y: -30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                {section.title}
+              </motion.h2>
+            </div>
+            <motion.p
+              style={styles.sectionDescription}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
             >
-              {section.title}
-            </motion.h2>
-            {/* Side Arrow Button */}
+              {section.description}
+            </motion.p>
             <motion.button
-              style={styles.sideArrowButton}
-              whileHover={{ scale: 1.1, rotate: 45 }}
+              style={styles.ctaButton}
+              whileHover={{ scale: 1.05, boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)" }}
               whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
               onClick={() => navigate(section.navigateTo)}
             >
-              →
+              Get Started <span style={styles.buttonArrow}>→</span>
             </motion.button>
           </div>
-          <motion.p
-            style={styles.sectionDescription}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {section.description}
-          </motion.p>
         </div>
       ))}
 
@@ -269,15 +381,22 @@ const styles = {
     textAlign: "center",
     fontFamily: "'Poppins', sans-serif",
     position: "relative",
-    overflow: "hidden",
+    overflow: "auto",
   },
-  parallaxBackground: {
-    position: "absolute",
+  particles: {
+    position: "fixed",
     top: 0,
     left: 0,
     width: "100%",
     height: "100%",
-    backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+    zIndex: -2,
+  },
+  parallaxLayer: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",
@@ -287,7 +406,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "10px 20px",
+    padding: "0.8rem 1.5rem",
     background: "rgba(30, 60, 114, 0.8)",
     backdropFilter: "blur(10px)",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
@@ -298,19 +417,50 @@ const styles = {
     zIndex: 4000,
   },
   headerTitle: {
-    fontSize: "1.8rem",
+    fontSize: "clamp(1.2rem, 5vw, 2rem)",
     fontWeight: "700",
     color: "#fff",
     margin: 0,
+    letterSpacing: "1px",
+  },
+  hamburger: {
+    display: "none",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    width: "30px",
+    height: "22px",
+    cursor: "pointer",
+    zIndex: 4001,
+    '@media (max-width: 768px)': {
+      display: "flex",
+    },
+  },
+  hamburgerLine: {
+    width: "100%",
+    height: "3px",
+    backgroundColor: "#fff",
+    borderRadius: "3px",
+    transition: "all 0.3s ease",
   },
   headerButtons: {
     display: "flex",
-    gap: "10px",
-    flexWrap: "wrap", // Allow buttons to wrap on smaller screens
+    gap: "0.8rem",
+    alignItems: "center",
+    '@media (max-width: 768px)': {
+      position: "absolute",
+      top: "60px",
+      right: "0",
+      flexDirection: "column",
+      width: "100%",
+      background: "rgba(30, 60, 114, 0.95)",
+      padding: "1rem",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+      zIndex: 4000,
+    },
   },
   signInButton: {
-    padding: "8px 16px",
-    fontSize: "1rem",
+    padding: "0.5rem 1rem",
+    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
@@ -319,10 +469,14 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    '@media (max-width: 768px)': {
+      width: "100%",
+      margin: "0.3rem 0",
+    },
   },
   signUpButton: {
-    padding: "8px 16px",
-    fontSize: "1rem",
+    padding: "0.5rem 1rem",
+    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
@@ -331,10 +485,14 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    '@media (max-width: 768px)': {
+      width: "100%",
+      margin: "0.3rem 0",
+    },
   },
   feedbackButton: {
-    padding: "8px 16px",
-    fontSize: "1rem",
+    padding: "0.5rem 1rem",
+    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
@@ -343,10 +501,14 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    '@media (max-width: 768px)': {
+      width: "100%",
+      margin: "0.3rem 0",
+    },
   },
   nameButton: {
-    padding: "8px 16px",
-    fontSize: "1rem",
+    padding: "0.5rem 1rem",
+    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
@@ -355,10 +517,14 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    '@media (max-width: 768px)': {
+      width: "100%",
+      margin: "0.3rem 0",
+    },
   },
   logoutButton: {
-    padding: "8px 16px",
-    fontSize: "1rem",
+    padding: "0.5rem 1rem",
+    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
     fontWeight: "600",
     border: "none",
     borderRadius: "8px",
@@ -367,6 +533,10 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    '@media (max-width: 768px)': {
+      width: "100%",
+      margin: "0.3rem 0",
+    },
   },
   welcomeScreen: {
     display: "flex",
@@ -375,20 +545,34 @@ const styles = {
     alignItems: "center",
     minHeight: "100vh",
     width: "100%",
-    padding: "20px",
+    padding: "1rem",
     textAlign: "center",
   },
   heading: {
-    fontSize: "2.5rem", // Smaller font size for mobile
+    fontSize: "clamp(2rem, 8vw, 3.5rem)",
     fontWeight: "700",
-    marginBottom: "20px",
+    marginBottom: "1rem",
     letterSpacing: "1px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
+  navDots: {
+    display: "flex",
+    gap: "0.8rem",
+    marginBottom: "1.5rem",
+  },
+  navDot: {
+    width: "10px",
+    height: "10px",
+    borderRadius: "50%",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
   downArrow: {
     fontSize: "2rem",
-    marginTop: "20px",
+    marginTop: "1rem",
     cursor: "pointer",
+    transition: "all 0.3s ease",
   },
   fullPageSection: {
     display: "flex",
@@ -397,45 +581,55 @@ const styles = {
     alignItems: "center",
     minHeight: "100vh",
     width: "100%",
-    padding: "20px",
+    padding: "1rem",
     textAlign: "center",
     position: "relative",
   },
+  sectionContent: {
+    maxWidth: "800px",
+    width: "90%",
+    margin: "0 auto",
+  },
   sectionHeader: {
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    gap: "10px", // Smaller gap for mobile
-    flexDirection: "column", // Stack title and button vertically on mobile
+    gap: "1rem",
+    marginBottom: "1.5rem",
+  },
+  sectionIcon: {
+    fontSize: "3rem",
+    marginBottom: "1rem",
   },
   sectionTitle: {
-    fontSize: "2rem", // Smaller font size for mobile
+    fontSize: "clamp(1.5rem, 6vw, 3rem)",
     fontWeight: "700",
-    marginBottom: "20px",
+    marginBottom: "1rem",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
   sectionDescription: {
-    fontSize: "1rem", // Smaller font size for mobile
-    maxWidth: "90%", // Adjust width for mobile
+    fontSize: "clamp(0.9rem, 3vw, 1.2rem)",
+    maxWidth: "90%",
     lineHeight: "1.6",
-    marginBottom: "20px",
+    marginBottom: "1.5rem",
   },
-  sideArrowButton: {
-    padding: "12px 24px",
-    fontSize: "1.5rem", // Smaller font size for mobile
+  ctaButton: {
+    padding: "0.75rem 1.5rem",
+    fontSize: "clamp(0.9rem, 3vw, 1rem)",
     fontWeight: "600",
     border: "none",
-    borderRadius: "50%",
-    background: "rgba(255, 255, 255, 0.2)",
+    borderRadius: "8px",
+    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    backdropFilter: "blur(10px)",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
-    width: "50px", // Smaller size for mobile
-    height: "50px", // Smaller size for mobile
+    gap: "0.5rem",
+  },
+  buttonArrow: {
+    fontSize: "1.2rem",
   },
   modalOverlay: {
     position: "fixed",
@@ -453,33 +647,33 @@ const styles = {
   modalContent: {
     background: "rgba(255, 255, 255, 0.9)",
     borderRadius: "12px",
-    padding: "20px",
+    padding: "1.5rem",
     width: "90%",
-    maxWidth: "350px", // Smaller modal for mobile
+    maxWidth: "clamp(300px, 80vw, 450px)",
     textAlign: "center",
     boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.1)",
   },
   modalTitle: {
-    fontSize: "1.5rem", // Smaller font size for mobile
-    marginBottom: "15px",
+    fontSize: "clamp(1.2rem, 5vw, 1.8rem)",
+    marginBottom: "1rem",
     fontWeight: "bold",
     color: "#333",
   },
   modalText: {
-    fontSize: "0.9rem", // Smaller font size for mobile
-    marginBottom: "20px",
+    fontSize: "clamp(0.8rem, 3vw, 1rem)",
+    marginBottom: "1.5rem",
     color: "#555",
     lineHeight: "1.5",
   },
   modalButtons: {
     display: "flex",
     justifyContent: "center",
-    gap: "10px", // Smaller gap for mobile
+    gap: "1rem",
   },
   modalButton: {
-    padding: "10px 20px",
-    fontSize: "0.9rem", // Smaller font size for mobile
+    padding: "0.75rem 1.5rem",
+    fontSize: "clamp(0.8rem, 3vw, 1rem)",
     backgroundColor: "#28a745",
     border: "none",
     borderRadius: "8px",
@@ -489,8 +683,8 @@ const styles = {
     fontWeight: "600",
   },
   modalButtonCancel: {
-    padding: "10px 20px",
-    fontSize: "0.9rem", // Smaller font size for mobile
+    padding: "0.75rem 1.5rem",
+    fontSize: "clamp(0.8rem, 3vw, 1rem)",
     backgroundColor: "#dc3545",
     border: "none",
     borderRadius: "8px",
