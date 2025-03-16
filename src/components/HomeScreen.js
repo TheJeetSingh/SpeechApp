@@ -487,6 +487,9 @@ const styles = {
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     animation: "glow 2s ease-in-out infinite alternate",
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
   },
   hamburger: {
     display: "none",
