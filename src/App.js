@@ -34,7 +34,7 @@ function App() {
         <Route path="/construction" element={<ConstructionScreen />} />
         <Route path="/beta" element={<BetaDev />} />
         <Route path="/extemp" element={<ExtempScreen />} />
-        <Route path="/extempPrep" element={<ExtempPrepScreen />} />
+        <Route path="/extempPrep/:topic" element={<ExtempPrepScreen />} />
       </Routes>
     </Router>
   );

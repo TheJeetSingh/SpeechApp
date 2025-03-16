@@ -194,7 +194,12 @@ function SpeechScreen() {
 
   return (
     <motion.div
-      style={componentStyles.container}
+      style={{
+        ...getMobileStyles(componentStyles.container, {
+          padding: "1rem",
+        }),
+        backgroundColor: "rgba(0, 0, 0, 0.85)",
+      }}
       variants={animations.container}
       initial="hidden"
       animate="visible"
@@ -219,12 +224,12 @@ function SpeechScreen() {
         style={componentStyles.content}
         variants={animations.content}
       >
-        <motion.h1
-          style={styles.heading}
+      <motion.h1
+        style={styles.heading}
           variants={animations.heading}
-        >
+      >
           {type || "Speech"} Practice
-        </motion.h1>
+      </motion.h1>
 
         <motion.div
           style={styles.topicContainer}
@@ -256,30 +261,30 @@ function SpeechScreen() {
 
         <motion.div style={styles.controlsContainer}>
           {!isRecording ? (
-            <motion.button
+          <motion.button
               style={styles.recordButton}
               whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.95 }}
               onClick={initiateRecording}
-            >
+          >
               <FiVideo size={24} />
               <span>Start Recording</span>
-            </motion.button>
-          ) : (
-            <motion.button
+          </motion.button>
+        ) : (
+          <motion.button
               style={{...styles.recordButton, background: colors.accent.red}}
               whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.95 }}
               onClick={stopRecording}
-            >
+          >
               <FiStopCircle size={24} />
               <span>Stop Recording</span>
-            </motion.button>
-          )}
+          </motion.button>
+        )}
 
           {recordingURL && (
             <AnimatePresence>
-              <motion.div
+        <motion.div
                 style={styles.audioContainer}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

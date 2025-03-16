@@ -1,229 +1,320 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
-import config from "../config";
+import { FiClock, FiMessageSquare, FiArrowRight } from "react-icons/fi";
+import { isMobile } from "react-device-detect";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 
 const ExtempScreen = () => {
-  const [articles, setArticles] = useState([]);
-  const [timer, setTimer] = useState(60); // 1 minute for extemp
-  const [isTimerActive, setIsTimerActive] = useState(true);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const [topics, setTopics] = useState([]);
+  const [timer, setTimer] = useState(30);
+  const [isTimerActive, setIsTimerActive] = useState(true);
 
-  // Function to filter relevant extemp topics
-  const filterExtempArticles = (articles) => {
-    const relevantKeywords = [
-      "politics", "election", "government", "international", "global", 
-      "climate change", "healthcare", "education", "equality", 
-      "economy", "trade", "conflict", "reform"
+  const getRandomTopics = () => {
+    const allTopics = [
+      "Should social media companies be regulated more strictly?",
+      "Is universal basic income a viable solution to poverty?",
+      "How can we address climate change effectively?",
+      "Should college education be free?",
+      "What role should AI play in healthcare?",
+      "Is space exploration worth the investment?",
+      "Should voting be mandatory?",
+      "How can we improve global education systems?",
+      "Should cryptocurrencies be regulated?",
+      "Is nuclear energy the future of clean power?",
     ];
 
-    return articles.filter(article =>
-      relevantKeywords.some(keyword => 
-        article.title?.toLowerCase().includes(keyword) || 
-        article.description?.toLowerCase().includes(keyword)
-      )
-    );
+    const randomTopics = [];
+    const shuffled = [...allTopics].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < 3; i++) randomTopics.push(shuffled[i]);
+    setTopics(randomTopics);
+    setTimer(30);
+    setIsTimerActive(true);
+  };
+
+  const handleTopicSelect = (topic) => {
+    navigate(`/extempPrep/${encodeURIComponent(topic)}`, { 
+      state: { 
+        topicName: topic,
+        type: "Extemp"
+      } 
+    });
   };
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await fetch(`${config.API_URL}${config.NEWS_ENDPOINT}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          credentials: 'omit' // Prevent CORS preflight
-        });
-
-        // Check if response is ok and content-type is application/json
-        const contentType = response.headers.get("content-type");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch topics (${response.status})`);
-        }
-
-        if (!contentType?.includes("application/json")) {
-          throw new Error("Invalid response format from server");
-        }
-
-        const data = await response.json();
-        
-        if (!data?.articles?.length) {
-          throw new Error("No articles available");
-        }
-
-        const processedArticles = data.articles
-          .filter(article => article.title && article.description) // Only keep articles with both title and description
-          .map(article => ({
-            title: article.title.trim(),
-            description: article.description.trim()
-          }));
-
-        if (processedArticles.length === 0) {
-          throw new Error("No valid articles found");
-        }
-
-        // Filter for extemp topics and get 2 random ones
-        const filteredArticles = filterExtempArticles(processedArticles);
-        if (filteredArticles.length === 0) {
-          throw new Error("No relevant extemp topics found");
-        }
-
-        setArticles(getRandomArticles(filteredArticles, 2));
-      } catch (error) {
-        console.error("Error fetching news topics:", error);
-        setError(error.message || "Failed to load topics. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchArticles();
+    getRandomTopics();
   }, []);
-
-  const getRandomArticles = (articles, count) => {
-    if (articles.length <= count) return articles;
-    const selectedIndexes = new Set();
-    while (selectedIndexes.size < count) {
-      selectedIndexes.add(Math.floor(Math.random() * articles.length));
-    }
-    return Array.from(selectedIndexes).map((index) => articles[index]);
-  };
 
   useEffect(() => {
     let interval;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    } else if (timer === 0 && articles.length) {
+    } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/extempPrep", { 
-        state: { topicName: articles[0].title } 
-      });
+      handleTopicSelect(topics[Math.floor(Math.random() * topics.length)]);
     }
     return () => clearInterval(interval);
-  }, [isTimerActive, timer, articles, navigate]);
+  }, [isTimerActive, timer, topics]);
+
+  const formatTime = (seconds) => {
+    return seconds.toString().padStart(2, "0");
+  };
+
+  const getMobileStyles = (baseStyles, mobileStyles) => {
+    return isMobile ? { ...baseStyles, ...mobileStyles } : baseStyles;
+  };
+
+  const styles = {
+    heading: getMobileStyles({
+      ...componentStyles.heading,
+      fontSize: "clamp(1.8rem, 4vw, 2.5rem)",
+      marginBottom: "clamp(1.5rem, 4vw, 2.5rem)",
+      background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.purple})`,
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      textAlign: "center",
+      width: "100%",
+      maxWidth: "800px",
+      margin: "0 auto",
+      padding: "0 1rem",
+    }, {
+      fontSize: "1.8rem",
+      marginBottom: "1.5rem",
+    }),
+
+    timerContainer: getMobileStyles({
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "clamp(0.5rem, 2vw, 1rem)",
+      background: `linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))`,
+      padding: "clamp(1rem, 3vw, 1.5rem) clamp(1.5rem, 4vw, 2.5rem)",
+      borderRadius: "50px",
+      backdropFilter: "blur(10px)",
+      WebkitBackdropFilter: "blur(10px)",
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+      boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+      width: "fit-content",
+      margin: "0 auto clamp(1.5rem, 4vw, 3rem) auto",
+    }, {
+      padding: "1rem 1.5rem",
+      gap: "0.5rem",
+    }),
+
+    clockIcon: getMobileStyles({
+      color: colors.text.primary,
+      width: "clamp(20px, 4vw, 24px)",
+      height: "clamp(20px, 4vw, 24px)",
+    }, {
+      width: "20px",
+      height: "20px",
+    }),
+
+    timer: getMobileStyles({
+      fontSize: "clamp(1.2rem, 4vw, 1.8rem)",
+      fontWeight: "700",
+      transition: "color 0.3s ease",
+      textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    }, {
+      fontSize: "1.2rem",
+    }),
+
+    topicsContainer: getMobileStyles({
+      display: "flex",
+      flexDirection: "column",
+      gap: "clamp(1rem, 3vw, 2rem)",
+      width: "90%",
+      maxWidth: "800px",
+      margin: "0 auto",
+      padding: "0 1rem",
+    }, {
+      width: "95%",
+      gap: "1rem",
+      padding: "0 0.5rem",
+    }),
+
+    topicCard: getMobileStyles({
+      background: `linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))`,
+      padding: "clamp(1.5rem, 4vw, 2rem)",
+      borderRadius: "clamp(1rem, 3vw, 1.5rem)",
+      backdropFilter: "blur(10px)",
+      WebkitBackdropFilter: "blur(10px)",
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+      boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: "clamp(1rem, 3vw, 1.5rem)",
+      transition: "all 0.3s ease",
+      position: "relative",
+      overflow: "hidden",
+      backgroundColor: "rgba(0, 0, 0, 0.2)",
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "rgba(255, 255, 255, 0.05)",
+        zIndex: -1,
+      },
+    }, {
+      padding: "1.25rem",
+      gap: "1rem",
+      borderRadius: "1rem",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      backgroundColor: "rgba(0, 0, 0, 0.3)",
+    }),
+
+    iconContainer: getMobileStyles({
+      color: colors.text.primary,
+      background: "rgba(255, 255, 255, 0.15)",
+      padding: "clamp(0.75rem, 2vw, 1rem)",
+      borderRadius: "clamp(0.75rem, 2vw, 1rem)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+    }, {
+      padding: "0.75rem",
+      borderRadius: "0.75rem",
+    }),
+
+    topicText: getMobileStyles({
+      fontSize: "clamp(1rem, 2.5vw, 1.2rem)",
+      color: colors.text.primary,
+      margin: 0,
+      lineHeight: 1.6,
+      flex: 1,
+      wordBreak: "break-word",
+    }, {
+      fontSize: "1rem",
+      lineHeight: 1.4,
+    }),
+
+    arrowContainer: getMobileStyles({
+      color: colors.text.primary,
+      display: "flex",
+      alignItems: "center",
+      marginLeft: "auto",
+      transition: "transform 0.3s ease",
+    }, {
+      alignSelf: "flex-end",
+    }),
+  };
 
   return (
     <motion.div
-      style={componentStyles.container}
+      style={{
+        ...getMobileStyles(componentStyles.container, {
+          padding: "1rem",
+        }),
+        backgroundColor: "rgba(0, 0, 0, 0.85)",
+      }}
       variants={animations.container}
       initial="hidden"
       animate="visible"
     >
       <Particles
         id="tsparticles"
-        options={particlesConfig}
+        options={isMobile ? {
+          ...particlesConfig,
+          particles: {
+            ...particlesConfig.particles,
+            number: {
+              ...particlesConfig.particles.number,
+              value: 30,
+            },
+          },
+        } : particlesConfig}
       />
+      
       <motion.div
-        style={componentStyles.content}
+        style={getMobileStyles(componentStyles.content, {
+          padding: "1rem",
+        })}
         variants={animations.content}
       >
-        {isLoading && (
-          <motion.div
-            style={styles.loading}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            Loading...
-          </motion.div>
-        )}
-        {error && (
-          <motion.div
-            style={styles.error}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-          >
-            {error}
-          </motion.div>
-        )}
-        <motion.div style={componentStyles.timer} variants={animations.content}>
-          Time Left: {timer}s
-        </motion.div>
         <motion.h1
-          style={componentStyles.heading}
+          style={styles.heading}
           variants={animations.heading}
         >
-          Choose an Extemp Topic
+          Choose Your Topic
         </motion.h1>
-        <motion.ul
-          style={styles.list}
-          variants={animations.content}
+
+        <motion.div
+          style={styles.timerContainer}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <AnimatePresence>
-            {articles.map((article, index) => (
-              <motion.li
-                key={index}
-                style={styles.listItem}
+          <FiClock style={styles.clockIcon} />
+          <motion.span 
+            style={{
+              ...styles.timer,
+              color: timer <= 10 ? colors.accent.red : colors.text.primary
+            }}
+          >
+            {formatTime(timer)}s
+          </motion.span>
+        </motion.div>
+
+        <motion.div style={styles.topicsContainer}>
+          <AnimatePresence mode="wait">
+            {topics.map((topic, index) => (
+              <motion.div
+                key={topic}
+                style={styles.topicCard}
                 variants={animations.card}
+                custom={index}
                 whileHover="hover"
                 whileTap="tap"
-                onClick={() =>
-                  navigate("/extempPrep", {
-                    state: { topicName: article.title },
-                  })
-                }
-                custom={index}
+                onClick={() => handleTopicSelect(topic)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: { delay: index * 0.2 }
+                }}
+                exit={{ opacity: 0, y: -20 }}
                 layout
               >
-                {article.title}
-              </motion.li>
+                <motion.div 
+                  style={styles.iconContainer}
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: index * 0.2
+                  }}
+                >
+                  <FiMessageSquare size={24} />
+                </motion.div>
+                <motion.p style={styles.topicText}>
+                  {topic}
+                </motion.p>
+                <motion.div
+                  style={styles.arrowContainer}
+                  whileHover={{ x: 5 }}
+                >
+                  <FiArrowRight size={20} />
+                </motion.div>
+              </motion.div>
             ))}
           </AnimatePresence>
-        </motion.ul>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
-};
-
-const styles = {
-  list: {
-    listStyle: "none",
-    padding: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    width: "100%",
-    maxWidth: "800px",
-    margin: "0 auto",
-  },
-  listItem: {
-    ...componentStyles.card,
-    fontSize: "1.2rem",
-    padding: "20px 32px",
-    background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.blue}88)`,
-    color: colors.text.primary,
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
-    lineHeight: 1.6,
-  },
-  error: {
-    padding: "15px 20px",
-    borderRadius: "10px",
-    background: `linear-gradient(135deg, ${colors.accent.red}44, ${colors.accent.red}22)`,
-    color: colors.accent.red,
-    fontSize: "1.1rem",
-    fontWeight: "500",
-    textAlign: "center",
-    marginBottom: "20px",
-    backdropFilter: "blur(5px)",
-    border: `1px solid ${colors.accent.red}44`,
-  },
-  loading: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    color: colors.text.primary,
-    textAlign: "center",
-    marginBottom: "20px",
-  },
 };
 
 export default ExtempScreen;
