@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import Particles from "react-tsparticles";
 import config from "../config";
+import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 
 const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
@@ -9,22 +12,6 @@ const CurrentScreen = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-
-  // Fallback topics in case API fails
-  const fallbackTopics = [
-    {
-      title: "Artificial Intelligence Advancements",
-      description: "Recent breakthroughs in AI technology and their impact on society"
-    },
-    {
-      title: "Climate Change Solutions",
-      description: "Latest initiatives and technologies addressing environmental challenges"
-    },
-    {
-      title: "Global Economic Trends",
-      description: "Current economic developments and their worldwide implications"
-    }
-  ];
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -40,8 +27,7 @@ const CurrentScreen = () => {
         // Check if response is ok and content-type is application/json
         const contentType = response.headers.get("content-type");
         if (!response.ok || !contentType?.includes("application/json")) {
-          console.error('API Response not valid:', response.status, contentType);
-          setArticles(fallbackTopics);
+          setError("Unable to fetch current topics. Please try again later.");
           return;
         }
 
@@ -50,7 +36,7 @@ const CurrentScreen = () => {
           data = await response.json();
         } catch (jsonError) {
           console.error("Failed to parse JSON:", jsonError);
-          setArticles(fallbackTopics);
+          setError("Invalid response format. Please try again later.");
           return;
         }
 
@@ -61,12 +47,11 @@ const CurrentScreen = () => {
           }));
           setArticles(getRandomArticles(processedArticles, 3));
         } else {
-          console.log("No articles found in response");
-          setArticles(fallbackTopics);
+          setError("No topics available at the moment. Please try again later.");
         }
       } catch (error) {
         console.error("API Error:", error);
-        setArticles(fallbackTopics);
+        setError("Failed to load topics. Please check your connection and try again.");
       } finally {
         setIsLoading(false);
       }
@@ -98,96 +83,117 @@ const CurrentScreen = () => {
   }, [isTimerActive, timer, articles, navigate]);
 
   return (
-    <div style={styles.container}>
-      {isLoading && <div style={styles.loading}>Loading...</div>}
-      {error && <div style={styles.error}>{error}</div>}
-      <div style={styles.timer}>Time Left: {timer}s</div>
-      <h1 style={styles.heading}>Current Events</h1>
-      <ul style={styles.list}>
-        {articles.map((article, index) => (
-          <li
-            key={index}
-            style={styles.listItem}
-            onClick={() =>
-              navigate(`/prep/${encodeURIComponent(article.title)}`, {
-                state: { topicName: article.title },
-              })
-            }
+    <motion.div
+      style={componentStyles.container}
+      variants={animations.container}
+      initial="hidden"
+      animate="visible"
+    >
+      <Particles
+        id="tsparticles"
+        options={particlesConfig}
+      />
+      <motion.div
+        style={componentStyles.content}
+        variants={animations.content}
+      >
+        {isLoading && (
+          <motion.div
+            style={styles.loading}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            {article.title}
-          </li>
-        ))}
-      </ul>
-    </div>
+            Loading...
+          </motion.div>
+        )}
+        {error && (
+          <motion.div
+            style={styles.error}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+          >
+            {error}
+          </motion.div>
+        )}
+        <motion.div style={componentStyles.timer} variants={animations.content}>
+          Time Left: {timer}s
+        </motion.div>
+        <motion.h1
+          style={componentStyles.heading}
+          variants={animations.heading}
+        >
+          Current Events
+        </motion.h1>
+        <motion.ul
+          style={styles.list}
+          variants={animations.content}
+        >
+          <AnimatePresence>
+            {articles.map((article, index) => (
+              <motion.li
+                key={index}
+                style={styles.listItem}
+                variants={animations.card}
+                whileHover="hover"
+                whileTap="tap"
+                onClick={() =>
+                  navigate(`/prep/${encodeURIComponent(article.title)}`, {
+                    state: { topicName: article.title },
+                  })
+                }
+                custom={index}
+                layout
+              >
+                {article.title}
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </motion.ul>
+      </motion.div>
+    </motion.div>
   );
 };
 
 const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "'Poppins', sans-serif",
-    position: "relative",
-    padding: "40px",
-  },
-  timer: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    color: "#fff",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    padding: "8px 16px",
-    borderRadius: "20px",
-    marginBottom: "20px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-  },
-  heading: {
-    fontSize: "2.5rem",
-    fontWeight: "700",
-    marginBottom: "30px",
-    letterSpacing: "1px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-  },
   list: {
     listStyle: "none",
     padding: 0,
     display: "flex",
     flexDirection: "column",
     gap: "20px",
+    width: "100%",
+    maxWidth: "800px",
+    margin: "0 auto",
   },
   listItem: {
+    ...componentStyles.card,
     fontSize: "1.2rem",
-    padding: "16px 32px",
-    borderRadius: "10px",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    color: "#333",
-    cursor: "pointer",
-    fontWeight: "600",
-    textAlign: "center",
-    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
-    transition: "transform 0.3s ease, background-color 0.3s ease",
-    "&:hover": {
-      transform: "scale(1.05)",
-      backgroundColor: "rgba(255, 255, 255, 1)",
-    },
+    padding: "20px 32px",
+    background: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.purple}88)`,
+    color: colors.text.primary,
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
+    lineHeight: 1.6,
   },
   error: {
-    color: "#ff6b6b",
-    backgroundColor: "rgba(255, 107, 107, 0.1)",
-    padding: "10px",
-    borderRadius: "5px",
-    marginBottom: "20px",
+    padding: "15px 20px",
+    borderRadius: "10px",
+    background: `linear-gradient(135deg, ${colors.accent.red}44, ${colors.accent.red}22)`,
+    color: colors.accent.red,
+    fontSize: "1.1rem",
+    fontWeight: "500",
     textAlign: "center",
+    marginBottom: "20px",
+    backdropFilter: "blur(5px)",
+    border: `1px solid ${colors.accent.red}44`,
   },
   loading: {
     fontSize: "1.5rem",
     fontWeight: "600",
-    color: "#fff",
+    color: colors.text.primary,
+    textAlign: "center",
+    marginBottom: "20px",
   },
 };
 

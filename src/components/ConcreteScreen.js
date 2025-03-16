@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import Particles from "react-tsparticles";
 import concreteTopics from "../data/concrete";
+import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 
 function ConcreteScreen() {
   const navigate = useNavigate();
@@ -37,73 +40,73 @@ function ConcreteScreen() {
   }, [isTimerActive, timer, topicsList, handleConcreteSelect]);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.timer}>Time Left: {timer}s</div>
-      <h1 style={styles.heading}>Choose a Concrete Topic</h1>
-      <ul style={styles.list}>
-        {topicsList.map((topic, index) => (
-          <li
-            key={index}
-            style={styles.listItem}
-            onClick={() => handleConcreteSelect(topic)}
-          >
-            {topic}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <motion.div
+      style={componentStyles.container}
+      variants={animations.container}
+      initial="hidden"
+      animate="visible"
+    >
+      <Particles
+        id="tsparticles"
+        options={particlesConfig}
+      />
+      <motion.div
+        style={componentStyles.content}
+        variants={animations.content}
+      >
+        <motion.div style={componentStyles.timer} variants={animations.content}>
+          Time Left: {timer}s
+        </motion.div>
+        <motion.h1
+          style={componentStyles.heading}
+          variants={animations.heading}
+        >
+          Choose a Concrete Topic
+        </motion.h1>
+        <motion.ul
+          style={styles.list}
+          variants={animations.content}
+        >
+          <AnimatePresence>
+            {topicsList.map((topic, index) => (
+              <motion.li
+                key={index}
+                style={styles.listItem}
+                variants={animations.card}
+                whileHover="hover"
+                whileTap="tap"
+                onClick={() => handleConcreteSelect(topic)}
+                custom={index}
+                layout
+              >
+                {topic}
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </motion.ul>
+      </motion.div>
+    </motion.div>
   );
 }
 
 const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "'Poppins', sans-serif",
-    position: "relative",
-    padding: "40px",
-  },
-  timer: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    color: "#fff",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    padding: "8px 16px",
-    borderRadius: "20px",
-    marginBottom: "20px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-  },
-  heading: {
-    fontSize: "2.5rem",
-    fontWeight: "700",
-    marginBottom: "30px",
-    letterSpacing: "1px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-  },
   list: {
     listStyle: "none",
     padding: 0,
     display: "flex",
     flexDirection: "column",
     gap: "20px",
+    width: "100%",
+    maxWidth: "600px",
+    margin: "0 auto",
   },
   listItem: {
+    ...componentStyles.card,
     fontSize: "1.2rem",
     padding: "16px 32px",
-    borderRadius: "10px",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    color: "#333",
-    cursor: "pointer",
-    fontWeight: "600",
-    textAlign: "center",
-    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
-    transition: "transform 0.3s ease, background-color 0.3s ease",
+    background: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.green}88)`,
+    color: colors.text.primary,
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
   },
 };
 

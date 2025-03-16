@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import Particles from "react-tsparticles";
+import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
+import { FiClock } from "react-icons/fi";
 
 const PrepScreen = () => {
   const location = useLocation();
@@ -49,177 +52,175 @@ const PrepScreen = () => {
     navigate("/speech", { state: { topicName, type: "Impromptu" } }); // Pass "Impromptu" tag
   };
 
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.headerTitle}>ARTICULATE</h1>
-      </div>
-
-      <motion.h1
-        style={styles.heading}
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+    <motion.div
+      style={componentStyles.container}
+      variants={animations.container}
+      initial="hidden"
+      animate="visible"
+    >
+      <Particles
+        id="tsparticles"
+        options={particlesConfig}
+      />
+      
+      <motion.div
+        style={componentStyles.content}
+        variants={animations.content}
       >
-        Prepare Your Speech
-      </motion.h1>
+        <motion.h1
+          style={styles.heading}
+          variants={animations.heading}
+        >
+          Preparation Time
+        </motion.h1>
 
-      <div style={styles.timerContainer}>
-        <div style={styles.timer}>Prep Time: {timer}s</div>
-        <div style={styles.timerLabel}>
-          Get ready to present your topic: <strong>{topicName || "No topic selected"}</strong>
-        </div>
-      </div>
+        <motion.div
+          style={styles.topicContainer}
+          variants={animations.card}
+        >
+          <motion.h2 style={styles.topicTitle}>
+            Your Topic:
+          </motion.h2>
+          <motion.p style={styles.topicText}>
+            {topicName || "No topic selected"}
+          </motion.p>
+        </motion.div>
 
-      {/* Helpful Banner placed here */}
-      {currentBanner && (
-        <div style={styles.banner}>
-          <p style={styles.bannerText}>{currentBanner}</p>
-        </div>
-      )}
+        <motion.div style={styles.timerSection}>
+          <motion.div
+            style={styles.timerContainer}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <FiClock size={32} style={styles.clockIcon} />
+            <motion.span 
+              style={{
+                ...styles.timer,
+                color: timer < 30 ? colors.accent.red : colors.text.primary
+              }}
+            >
+              {formatTime(timer)}
+            </motion.span>
+          </motion.div>
 
-      <div style={styles.contentContainer}>
-        {topicName ? (
-          <>
-            <h2 style={styles.subHeading}>Your Topic:</h2>
-            <p style={styles.contentText}>{topicName}</p>
-          </>
-        ) : (
-          <p style={styles.contentText}>No topic available.</p>
-        )}
-      </div>
+          {currentBanner && (
+            <motion.div
+              style={styles.banner}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <motion.p style={styles.bannerText}>
+                {currentBanner}
+              </motion.p>
+            </motion.div>
+          )}
 
-      <div style={styles.footer}>
-        <button style={styles.startButton} onClick={handleStartSpeaking}>
-          Start Speaking!
-        </button>
-      </div>
-    </div>
+          <motion.button
+            style={styles.startButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleStartSpeaking}
+          >
+            Start Speaking!
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
-// Styles to match HomeScreen, using only blue and white
 const styles = {
-  container: {
+  heading: {
+    ...componentStyles.heading,
+    marginBottom: "2rem",
+    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.secondary.main})`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textAlign: "center",
+  },
+  topicContainer: {
+    background: colors.background.glass,
+    padding: "2rem",
+    borderRadius: "15px",
+    marginBottom: "2rem",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  },
+  topicTitle: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    marginBottom: "1rem",
+    color: colors.text.primary,
+  },
+  topicText: {
+    fontSize: "1.2rem",
+    color: colors.text.secondary,
+    lineHeight: "1.6",
+  },
+  timerSection: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)", // Blue gradient background
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "'Poppins', sans-serif",
-    position: "relative",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "10px 20px",
-    background: "#1e3c72", // Blue header background
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    width: "100%",
-    position: "fixed",
-    top: 0,
-    left: 0,
-    zIndex: 4000,
-  },
-  headerTitle: {
-    fontSize: "1.8rem",
-    fontWeight: "700",
-    color: "#fff",
-    margin: 0,
-  },
-  heading: {
-    fontSize: "3.5rem",
-    fontWeight: "700",
-    marginBottom: "20px",
-    letterSpacing: "1px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    marginTop: "100px",
+    gap: "2rem",
   },
   timerContainer: {
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
-    marginBottom: "40px",
-    background: "rgba(0, 0, 0, 0.4)", // Dark background for the timer container
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
+    gap: "1rem",
+    background: colors.background.glass,
+    padding: "2rem",
+    borderRadius: "15px",
+    backdropFilter: "blur(10px)",
+  },
+  clockIcon: {
+    color: colors.text.primary,
   },
   timer: {
-    fontSize: "2.5rem",
+    fontSize: "3rem",
     fontWeight: "700",
-    color: "#fff",
-    background: "rgba(255, 255, 255, 0.3)", // Semi-transparent white background for visibility
-    padding: "16px 32px",
-    borderRadius: "50px",
-    boxShadow: "0 4px 15px rgba(255, 255, 255, 0.3)",
-  },
-  timerLabel: {
-    fontSize: "1.1rem",
-    fontWeight: "500",
-    color: "#ddd",
-    letterSpacing: "0.5px",
-  },
-  contentContainer: {
-    marginBottom: "40px",
-    maxWidth: "600px",
-    width: "100%",
-  },
-  subHeading: {
-    fontSize: "1.6rem",
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: "16px",
-  },
-  contentText: {
-    fontSize: "1.3rem",
-    padding: "16px",
-    background: "rgba(255, 255, 255, 0.2)",
-    borderRadius: "12px",
-    boxShadow: "0 4px 20px rgba(255, 255, 255, 0.1)",
-    margin: "16px 0",
-    textAlign: "center",
-    lineHeight: "1.6",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
   },
   banner: {
-    background: "rgba(255, 255, 255, 0.9)",
-    padding: "12px 24px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-    backdropFilter: "blur(5px)",
-    animation: "fadeIn 0.5s ease",
+    background: colors.background.glass,
+    padding: "1.5rem",
+    borderRadius: "15px",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    maxWidth: "600px",
+    width: "100%",
+    textAlign: "center",
   },
   bannerText: {
-    fontSize: "1rem",
-    fontWeight: "500",
-    color: "#333",
-    margin: "0",
-  },
-  footer: {
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    padding: "10px 0",
-    background: "#1e3c72", // Blue footer background
-    textAlign: "center",
-    boxShadow: "0px -4px 10px rgba(0, 0, 0, 0.2)",
+    fontSize: "1.2rem",
+    color: colors.text.primary,
+    margin: 0,
+    lineHeight: 1.5,
   },
   startButton: {
-    fontSize: "1.4rem",
-    padding: "16px 40px",
-    borderRadius: "50px",
-    background: "#2a5298", // Darker blue button
-    color: "#fff",
-    fontWeight: "700",
-    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    padding: "1rem 2rem",
+    fontSize: "1.2rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    background: colors.accent.green,
     border: "none",
-    boxShadow: "0 4px 15px rgba(42, 82, 152, 0.3)",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
+    borderRadius: "50px",
+    cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    transition: "all 0.3s ease",
   },
 };
 

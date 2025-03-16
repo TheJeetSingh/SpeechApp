@@ -6,6 +6,54 @@ import Particles from "react-tsparticles";
 import { Engine } from "tsparticles-engine";
 import { FiArrowDown } from "react-icons/fi";
 
+// Add TypeWriter component before HomeScreen component
+const TypeWriter = ({ text, delay = 100 }) => {
+  const [displayText, setDisplayText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        if (currentIndex < text.length) {
+          setDisplayText(prev => prev + text[currentIndex]);
+          setCurrentIndex(currentIndex + 1);
+        } else {
+          setTimeout(() => setIsDeleting(true), 2000); // Wait 2s before deleting
+        }
+      } else {
+        if (displayText.length > 0) {
+          setDisplayText(prev => prev.slice(0, -1));
+        } else {
+          setIsDeleting(false);
+          setCurrentIndex(0);
+        }
+      }
+    }, isDeleting ? delay / 2 : delay);
+
+    return () => clearTimeout(timeout);
+  }, [currentIndex, text, delay, isDeleting, displayText]);
+
+  return (
+    <motion.span
+      style={{
+        display: "inline-block",
+        background: "linear-gradient(45deg, #fff, #87CEEB, #1E90FF)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+      }}
+    >
+      {displayText}
+      <motion.span
+        animate={{ opacity: [1, 0] }}
+        transition={{ duration: 0.5, repeat: Infinity }}
+      >
+        |
+      </motion.span>
+    </motion.span>
+  );
+};
+
 // Modal Component
 function Modal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
@@ -88,34 +136,66 @@ function Header({ onFeedbackClick }) {
   return (
     <div style={styles.header}>
       <h1 style={styles.headerTitle}>ARTICULATE</h1>
-      <div style={styles.hamburger} onClick={toggleMenu}>
-        <div style={{ ...styles.hamburgerLine, transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }}></div>
-        <div style={{ ...styles.hamburgerLine, opacity: menuOpen ? 0 : 1 }}></div>
-        <div style={{ ...styles.hamburgerLine, transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></div>
-      </div>
-      <div style={{ ...styles.headerButtons, ...(menuOpen && { transform: 'translateY(0)' }) }}>
-        {userName ? (
-          <>
-            <motion.button style={styles.nameButton} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-              {userName}
+      <div style={styles.settingsContainer}>
+        <motion.div 
+          style={styles.settingsIcon} 
+          onClick={toggleMenu}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          ⚙️
+        </motion.div>
+        {menuOpen && (
+          <motion.div 
+            style={styles.settingsDropdown}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            {userName ? (
+              <>
+                <motion.div style={styles.userName}>
+                  {userName}
+                </motion.div>
+                <motion.button 
+                  style={styles.dropdownButton} 
+                  onClick={handleLogout}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Log Out
+                </motion.button>
+              </>
+            ) : (
+              <>
+                <motion.button 
+                  style={styles.dropdownButton} 
+                  onClick={() => handleNavigation("/login")}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sign In
+                </motion.button>
+                <motion.button 
+                  style={styles.dropdownButton} 
+                  onClick={() => handleNavigation("/signup")}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sign Up
+                </motion.button>
+              </>
+            )}
+            <motion.button 
+              style={styles.dropdownButton} 
+              onClick={() => { onFeedbackClick(); setMenuOpen(false); }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Give Feedback
             </motion.button>
-            <motion.button style={styles.logoutButton} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={handleLogout}>
-              Log Out
-            </motion.button>
-          </>
-        ) : (
-          <>
-            <motion.button style={styles.signInButton} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={() => handleNavigation("/login")}>
-              Sign In
-            </motion.button>
-            <motion.button style={styles.signUpButton} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={() => handleNavigation("/signup")}>
-              Sign Up
-            </motion.button>
-          </>
+          </motion.div>
         )}
-        <motion.button style={styles.feedbackButton} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={() => { onFeedbackClick(); setMenuOpen(false); }}>
-          Give Feedback
-        </motion.button>
       </div>
     </div>
   );
@@ -156,7 +236,7 @@ function HomeScreen() {
         value: ["#ffffff", "#87CEEB", "#00BFFF", "#1E90FF"]
       },
       shape: {
-        type: "circle",
+        type: ["circle", "star"],
       },
       opacity: {
         value: 0.5,
@@ -192,7 +272,7 @@ function HomeScreen() {
       },
       move: {
         enable: true,
-        speed: 1,
+        speed: 1.5,
         direction: "none",
         random: true,
         straight: false,
@@ -201,6 +281,19 @@ function HomeScreen() {
           enable: true,
           rotateX: 600,
           rotateY: 1200
+        },
+        path: {
+          enable: true,
+          options: {
+            size: 50,
+            draw: false,
+            increment: 0.001
+          }
+        },
+        trail: {
+          enable: true,
+          length: 10,
+          fill: { color: "#ffffff" },
         }
       }
     },
@@ -209,7 +302,7 @@ function HomeScreen() {
       events: {
         onHover: {
           enable: true,
-          mode: ["grab", "bubble"]
+          mode: ["grab", "bubble", "repulse"]
         },
         onClick: {
           enable: true,
@@ -221,7 +314,8 @@ function HomeScreen() {
         grab: {
           distance: 140,
           links: {
-            opacity: 1
+            opacity: 1,
+            color: "#87CEEB"
           }
         },
         bubble: {
@@ -229,7 +323,12 @@ function HomeScreen() {
           size: 12,
           duration: 2,
           opacity: 0.8,
-          speed: 3
+          speed: 3,
+          color: "#1E90FF"
+        },
+        repulse: {
+          distance: 100,
+          duration: 0.4
         },
         push: {
           quantity: 4
@@ -286,6 +385,7 @@ function HomeScreen() {
       background: "linear-gradient(135deg, #1e3c72, #2a5298)",
       navigateTo: "/topics",
       icon: "⚡️",
+      type: "Impromptu"
     },
     {
       id: "interp",
@@ -294,6 +394,8 @@ function HomeScreen() {
       background: "linear-gradient(135deg, #6a11cb, #2575fc)",
       navigateTo: "/speech",
       icon: "🎭",
+      type: "Interp",
+      defaultTopic: "Choose a piece of literature, poem, or dramatic work to interpret"
     },
     {
       id: "original",
@@ -302,6 +404,8 @@ function HomeScreen() {
       background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
       navigateTo: "/speech",
       icon: "✏️",
+      type: "Original",
+      defaultTopic: "Present your original speech on a topic of your choice"
     },
     {
       id: "extemp",
@@ -310,6 +414,7 @@ function HomeScreen() {
       background: "linear-gradient(135deg, #00c853, #00e676)",
       navigateTo: "/beta",
       icon: "🌎",
+      type: "Extemp"
     },
   ];
 
@@ -321,76 +426,193 @@ function HomeScreen() {
         init={particlesInit}
         loaded={particlesLoaded}
         options={particlesOptions}
+        style={{ opacity: 0 }}
       />
 
       {/* Parallax Background Layers */}
       <motion.div
-        style={{ ...styles.parallaxLayer, y: y1, backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')" }}
+        style={{
+          ...styles.parallaxLayer,
+          y: y1,
+          backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+          opacity: 1,
+          mixBlendMode: "normal"
+        }}
       />
       <motion.div
-        style={{ ...styles.parallaxLayer, y: y2, backgroundImage: "url('https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')" }}
+        style={{
+          ...styles.parallaxLayer,
+          y: y2,
+          backgroundImage: "url('https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+          opacity: 1,
+          mixBlendMode: "normal"
+        }}
       />
       <motion.div
-        style={{ ...styles.parallaxLayer, y: y3, backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')" }}
+        style={{
+          ...styles.parallaxLayer,
+          y: y3,
+          backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+          opacity: 1,
+          mixBlendMode: "normal"
+        }}
       />
 
       <Header onFeedbackClick={handleFeedbackClick} />
 
       {/* Welcome Screen */}
-      <div style={styles.welcomeScreen}>
+      <motion.div 
+        style={styles.welcomeScreen}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1 }
+        }}
+      >
         <motion.h1
           style={styles.heading}
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
         >
-          Welcome to Speech App{userName ? `, ${userName}` : ""}
+          <TypeWriter text="Welcome to Speech App" delay={100} />
+          {userName && (
+            <motion.span
+              style={{ 
+                display: "inline-block", 
+                marginLeft: "10px",
+                background: "linear-gradient(45deg, #fff, #87CEEB, #1E90FF)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2.5 }}
+            >
+              , {userName}
+            </motion.span>
+          )}
         </motion.h1>
-        <div style={styles.navDots}>
+
+        <motion.div 
+          style={styles.navDots}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
           {sections.map((section, index) => (
             <motion.div
               key={index}
               style={styles.navDot}
-              whileHover={{ scale: 1.5, backgroundColor: "#fff" }}
+              whileHover={{ 
+                scale: 1.5, 
+                backgroundColor: "#fff",
+                boxShadow: "0 0 20px rgba(255, 255, 255, 0.8)"
+              }}
               onClick={() => scrollToSection(section.id)}
               initial={{ opacity: 0, scale: 0 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
+              transition={{ 
+                duration: 0.4,
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 200
+              }}
+              whileTap={{ scale: 0.9 }}
+              drag
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              dragElastic={0.1}
             />
           ))}
-        </div>
+        </motion.div>
+
         <motion.div
           style={styles.downArrow}
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ 
+            opacity: [0.4, 1, 0.4],
+            y: [0, 10, 0],
+            scale: [1, 1.1, 1],
+            rotate: [0, 5, 0]
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          whileHover={{
+            scale: 1.2,
+            rotate: [0, -10, 10, -10, 0],
+            transition: { duration: 0.5 }
+          }}
           onClick={() => scrollToSection(sections[0].id)}
         >
-          <FiArrowDown size={24} />
+          <FiArrowDown size={52.5} />
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Full-page sections */}
       {sections.map((section, index) => (
-        <div
+        <motion.div
           key={section.id}
           id={section.id}
           style={{ ...styles.fullPageSection, background: section.background }}
+          initial={{ opacity: 0 }}
+          whileInView={{ 
+            opacity: 1,
+            transition: {
+              duration: 0.8,
+              staggerChildren: 0.2
+            }
+          }}
+          viewport={{ once: false, amount: 0.3 }}
         >
-          <div style={styles.sectionContent}>
+          <motion.div 
+            style={styles.sectionContent}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <div style={styles.sectionHeader}>
               <motion.div
                 style={styles.sectionIcon}
-                initial={{ opacity: 0, scale: 0 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                whileHover={{
+                  scale: 1.2,
+                  rotate: 360,
+                  transition: { duration: 0.5 }
+                }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.3,
+                  type: "spring",
+                  stiffness: 200
+                }}
               >
                 {section.icon}
               </motion.div>
               <motion.h2
                 style={styles.sectionTitle}
-                initial={{ opacity: 0, y: -30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                whileHover={{
+                  scale: 1.05,
+                  textShadow: "0 0 15px rgba(255,255,255,0.8)",
+                  transition: { duration: 0.3 }
+                }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.4,
+                  type: "spring",
+                  stiffness: 100
+                }}
               >
                 {section.title}
               </motion.h2>
@@ -399,23 +621,70 @@ function HomeScreen() {
               style={styles.sectionDescription}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              whileHover={{
+                scale: 1.02,
+                transition: { duration: 0.2 }
+              }}
+              transition={{ duration: 0.6, delay: 0.5 }}
             >
               {section.description}
             </motion.p>
             <motion.button
               style={styles.ctaButton}
-              whileHover={{ scale: 1.05, boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)" }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)",
+              }}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              onClick={() => navigate(section.navigateTo)}
+              transition={{ 
+                duration: 0.6,
+                delay: 0.6,
+                type: "spring",
+                stiffness: 200
+              }}
+              onClick={() => navigate(section.navigateTo, { 
+                state: { 
+                  topicName: section.defaultTopic || null,
+                  type: section.type 
+                }
+              })}
             >
-              Get Started <span style={styles.buttonArrow}>→</span>
+              <motion.span
+                animate={{ 
+                  x: [0, 5, 0],
+                  textShadow: [
+                    "0 0 5px rgba(255,255,255,0.5)",
+                    "0 0 20px rgba(255,255,255,0.8)",
+                    "0 0 5px rgba(255,255,255,0.5)"
+                  ]
+                }}
+                transition={{ 
+                  repeat: Infinity, 
+                  duration: 2,
+                  ease: "easeInOut"
+                }}
+              >
+                Begin Journey
+              </motion.span>
+              <motion.span 
+                style={styles.buttonArrow}
+                animate={{ 
+                  x: [0, 8, 0],
+                  opacity: [1, 0.6, 1]
+                }}
+                transition={{ 
+                  repeat: Infinity, 
+                  duration: 2,
+                  ease: "easeInOut"
+                }}
+              >
+                →
+              </motion.span>
             </motion.button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       ))}
 
       <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
@@ -492,127 +761,59 @@ const styles = {
       display: 'none',
     },
   },
-  hamburger: {
-    display: "none",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    width: "30px",
-    height: "22px",
-    cursor: "pointer",
-    zIndex: 4001,
-    marginLeft: "auto",
-    '@media (max-width: 768px)': {
-      display: "flex"
-    }
-  },
-  hamburgerLine: {
-    width: "100%",
-    height: "3px",
-    backgroundColor: "#fff",
-    borderRadius: "3px",
-    transition: "all 0.3s ease",
-  },
-  headerButtons: {
+  settingsContainer: {
+    position: "relative",
     display: "flex",
-    gap: "clamp(0.4rem, 1vw, 0.8rem)",
     alignItems: "center",
-    marginRight: "2rem",
-    '@media (max-width: 768px)': {
-      position: "fixed",
-      top: "60px",
-      left: 0,
-      right: 0,
-      flexDirection: "column",
-      width: "100%",
-      margin: 0,
-      background: "rgba(30, 60, 114, 0.95)",
-      padding: "1rem",
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-      transform: "translateY(-100%)",
-      transition: "transform 0.3s ease",
-      "&.open": {
-        transform: "translateY(0)"
-      }
-    }
+    marginRight: "4rem",
+    marginLeft: "auto",
+    zIndex: 5000,
   },
-  signInButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
+  settingsIcon: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "1.8rem",
+    cursor: "pointer",
+    filter: "drop-shadow(0 0 5px rgba(255, 255, 255, 0.3))",
+    transition: "all 0.3s ease",
+  },
+  settingsDropdown: {
+    position: "absolute",
+    top: "calc(100% + 10px)",
+    right: 0,
+    background: "rgba(255, 255, 255, 0.95)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "12px",
+    padding: "1rem",
+    width: "200px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+  },
+  userName: {
+    fontSize: "1rem",
     fontWeight: "600",
+    color: "#333",
+    padding: "0.5rem",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
+    marginBottom: "0.5rem",
+  },
+  dropdownButton: {
+    padding: "0.5rem 1rem",
+    fontSize: "0.9rem",
+    fontWeight: "500",
+    width: "100%",
     border: "none",
     borderRadius: "8px",
-    background: "linear-gradient(135deg, #00c853, #00e676)",
-    color: "#fff",
+    background: "rgba(255, 255, 255, 0.1)",
+    color: "#333",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    '@media (max-width: 768px)': {
-      width: "100%",
-      margin: "0.3rem 0",
-    },
-  },
-  signUpButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
-    fontWeight: "600",
-    border: "none",
-    borderRadius: "8px",
-    background: "linear-gradient(135deg, #00bcd4, #00e5ff)",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    '@media (max-width: 768px)': {
-      width: "100%",
-      margin: "0.3rem 0",
-    },
-  },
-  feedbackButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
-    fontWeight: "600",
-    border: "none",
-    borderRadius: "8px",
-    background: "linear-gradient(135deg, #C70039, #ff416c)",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    '@media (max-width: 768px)': {
-      width: "100%",
-      margin: "0.3rem 0",
-    },
-  },
-  nameButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
-    fontWeight: "600",
-    border: "none",
-    borderRadius: "8px",
-    background: "linear-gradient(135deg, #4CAF50, #66bb6a)",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    '@media (max-width: 768px)': {
-      width: "100%",
-      margin: "0.3rem 0",
-    },
-  },
-  logoutButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "clamp(0.8rem, 2.5vw, 0.9rem)",
-    fontWeight: "600",
-    border: "none",
-    borderRadius: "8px",
-    background: "linear-gradient(135deg, #ff4d4d, #ff6b6b)",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    '@media (max-width: 768px)': {
-      width: "100%",
-      margin: "0.3rem 0",
+    "&:hover": {
+      background: "rgba(0, 0, 0, 0.05)",
     },
   },
   welcomeScreen: {
@@ -646,10 +847,8 @@ const styles = {
     display: "flex",
     gap: "1rem",
     marginBottom: "2rem",
-    background: "rgba(255, 255, 255, 0.1)",
     padding: "1rem",
     borderRadius: "20px",
-    backdropFilter: "blur(5px)",
   },
   navDot: {
     width: "12px",
@@ -666,37 +865,61 @@ const styles = {
     }
   },
   downArrow: {
-    fontSize: "2rem",
+    fontSize: "3rem",
     marginTop: "2rem",
     cursor: "pointer",
     transition: "all 0.3s ease",
     color: "#fff",
-    animation: "bounce 2s infinite",
-    filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))",
+    animation: "bounce 4s infinite ease-in-out",
+    filter: "drop-shadow(0 0 15px rgba(255, 255, 255, 0.7))",
     "&:hover": {
       transform: "scale(1.2)",
     }
   },
   "@keyframes bounce": {
-    "0%, 20%, 50%, 80%, 100%": {
+    "0%": {
       transform: "translateY(0)",
     },
+    "20%": {
+      transform: "translateY(-80px)",
+    },
+    "30%": {
+      transform: "translateY(-40px)",
+    },
     "40%": {
-      transform: "translateY(-20px)",
+      transform: "translateY(-100px)",
+    },
+    "50%": {
+      transform: "translateY(-60px)",
     },
     "60%": {
-      transform: "translateY(-10px)",
+      transform: "translateY(-90px)",
+    },
+    "70%": {
+      transform: "translateY(-30px)",
+    },
+    "80%": {
+      transform: "translateY(-70px)",
+    },
+    "90%": {
+      transform: "translateY(-20px)",
+    },
+    "100%": {
+      transform: "translateY(0)",
     }
   },
   "@keyframes gradientText": {
     "0%": {
       backgroundPosition: "0% 50%",
+      backgroundSize: "200% 200%",
     },
     "50%": {
       backgroundPosition: "100% 50%",
+      backgroundSize: "200% 200%",
     },
     "100%": {
       backgroundPosition: "0% 50%",
+      backgroundSize: "200% 200%",
     }
   },
   "@keyframes glow": {
@@ -737,12 +960,8 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    backdropFilter: "blur(10px)",
-    background: "rgba(255, 255, 255, 0.1)",
     borderRadius: "clamp(10px, 2vw, 20px)",
     padding: "clamp(1rem, 4vw, 2rem)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
     '@media (max-width: 768px)': {
       width: "95%",
       padding: "1.5rem",
@@ -768,6 +987,7 @@ const styles = {
     fontSize: "clamp(2.5rem, 8vw, 4rem)",
     marginBottom: "clamp(0.5rem, 2vw, 1rem)",
     filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))",
+    display: "inline-block",
   },
   sectionTitle: {
     fontSize: "clamp(1.2rem, 5vw, 3rem)",
@@ -819,7 +1039,9 @@ const styles = {
     },
   },
   buttonArrow: {
-    fontSize: "1.2rem",
+    fontSize: "1.8rem",
+    fontWeight: "bold",
+    filter: "drop-shadow(0 0 5px rgba(255,255,255,0.5))",
   },
   modalOverlay: {
     position: "fixed",

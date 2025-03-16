@@ -1,232 +1,543 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import Particles from "react-tsparticles";
+import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
+import { FiMic, FiStopCircle, FiDownload, FiVideo, FiInfo } from "react-icons/fi";
+
+// Disclaimer Modal Component
+function DisclaimerModal({ isOpen, onClose, onAccept }) {
+  if (!isOpen) return null;
+
+  return (
+    <motion.div
+      style={styles.modalOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        style={styles.modalContent}
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -50, opacity: 0 }}
+      >
+        <h2 style={styles.modalTitle}>Privacy Notice</h2>
+        <div style={styles.modalBody}>
+          <FiInfo size={24} style={{ color: colors.accent.blue }} />
+          <p style={styles.modalText}>
+            Your video will only be shown locally in your browser and will not be saved or uploaded anywhere. 
+            The video will be available for download after recording.
+          </p>
+        </div>
+        <div style={styles.modalButtons}>
+          <motion.button
+            style={{...styles.modalButton, background: colors.accent.green}}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onAccept}
+          >
+            I Understand, Start Recording
+          </motion.button>
+          <motion.button
+            style={{...styles.modalButton, background: colors.accent.red}}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onClose}
+          >
+            Cancel
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function SpeechScreen() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [startTime, setStartTime] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState(0); // Time in seconds
-  const [showPopup, setShowPopup] = useState(false); // Controls popup visibility
-
-  // Retrieve the type from location.state
-  const type = location.state?.type || "Unknown";
+  const { topicName, type } = location.state || {};
+  const [isRecording, setIsRecording] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [recordingURL, setRecordingURL] = useState(null);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState("mp4");
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     let interval;
-    if (startTime) {
+    if (isRecording) {
       interval = setInterval(() => {
-        const time = Math.floor((Date.now() - startTime) / 1000);
-        setElapsedTime(time);
-
-        // Show popup based on the type
-        if (type === "Impromptu" && time > 330) {
-          setShowPopup(true); // 5 minutes and 30 seconds for Impromptu
-        } else if (
-          (type === "Interp" || type === "Original") &&
-          time > 630
-        ) {
-          setShowPopup(true); // 10 minutes and 30 seconds for Interp/Original
-        } else if (type === "Extemp" && time > 450) {
-          setShowPopup(true); // 7 minutes and 30 seconds for Extemp
-        }
+        setTimer((prevTimer) => prevTimer + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [startTime, type]);
+  }, [isRecording]);
 
-  const handleStartSpeech = () => {
-    setStartTime(Date.now());
-    setShowPopup(false); // Reset popup visibility when starting a new speech
+  useEffect(() => {
+    // Clean up video stream when component unmounts
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const initiateRecording = () => {
+    setShowDisclaimer(true);
   };
 
-  const handleEndSpeech = () => {
-    navigate("/");
+  const getFileExtension = () => {
+    switch (selectedFormat) {
+      case "mp4":
+        return "mp4";
+      case "wav":
+        return "wav";
+      case "m4a":
+        return "m4a";
+      default:
+        return "mp4";
+    }
+  };
+
+  const getMimeType = () => {
+    switch (selectedFormat) {
+      case "mp4":
+        return "video/mp4";
+      case "wav":
+        return "audio/wav";
+      case "m4a":
+        return "audio/mp4";
+      default:
+        return "video/mp4";
+    }
+  };
+
+  const sanitizeFileName = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_') // Replace non-alphanumeric chars with underscore
+      .replace(/_+/g, '_') // Replace multiple underscores with single
+      .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: true,
+        video: true
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream, {
+        mimeType: getMimeType()
+      });
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: getMimeType() });
+        const url = URL.createObjectURL(blob);
+        setRecordingURL(url);
+      };
+
+      setMediaRecorder(recorder);
+      recorder.start();
+      setIsRecording(true);
+      setTimer(0);
+    } catch (error) {
+      console.error("Error accessing media devices:", error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      
+      // Stop all tracks
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      
+      // Clear video preview
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    }
+  };
+
+  const downloadRecording = () => {
+    if (recordingURL) {
+      const sanitizedTopic = sanitizeFileName(topicName || "speech");
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fileName = `${sanitizedTopic}_${timestamp}.${getFileExtension()}`;
+      
+      const a = document.createElement("a");
+      a.href = recordingURL;
+      a.download = fileName;
+      a.click();
+    }
   };
 
   const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <h1 style={styles.headerTitle}>ARTICULATE</h1>
-      </header>
-      <motion.h1
-        style={styles.heading}
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+    <motion.div
+      style={componentStyles.container}
+      variants={animations.container}
+      initial="hidden"
+      animate="visible"
+    >
+      <Particles
+        id="tsparticles"
+        options={particlesConfig}
+      />
+      
+      <AnimatePresence>
+        <DisclaimerModal
+          isOpen={showDisclaimer}
+          onClose={() => setShowDisclaimer(false)}
+          onAccept={() => {
+            setShowDisclaimer(false);
+            startRecording();
+          }}
+        />
+      </AnimatePresence>
+
+      <motion.div
+        style={componentStyles.content}
+        variants={animations.content}
       >
-        Get Ready To Speak!
-      </motion.h1>
-      <div style={styles.timerContainer}>
-        <h2 style={styles.subHeading}>Elapsed Time:</h2>
-        <p style={styles.timer}>{formatTime(elapsedTime)}</p>
-      </div>
-      <div style={styles.footer}>
-        {!startTime ? (
-          <motion.button
-            style={styles.startButton}
-            onClick={handleStartSpeech}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Start Speech
-          </motion.button>
-        ) : (
-          <motion.button
-            style={styles.endButton}
-            onClick={handleEndSpeech}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            End Speech
-          </motion.button>
-        )}
-      </div>
-
-      {/* Display the type */}
-      <p style={styles.typeText}>Type: {type}</p>
-
-      {/* Popup for exceeding time */}
-      {showPopup && (
-        <motion.div
-          style={styles.popup}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <motion.h1
+          style={styles.heading}
+          variants={animations.heading}
         >
-          <p style={styles.popupText}>
-            {type === "Impromptu"
-              ? "You are above the grace period for Impromptu! Try to finish soon!"
-              : type === "Extemp"
-              ? "You are above the grace period for Extemp! Try to finish soon!"
-              : "You are above the grace period! Try to finish soon!"}
-          </p>
+          {type || "Speech"} Practice
+        </motion.h1>
+
+        <motion.div
+          style={styles.topicContainer}
+          variants={animations.card}
+        >
+          <motion.h2 style={styles.topicTitle}>
+            Your Topic:
+          </motion.h2>
+          <motion.p style={styles.topicText}>
+            {topicName || "No topic selected"}
+          </motion.p>
         </motion.div>
-      )}
-    </div>
+
+        <motion.div style={styles.videoContainer}>
+          <video
+            ref={videoRef}
+            style={styles.video}
+            autoPlay
+            muted
+            playsInline
+          />
+        </motion.div>
+
+        <motion.div style={styles.timerContainer}>
+          <motion.span style={styles.timer}>
+            {formatTime(timer)}
+          </motion.span>
+        </motion.div>
+
+        <motion.div style={styles.controlsContainer}>
+          {!isRecording ? (
+            <motion.button
+              style={styles.recordButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={initiateRecording}
+            >
+              <FiVideo size={24} />
+              <span>Start Recording</span>
+            </motion.button>
+          ) : (
+            <motion.button
+              style={{...styles.recordButton, background: colors.accent.red}}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={stopRecording}
+            >
+              <FiStopCircle size={24} />
+              <span>Stop Recording</span>
+            </motion.button>
+          )}
+
+          {recordingURL && (
+            <AnimatePresence>
+              <motion.div
+                style={styles.audioContainer}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                {selectedFormat === "mp4" ? (
+                  <video 
+                    src={recordingURL} 
+                    controls 
+                    style={styles.recordingPlayer}
+                  />
+                ) : (
+                  <audio 
+                    src={recordingURL} 
+                    controls 
+                    style={styles.recordingPlayer}
+                  />
+                )}
+                <motion.div style={styles.formatSelector}>
+                  <select
+                    value={selectedFormat}
+                    onChange={(e) => setSelectedFormat(e.target.value)}
+                    style={styles.formatSelect}
+                  >
+                    <option value="mp4">Video (MP4)</option>
+                    <option value="wav">Audio (WAV)</option>
+                    <option value="m4a">Audio (M4A)</option>
+                  </select>
+                  <motion.button
+                    style={styles.downloadButton}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={downloadRecording}
+                  >
+                    <FiDownload size={20} />
+                    <span>Download Recording</span>
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </motion.div>
+
+        <motion.button
+          style={styles.backButton}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate("/")}
+        >
+          Back to Home
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 }
 
 const styles = {
-  container: {
+  heading: {
+    ...componentStyles.heading,
+    marginBottom: "1rem",
+    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.secondary.main})`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textAlign: "center",
+  },
+  topicContainer: {
+    background: colors.background.glass,
+    padding: "1.5rem",
+    borderRadius: "15px",
+    marginBottom: "1.5rem",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  },
+  topicTitle: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    marginBottom: "1rem",
+    color: colors.text.primary,
+  },
+  topicText: {
+    fontSize: "1.2rem",
+    color: colors.text.secondary,
+    lineHeight: "1.6",
+  },
+  videoContainer: {
+    width: "100%",
+    maxWidth: "640px",
+    aspectRatio: "16/9",
+    margin: "0 auto 1.5rem auto",
+    background: colors.background.glass,
+    borderRadius: "15px",
+    overflow: "hidden",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  timerContainer: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "1.5rem",
+  },
+  timer: {
+    fontSize: "3rem",
+    fontWeight: "700",
+    color: colors.text.primary,
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    background: colors.background.glass,
+    padding: "1rem 2rem",
+    borderRadius: "15px",
+    backdropFilter: "blur(10px)",
+  },
+  controlsContainer: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
-    padding: "40px",
-    borderRadius: "15px",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
-    textAlign: "center",
-    fontFamily: "'Poppins', sans-serif",
-    color: "#ffffff",
-    position: "relative", // Needed for positioning the popup
+    gap: "1.5rem",
+    marginBottom: "1.5rem",
   },
-  header: {
+  recordButton: {
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: "10px 20px",
-    background: "#1e3c72",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    gap: "0.5rem",
+    padding: "1rem 2rem",
+    fontSize: "1.2rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    background: colors.accent.green,
+    border: "none",
+    borderRadius: "50px",
+    cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    transition: "all 0.3s ease",
+  },
+  audioContainer: {
     width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "1rem",
+  },
+  recordingPlayer: {
+    width: "100%",
+    maxWidth: "500px",
+    borderRadius: "25px",
+    background: colors.background.glass,
+    marginBottom: "1rem",
+  },
+  formatSelector: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "1rem",
+    width: "100%",
+    maxWidth: "500px",
+  },
+  formatSelect: {
+    width: "100%",
+    padding: "0.8rem 1.5rem",
+    fontSize: "1rem",
+    color: colors.text.primary,
+    background: colors.background.glass,
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    borderRadius: "25px",
+    cursor: "pointer",
+    outline: "none",
+    backdropFilter: "blur(10px)",
+    transition: "all 0.3s ease",
+  },
+  downloadButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    padding: "0.8rem 1.5rem",
+    fontSize: "1rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    background: colors.accent.blue,
+    border: "none",
+    borderRadius: "25px",
+    cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    transition: "all 0.3s ease",
+  },
+  backButton: {
+    padding: "0.8rem 1.5rem",
+    fontSize: "1rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    background: colors.primary.light,
+    border: "none",
+    borderRadius: "25px",
+    cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    transition: "all 0.3s ease",
+  },
+  modalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
-    zIndex: 4000,
-  },
-  headerTitle: {
-    fontSize: "1.8rem",
-    fontWeight: "700",
-    color: "#fff",
-    margin: 0,
-  },
-  heading: {
-    fontSize: "3.5rem",
-    fontWeight: "700",
-    marginBottom: "20px",
-    letterSpacing: "1px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    marginTop: "100px",
-  },
-  timerContainer: {
-    background: "rgba(255, 255, 255, 0.15)",
-    padding: "20px 40px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 10px rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(8px)",
-  },
-  subHeading: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    marginBottom: "10px",
-  },
-  timer: {
-    fontSize: "2rem",
-    fontWeight: "700",
-    padding: "10px 20px",
-    background: "rgba(255, 255, 255, 0.2)",
-    borderRadius: "10px",
-    boxShadow: "0 3px 8px rgba(255, 255, 255, 0.2)",
-  },
-  footer: {
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "30px",
-    gap: "20px",
-  },
-  startButton: {
-    fontSize: "1.3rem",
-    padding: "14px 35px",
-    borderRadius: "30px",
-    background: "rgba(0, 255, 127, 0.8)",
-    color: "#fff",
-    fontWeight: "600",
-    cursor: "pointer",
-    border: "none",
-    boxShadow: "0 6px 20px rgba(0, 255, 127, 0.4)",
-    transition: "0.3s ease",
-  },
-  endButton: {
-    fontSize: "1.3rem",
-    padding: "14px 35px",
-    borderRadius: "30px",
-    background: "rgba(255, 69, 58, 0.8)",
-    color: "#fff",
-    fontWeight: "600",
-    cursor: "pointer",
-    border: "none",
-    boxShadow: "0 6px 20px rgba(255, 69, 58, 0.4)",
-    transition: "0.3s ease",
-  },
-  typeText: {
-    fontSize: "1.2rem",
-    fontWeight: "500",
-    marginTop: "20px",
-  },
-  popup: {
-    position: "absolute",
-    top: "80px", // Adjusted the popup's vertical position
-    right: "20px",
-    background: "rgba(255, 69, 58, 0.9)",
-    padding: "15px 25px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 15px rgba(255, 69, 58, 0.3)",
+    zIndex: 1000,
     backdropFilter: "blur(5px)",
   },
-  popupText: {
+  modalContent: {
+    background: colors.background.glass,
+    padding: "2rem",
+    borderRadius: "15px",
+    maxWidth: "500px",
+    width: "90%",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  },
+  modalTitle: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    marginBottom: "1.5rem",
+    textAlign: "center",
+  },
+  modalBody: {
+    display: "flex",
+    gap: "1rem",
+    alignItems: "flex-start",
+    marginBottom: "1.5rem",
+  },
+  modalText: {
     fontSize: "1rem",
-    fontWeight: "500",
-    color: "#ffffff",
-    margin: "0",
+    color: colors.text.secondary,
+    lineHeight: 1.6,
+    margin: 0,
+  },
+  modalButtons: {
+    display: "flex",
+    gap: "1rem",
+    justifyContent: "center",
+  },
+  modalButton: {
+    padding: "0.8rem 1.5rem",
+    fontSize: "1rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    border: "none",
+    borderRadius: "25px",
+    cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    transition: "all 0.3s ease",
   },
 };
 
