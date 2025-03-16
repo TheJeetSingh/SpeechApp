@@ -589,6 +589,10 @@ const styles = {
     maxWidth: "800px",
     width: "90%",
     margin: "0 auto",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
   },
   sectionHeader: {
     display: "flex",
@@ -627,6 +631,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "0.5rem",
+    margin: "0 auto",
   },
   buttonArrow: {
     fontSize: "1.2rem",
