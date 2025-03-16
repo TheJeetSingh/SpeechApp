@@ -93,12 +93,14 @@ const TopicsScreen = () => {
                 >
                   {category.icon}
                 </motion.div>
-                <motion.h2 style={styles.cardTitle}>
-                  {category.title}
-                </motion.h2>
-                <motion.p style={styles.cardDescription}>
-                  {category.description}
-                </motion.p>
+                <div>
+                  <motion.h2 style={styles.cardTitle}>
+                    {category.title}
+                  </motion.h2>
+                  <motion.p style={styles.cardDescription}>
+                    {category.description}
+                  </motion.p>
+                </div>
                 <motion.div
                   style={styles.arrowContainer}
                   whileHover={{ x: 5 }}
@@ -127,30 +129,27 @@ const styles = {
     margin: "0 auto 2rem auto",
   },
   categoriesGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
+    display: "flex",
+    flexDirection: "column",
     gap: "1.5rem",
-    width: "95%",
-    maxWidth: "1400px",
+    width: "90%",
+    maxWidth: "800px",
     margin: "0 auto",
     padding: "1rem",
   },
   categoryCard: {
-    background: colors.background.glass,
+    background: 'rgba(42, 82, 152, 0.95)',
     padding: "1.5rem",
     borderRadius: "20px",
-    backdropFilter: "blur(10px)",
     border: "1px solid rgba(255, 255, 255, 0.18)",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     cursor: "pointer",
     position: "relative",
     overflow: "hidden",
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "0.75rem",
+    alignItems: "center",
+    gap: "1.5rem",
     transition: "all 0.3s ease",
-    minWidth: "240px",
   },
   iconContainer: {
     color: colors.text.primary,
@@ -160,6 +159,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   cardTitle: {
     fontSize: "1.25rem",
@@ -170,15 +170,14 @@ const styles = {
   cardDescription: {
     fontSize: "0.9rem",
     color: colors.text.secondary,
-    margin: 0,
+    margin: "0.25rem 0 0 0",
     lineHeight: 1.4,
-    flex: 1,
   },
   arrowContainer: {
     color: colors.text.primary,
     display: "flex",
     alignItems: "center",
-    marginTop: "0.75rem",
+    marginLeft: "auto",
     transition: "transform 0.3s ease",
   },
 };
