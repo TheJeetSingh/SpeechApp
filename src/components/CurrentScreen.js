@@ -195,18 +195,6 @@ const styles = {
     textAlign: "center",
     marginBottom: "20px",
   },
-  topicCard: {
-    background: 'rgba(42, 82, 152, 0.95)',
-    padding: "2rem",
-    borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: "1.5rem",
-    transition: "all 0.3s ease",
-  },
 };
 
 export default CurrentScreen;

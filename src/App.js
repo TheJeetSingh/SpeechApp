@@ -14,6 +14,7 @@ import ExtempScreen from "./components/ExtempScreen";
 import ExtempPrepScreen from "./components/ExtempPrepScreen";
 import LoginScreen from "./components/LoginScreen"; // Import the new LoginScreen
 import SignupScreen from "./components/SignupScreen";
+import SpeechStats from "./components/SpeechStats"; // Add import for SpeechStats
 import { Analytics } from "@vercel/analytics/react";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/beta" element={<BetaDev />} />
         <Route path="/extemp" element={<ExtempScreen />} />
         <Route path="/extempPrep" element={<ExtempPrepScreen />} />
+        <Route path="/stats" element={<SpeechStats />} /> {/* Add route for SpeechStats */}
       </Routes>
     </Router>
   );

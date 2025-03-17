@@ -25,9 +25,9 @@ export const colors = {
     dark: '#333333',
   },
   background: {
-    glass: 'rgba(42, 82, 152, 0.95)',
+    glass: 'rgba(255, 255, 255, 0.1)',
     overlay: 'rgba(0, 0, 0, 0.3)',
-    card: 'rgba(255, 255, 255, 0.95)',
+    card: 'rgba(255, 255, 255, 0.9)',
   }
 };
 
@@ -239,6 +239,7 @@ export const componentStyles = {
     maxWidth: "1200px",
     zIndex: 1,
     padding: "clamp(1rem, 3vw, 2rem)",
+    backdropFilter: "blur(10px)",
     background: colors.background.glass,
     borderRadius: "20px",
     border: "1px solid rgba(255, 255, 255, 0.18)",
@@ -284,6 +285,7 @@ export const componentStyles = {
     flexDirection: "column",
     alignItems: "center",
     textAlign: "center",
+    backdropFilter: "blur(5px)",
     border: "1px solid rgba(255, 255, 255, 0.18)",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
