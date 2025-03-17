@@ -38,9 +38,7 @@ const TypeWriter = ({ text, delay = 100 }) => {
     <motion.span
       style={{
         display: "inline-block",
-        background: "linear-gradient(45deg, #fff, #87CEEB, #1E90FF)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
+        color: "#000000",
       }}
     >
       {displayText}
@@ -476,23 +474,7 @@ function HomeScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <TypeWriter text="Welcome to Speech App" delay={100} />
-          {userName && (
-            <motion.span
-              style={{ 
-                display: "inline-block", 
-                marginLeft: "10px",
-                background: "linear-gradient(45deg, #fff, #87CEEB, #1E90FF)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.5 }}
-            >
-              , {userName}
-            </motion.span>
-          )}
+          <TypeWriter text={userName ? `Welcome to Speech App, ${userName}` : "Welcome to Speech App"} delay={100} />
         </motion.h1>
 
         <motion.div 
@@ -837,11 +819,8 @@ const styles = {
     fontWeight: "700",
     marginBottom: "1rem",
     letterSpacing: "2px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    background: "linear-gradient(45deg, #fff, #87CEEB, #1E90FF)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    animation: "gradientText 3s ease infinite",
+    textShadow: "none",
+    color: "#000000",
   },
   navDots: {
     display: "flex",
