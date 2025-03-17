@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
 import { Engine } from "tsparticles-engine";
 import { FiArrowDown } from "react-icons/fi";
@@ -199,10 +199,251 @@ function Header({ onFeedbackClick }) {
   );
 }
 
+// Rules Display Component
+const RulesDisplay = ({ isVisible, onClose, eventType }) => {
+  const rulesContent = {
+    Impromptu: {
+      title: "Impromptu Rules",
+      rules: [
+        {
+          title: "Time Limit",
+          content: "You have 2 minutes to deliver your speech"
+        },
+        {
+          title: "Preparation",
+          content: "No preparation time - speak immediately after receiving your topic"
+        },
+        {
+          title: "Structure",
+          content: "Introduction, 2-3 main points, and conclusion recommended"
+        },
+        {
+          title: "Topic Types",
+          content: [
+            "• Quotes - Interpret and discuss meaningful quotes",
+            "• Abstract - Philosophical and conceptual topics",
+            "• Concrete - Real-world subjects and scenarios",
+            "• Current Events - Contemporary issues and news"
+          ]
+        },
+        {
+          title: "Scoring Criteria",
+          content: [
+            "• Content Development",
+            "• Organization",
+            "• Delivery",
+            "• Language Use",
+            "• Time Management"
+          ]
+        },
+        {
+          title: "Tips",
+          content: [
+            "• Stay calm and confident",
+            "• Use personal experiences and examples",
+            "• Maintain eye contact",
+            "• Practice vocal variety",
+            "• End with a strong conclusion"
+          ]
+        }
+      ]
+    },
+    Interp: {
+      title: "Interpretation Rules",
+      rules: [
+        {
+          title: "Time Limit",
+          content: "10 minutes maximum performance time"
+        },
+        {
+          title: "Selection",
+          content: "Choose from published prose, poetry, or dramatic literature"
+        },
+        {
+          title: "Performance",
+          content: "Develop character voices, gestures, and emotional connection"
+        },
+        {
+          title: "Requirements",
+          content: [
+            "• Must use a published work",
+            "• Clear distinction between characters",
+            "• Maintain consistent character portrayal",
+            "• Limited movement/gestures",
+            "• No props or costumes allowed"
+          ]
+        },
+        {
+          title: "Scoring Criteria",
+          content: [
+            "• Character Development",
+            "• Vocal Variety",
+            "• Physical Presence",
+            "• Interpretation Choices",
+            "• Overall Impact"
+          ]
+        },
+        {
+          title: "Tips",
+          content: [
+            "• Choose material that resonates with you",
+            "• Practice transitions between characters",
+            "• Use varied vocal techniques",
+            "• Connect with your audience",
+            "• Tell the story authentically"
+          ]
+        }
+      ]
+    },
+    Original: {
+      title: "Original Speech Rules",
+      rules: [
+        {
+          title: "Time Limit",
+          content: "10 minutes maximum speech time"
+        },
+        {
+          title: "Content",
+          content: "Must be original content written by you"
+        },
+        {
+          title: "Structure",
+          content: "Clear introduction, body, and conclusion required"
+        },
+        {
+          title: "Requirements",
+          content: [
+            "• Original research and writing",
+            "• Proper citation of sources",
+            "• Clear thesis statement",
+            "• Supporting evidence",
+            "• Persuasive argument"
+          ]
+        },
+        {
+          title: "Scoring Criteria",
+          content: [
+            "• Content Organization",
+            "• Research Quality",
+            "• Delivery Style",
+            "• Persuasiveness",
+            "• Overall Impact"
+          ]
+        },
+        {
+          title: "Tips",
+          content: [
+            "• Choose a passionate topic",
+            "• Use credible sources",
+            "• Practice delivery techniques",
+            "• Engage your audience",
+            "• End with a strong call to action"
+          ]
+        }
+      ]
+    },
+    Extemp: {
+      title: "Extemporaneous Rules",
+      rules: [
+        {
+          title: "Time Limit",
+          content: "7 minutes maximum speech time"
+        },
+        {
+          title: "Preparation",
+          content: "30 minutes prep time with access to research materials"
+        },
+        {
+          title: "Structure",
+          content: "Introduction, analysis points, and conclusion required"
+        },
+        {
+          title: "Requirements",
+          content: [
+            "• Current events focus",
+            "• Use of recent sources",
+            "• Clear analysis",
+            "• Supported arguments",
+            "• Organized structure"
+          ]
+        },
+        {
+          title: "Scoring Criteria",
+          content: [
+            "• Analysis Depth",
+            "• Source Usage",
+            "• Organization",
+            "• Delivery",
+            "• Time Management"
+          ]
+        },
+        {
+          title: "Tips",
+          content: [
+            "• Stay updated on current events",
+            "• Organize research effectively",
+            "• Use specific examples",
+            "• Practice time management",
+            "• Develop clear analysis"
+          ]
+        }
+      ]
+    }
+  };
+
+  const currentRules = rulesContent[eventType];
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={styles.rulesOverlay}
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            style={styles.rulesContent}
+            onClick={e => e.stopPropagation()}
+          >
+            <motion.h2 style={styles.rulesTitle}>{currentRules.title}</motion.h2>
+            <motion.div style={styles.rulesList}>
+              {currentRules.rules.map((rule, index) => (
+                <motion.div 
+                  key={index}
+                  style={styles.ruleItem}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <h3>{rule.title}</h3>
+                  {Array.isArray(rule.content) ? (
+                    rule.content.map((item, i) => (
+                      <p key={i}>{item}</p>
+                    ))
+                  ) : (
+                    <p>{rule.content}</p>
+                  )}
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // HomeScreen Component
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState("");
+  const [showRules, setShowRules] = useState(false);
+  const [selectedEventType, setSelectedEventType] = useState(null);
   const navigate = useNavigate();
   const containerRef = useRef(null);
 
@@ -383,7 +624,11 @@ function HomeScreen() {
       background: "linear-gradient(135deg, #1e3c72, #2a5298)",
       navigateTo: "/topics",
       icon: "⚡️",
-      type: "Impromptu"
+      type: "Impromptu",
+      onClick: () => {
+        setSelectedEventType("Impromptu");
+        setShowRules(true);
+      }
     },
     {
       id: "interp",
@@ -393,7 +638,11 @@ function HomeScreen() {
       navigateTo: "/speech",
       icon: "🎭",
       type: "Interp",
-      defaultTopic: "Choose a piece of literature, poem, or dramatic work to interpret"
+      defaultTopic: "Choose a piece of literature, poem, or dramatic work to interpret",
+      onClick: () => {
+        setSelectedEventType("Interp");
+        setShowRules(true);
+      }
     },
     {
       id: "original",
@@ -403,7 +652,11 @@ function HomeScreen() {
       navigateTo: "/speech",
       icon: "✏️",
       type: "Original",
-      defaultTopic: "Present your original speech on a topic of your choice"
+      defaultTopic: "Present your original speech on a topic of your choice",
+      onClick: () => {
+        setSelectedEventType("Original");
+        setShowRules(true);
+      }
     },
     {
       id: "extemp",
@@ -412,7 +665,11 @@ function HomeScreen() {
       background: "linear-gradient(135deg, #00c853, #00e676)",
       navigateTo: "/beta",
       icon: "🌎",
-      type: "Extemp"
+      type: "Extemp",
+      onClick: () => {
+        setSelectedEventType("Extemp");
+        setShowRules(true);
+      }
     },
   ];
 
@@ -534,6 +791,13 @@ function HomeScreen() {
         </motion.div>
       </motion.div>
 
+      {/* Add RulesDisplay component */}
+      <RulesDisplay 
+        isVisible={showRules} 
+        onClose={() => setShowRules(false)} 
+        eventType={selectedEventType}
+      />
+
       {/* Full-page sections */}
       {sections.map((section, index) => (
         <motion.div
@@ -549,6 +813,7 @@ function HomeScreen() {
             }
           }}
           viewport={{ once: false, amount: 0.3 }}
+          onClick={section.onClick}
         >
           <motion.div 
             style={styles.sectionContent}
@@ -819,7 +1084,7 @@ const styles = {
     fontWeight: "700",
     marginBottom: "1rem",
     letterSpacing: "2px",
-    textShadow: "none",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
     color: "#000000",
   },
   navDots: {
@@ -1157,6 +1422,62 @@ const styles = {
     alignItems: "center",
     justifyContent: "space-between",
     gap: "1rem",
+  },
+  rulesOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(30, 60, 114, 0.97)",
+    zIndex: 5000,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "2rem",
+    overflow: "auto",
+  },
+  rulesContent: {
+    width: "100%",
+    maxWidth: "1000px",
+    background: "rgba(255, 255, 255, 0.1)",
+    borderRadius: "20px",
+    padding: "2rem",
+    color: "#fff",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  },
+  rulesTitle: {
+    fontSize: "2.5rem",
+    fontWeight: "700",
+    marginBottom: "2rem",
+    textAlign: "center",
+    background: "linear-gradient(45deg, #fff, #87CEEB)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+  rulesList: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "2rem",
+    padding: "1rem",
+  },
+  ruleItem: {
+    background: "rgba(255, 255, 255, 0.05)",
+    padding: "1.5rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    "& h3": {
+      fontSize: "1.2rem",
+      fontWeight: "600",
+      marginBottom: "1rem",
+      color: "#87CEEB",
+    },
+    "& p": {
+      fontSize: "1rem",
+      lineHeight: "1.6",
+      marginBottom: "0.5rem",
+    },
   },
 };
 
