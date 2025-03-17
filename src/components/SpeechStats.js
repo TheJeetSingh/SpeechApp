@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { colors } from '../styles/theme';
 import { FiClock, FiTrendingUp, FiRotateCcw, FiHome, FiTarget } from 'react-icons/fi';
 import Particles from 'react-tsparticles';
+import { useSpring, animated } from 'react-spring';
 
 // Define timeRequirements globally
 const timeRequirements = {
@@ -172,6 +173,9 @@ function SpeechStats() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Spring animation for stats details
+  const props = useSpring({ opacity: showStats ? 1 : 0, transform: showStats ? 'translateY(0)' : 'translateY(20px)', config: { tension: 200, friction: 20 } });
+
   return (
     <motion.div
       style={styles.container}
@@ -207,7 +211,7 @@ function SpeechStats() {
 
         <AnimatePresence>
           {showStats && (
-            <motion.div style={styles.statsContainer} variants={containerVariants}>
+            <animated.div style={{ ...props, ...styles.statsContainer }} variants={containerVariants}>
               <motion.div style={styles.gradeCard} variants={cardVariants}>
                 <motion.div style={styles.gradeCircle}>
                   <svg width="150" height="150" viewBox="0 0 100 100">
@@ -251,12 +255,12 @@ function SpeechStats() {
                     {formatTime(timeRequirements[speechType]?.ideal || 120)}
                   </p>
                 </motion.div>
+              </motion.div>
 
-                <motion.div style={{ ...styles.statCard, gridColumn: "1 / -1" }} variants={cardVariants}>
-                  <FiTrendingUp size={28} color={grade.color} />
-                  <h3>Feedback</h3>
-                  <p style={styles.feedback}>{grade.feedback}</p>
-                </motion.div>
+              <motion.div style={{ ...styles.statCard, gridColumn: "1 / -1" }} variants={cardVariants}>
+                <FiTrendingUp size={28} color={grade.color} />
+                <h3>Feedback</h3>
+                <p style={styles.feedback}>{grade.feedback}</p>
               </motion.div>
 
               <motion.div style={styles.buttonContainer} variants={itemVariants}>
@@ -280,7 +284,7 @@ function SpeechStats() {
                   <span>Try Again</span>
                 </motion.button>
               </motion.div>
-            </motion.div>
+            </animated.div>
           )}
         </AnimatePresence>
       </motion.div>

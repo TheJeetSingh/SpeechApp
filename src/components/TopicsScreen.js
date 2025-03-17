@@ -62,7 +62,7 @@ const TopicsScreen = () => {
           Choose Your Topic Type
         </motion.h1>
 
-        <motion.div style={styles.categoriesGrid}>
+        <motion.div style={styles.categoriesList}>
           <AnimatePresence>
             {categories.map((category, index) => (
               <motion.div
@@ -93,12 +93,14 @@ const TopicsScreen = () => {
                 >
                   {category.icon}
                 </motion.div>
-                <motion.h2 style={styles.cardTitle}>
-                  {category.title}
-                </motion.h2>
-                <motion.p style={styles.cardDescription}>
-                  {category.description}
-                </motion.p>
+                <motion.div style={styles.cardContent}>
+                  <motion.h2 style={styles.cardTitle}>
+                    {category.title}
+                  </motion.h2>
+                  <motion.p style={styles.cardDescription}>
+                    {category.description}
+                  </motion.p>
+                </motion.div>
                 <motion.div
                   style={styles.arrowContainer}
                   whileHover={{ x: 5 }}
@@ -126,12 +128,12 @@ const styles = {
     maxWidth: "800px",
     margin: "0 auto 2rem auto",
   },
-  categoriesGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "1.5rem",
+  categoriesList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
     width: "95%",
-    maxWidth: "1400px",
+    maxWidth: "600px",
     margin: "0 auto",
     padding: "1rem",
   },
@@ -146,11 +148,12 @@ const styles = {
     position: "relative",
     overflow: "hidden",
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "0.75rem",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "1rem",
     transition: "all 0.3s ease",
-    minWidth: "240px",
+    width: "100%",
   },
   iconContainer: {
     color: colors.text.primary,
@@ -160,6 +163,13 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
+  },
+  cardContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    flex: 1,
   },
   cardTitle: {
     fontSize: "1.25rem",
@@ -172,14 +182,13 @@ const styles = {
     color: colors.text.secondary,
     margin: 0,
     lineHeight: 1.4,
-    flex: 1,
   },
   arrowContainer: {
     color: colors.text.primary,
     display: "flex",
     alignItems: "center",
-    marginTop: "0.75rem",
     transition: "transform 0.3s ease",
+    flexShrink: 0,
   },
 };
 
