@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useInterval } from 'react-use';
 
-const AudioReactiveBackground = ({ colorMapping = {
+const VisualBackground = ({ colorMapping = {
   lowFreq: '#1e3c72',
   midFreq: '#2a5298',
   highFreq: '#00BFFF'
@@ -10,7 +10,7 @@ const AudioReactiveBackground = ({ colorMapping = {
   const canvasRef = useRef(null);
   const [visualizerData, setVisualizerData] = useState([]);
   
-  // Generate visualization data without actual audio input
+  // Generate visualization data based on time
   const generateVisualizationData = () => {
     const time = Date.now() * 0.001;
     const data = Array(128).fill(0).map((_, i) => {
@@ -79,16 +79,16 @@ const AudioReactiveBackground = ({ colorMapping = {
       const totalBars = Math.min(64, visualizerData.length); // Limit to 64 bars for performance
       
       for (let i = 0; i < totalBars; i++) {
-        // Calculate frequency range (0-1) where 0 is lowest frequency and 1 is highest
-        const freqRange = i / totalBars;
+        // Calculate range (0-1) where 0 is lowest and 1 is highest
+        const range = i / totalBars;
         
-        // More dynamic color selection based on frequency and time
+        // More dynamic color selection based on range and time
         let color;
-        if (freqRange < 0.25) {
+        if (range < 0.25) {
           color = dynamicColors.lowFreq.clone().lerp(dynamicColors.accent3, hueShift);
-        } else if (freqRange < 0.5) {
+        } else if (range < 0.5) {
           color = dynamicColors.midFreq.clone().lerp(dynamicColors.accent1, hueShift);
-        } else if (freqRange < 0.75) {
+        } else if (range < 0.75) {
           color = dynamicColors.highFreq.clone().lerp(dynamicColors.accent2, hueShift);
         } else {
           color = dynamicColors.accent4.clone().lerp(dynamicColors.highFreq, hueShift);
@@ -111,7 +111,7 @@ const AudioReactiveBackground = ({ colorMapping = {
         bar.position.y = Math.sin(angle) * radius;
         bar.rotation.z = angle;
         
-        // Scale based on frequency data
+        // Scale based on visualization data
         const value = visualizerData[i] || 0;
         const normalizedValue = value / 255; // Normalize to 0-1
         bar.scale.y = 1 + normalizedValue * 30; // Scale the bar based on animation intensity
@@ -120,7 +120,7 @@ const AudioReactiveBackground = ({ colorMapping = {
         bars.push(bar);
       }
       
-      // Create inner frequency wave with more vibrant colors
+      // Create inner wave with more vibrant colors
       const wavePoints = [];
       const waveSegments = 128; // Number of segments in the wave
       const waveRadius = 25; // Smaller inner radius
@@ -132,7 +132,7 @@ const AudioReactiveBackground = ({ colorMapping = {
         const value = visualizerData[dataIndex] || 0;
         const normalizedValue = value / 255;
         
-        // Calculate point position with frequency-based displacement
+        // Calculate point position with displacement
         const radius = waveRadius + normalizedValue * 10;
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
@@ -372,4 +372,4 @@ const AudioReactiveBackground = ({ colorMapping = {
   );
 };
 
-export default AudioReactiveBackground; 
+export default VisualBackground; 

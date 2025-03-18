@@ -10,7 +10,7 @@ import { useSpring, animated } from 'react-spring';
 import { useMouse, useWindowSize } from 'react-use';
 import { gsap } from 'gsap';
 import { TypeAnimation } from 'react-type-animation';
-import AudioReactiveBackground from "./AudioReactiveBackground";
+import VisualBackground from "./AudioReactiveBackground";
 import PatchNotes from "./PatchNotes";
 
 // StickFigureSpeechAnimation component for fallback when audio permissions are denied
@@ -883,11 +883,11 @@ function Header({ onFeedbackClick }) {
     window.dispatchEvent(new CustomEvent('showPatchNotes'));
   };
   
-  // Function to toggle background
-  const handleToggleBackground = () => {
+  // Function to show privacy policy
+  const handlePrivacyPolicyClick = () => {
     setMenuOpen(false);
-    // Trigger background toggle in the parent component
-    window.dispatchEvent(new CustomEvent('toggleBackground'));
+    // Trigger privacy policy modal in the parent component
+    window.dispatchEvent(new CustomEvent('showPrivacyPolicy'));
   };
 
   return (
@@ -962,11 +962,11 @@ function Header({ onFeedbackClick }) {
             </motion.button>
             <motion.button 
               style={styles.dropdownButton} 
-              onClick={handleToggleBackground}
+              onClick={handlePrivacyPolicyClick}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Toggle Background
+              Privacy Policy
             </motion.button>
             <motion.button 
               style={styles.dropdownButton} 
@@ -1226,165 +1226,34 @@ const RulesDisplay = ({ isVisible, onClose, eventType }) => {
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPatchNotesVisible, setIsPatchNotesVisible] = useState(false);
+  const [isPrivacyPolicyVisible, setIsPrivacyPolicyVisible] = useState(false);
   const [userName, setUserName] = useState("");
   const [showRules, setShowRules] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Impromptu");
-  const [useAudioBackground, setUseAudioBackground] = useState(true);
-  const [useWaveBackground, setUseWaveBackground] = useState(false);
-  const [showAudioDisclaimer, setShowAudioDisclaimer] = useState(false);
   const containerRef = useRef(null);
-  const modalContentRef = useRef(null);
   const { scrollYProgress } = useScroll({ 
     target: containerRef, 
     offset: ["start start", "end end"] 
   });
   const navigate = useNavigate();
   
-  // Mouse tracking for 3D effect
-  const ref = useRef(null);
-  const mouse = useMouse(ref);
+  // Check for mobile devices and apply responsive styling
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Mouse position for dynamic effects in sections
+  const mouse = useMouse(containerRef);
   const { width, height } = useWindowSize();
-
-  // Initialize particles - fixed to work with the installed version
-  const particlesInit = async (engine) => {
-    // Load the bubbles preset directly
-    await loadBubblesPreset(engine);
-  };
-
-  // Mouse position for dynamic shadow and light effects
-  const calcX = (mouse.docX / width) * 100;
-  const calcY = (mouse.docY / height) * 100;
-  
-  // Spring animation for floating element
-  const floatingProps = useSpring({
-    from: { transform: 'translateY(0px)' },
-    to: async (next) => {
-      while (showAudioDisclaimer) {
-        await next({ transform: 'translateY(-20px)' });
-        await next({ transform: 'translateY(0px)' });
-      }
-    },
-    config: { duration: 3000, tension: 120, friction: 14 },
-  });
-  
-  // Button animation
-  const pulseProps = useSpring({
-    from: { scale: 1 },
-    to: async (next) => {
-      while (showAudioDisclaimer) {
-        await next({ scale: 1.1 });
-        await next({ scale: 1 });
-      }
-    },
-    config: { duration: 2000 },
-  });
-
-  // Particle options for the popup background
-  const particlesOptions = useMemo(() => ({
-    preset: "bubbles",
-    particles: {
-      number: {
-        value: 20,
-        density: {
-          enable: true,
-          value_area: 800
-        }
-      },
-      color: {
-        value: ["#1e3c72", "#2a5298", "#00BFFF", "#36D6E7"]
-      },
-      opacity: {
-        value: 0.5,
-        random: true,
-        anim: {
-          enable: true,
-          speed: 1,
-          opacity_min: 0.1,
-          sync: false
-        }
-      },
-      size: {
-        value: 8,
-        random: true,
-        anim: {
-          enable: true,
-          speed: 4,
-          size_min: 0.5,
-          sync: false
-        }
-      },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: "top",
-        random: true,
-        straight: false,
-        out_mode: "out",
-        attract: {
-          enable: true,
-          rotateX: 600,
-          rotateY: 1200
-        }
-      }
-    },
-    interactivity: {
-      detect_on: "canvas",
-      events: {
-        onhover: {
-          enable: true,
-          mode: "bubble"
-        },
-        onclick: {
-          enable: true,
-          mode: "push"
-        }
-      },
-      modes: {
-        bubble: {
-          distance: 150,
-          size: 15,
-          duration: 2,
-          opacity: 0.8
-        },
-        push: {
-          particles_nb: 4
-        }
-      }
-    },
-    retina_detect: true,
-    background: {
-      color: "transparent",
-    }
-  }), []);
-
-  // GSAP animation for the modal content
-  useEffect(() => {
-    if (showAudioDisclaimer && modalContentRef.current) {
-      // Create stagger effect for elements inside the modal
-      const elements = modalContentRef.current.querySelectorAll('.animate-in');
-      gsap.fromTo(
-        elements, 
-        { opacity: 0, y: 50 },
-        { 
-          opacity: 1, 
-          y: 0, 
-          stagger: 0.1, 
-          duration: 0.5,
-          ease: "power2.out"
-        }
-      );
-    }
-  }, [showAudioDisclaimer]);
 
   // Parallax effect with Framer Motion
   const y1 = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const y2 = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const y3 = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
 
-  // Check for mobile devices and apply responsive styling
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // Initialize particles
+  const particlesInit = async (engine) => {
+    await loadBubblesPreset(engine);
+  };
 
-  // Modified useEffect for proper popup behavior in production
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -1405,62 +1274,25 @@ function HomeScreen() {
       setIsPatchNotesVisible(true);
       localStorage.setItem("lastVisit", today);
     }
-
-    // Production mode: Check if user has seen audio disclaimer
-    const hasSeenAudioDisclaimer = localStorage.getItem("hasSeenAudioDisclaimer");
-    if (useAudioBackground && !hasSeenAudioDisclaimer) {
-      setShowAudioDisclaimer(true);
-    }
     
     // Listen for patch notes button click
     const handleShowPatchNotes = () => {
       setIsPatchNotesVisible(true);
     };
     
-    // Listen for background toggle event from Header
-    const handleToggleBackground = () => {
-      toggleBackgroundType();
+    // Listen for privacy policy event from Header
+    const handleShowPrivacyPolicy = () => {
+      setIsPrivacyPolicyVisible(true);
     };
     
     window.addEventListener('showPatchNotes', handleShowPatchNotes);
-    window.addEventListener('toggleBackground', handleToggleBackground);
+    window.addEventListener('showPrivacyPolicy', handleShowPrivacyPolicy);
     
     return () => {
       window.removeEventListener('showPatchNotes', handleShowPatchNotes);
-      window.removeEventListener('toggleBackground', handleToggleBackground);
+      window.removeEventListener('showPrivacyPolicy', handleShowPrivacyPolicy);
     };
-  }, [useAudioBackground]);
-
-  // Toggle background type - now triggered from Header
-  const toggleBackgroundType = () => {
-    if (useAudioBackground) {
-      setUseAudioBackground(false);
-      setUseWaveBackground(true);
-      setShowAudioDisclaimer(false);
-    } else {
-      setUseWaveBackground(false);
-      setUseAudioBackground(true);
-      
-      // Production mode: Check if user has seen audio disclaimer
-      const hasSeenAudioDisclaimer = localStorage.getItem("hasSeenAudioDisclaimer");
-      if (!hasSeenAudioDisclaimer) {
-        setShowAudioDisclaimer(true);
-      }
-    }
-  };
-
-  // Handle audio permission denial
-  const handlePermissionDenied = () => {
-    setUseAudioBackground(false);
-    setUseWaveBackground(true);
-    setShowAudioDisclaimer(false);
-  };
-
-  // Close audio disclaimer and save to localStorage for production
-  const closeAudioDisclaimer = () => {
-    setShowAudioDisclaimer(false);
-    localStorage.setItem("hasSeenAudioDisclaimer", "true");
-  };
+  }, []);
 
   const handleFeedbackClick = () => {
     setIsModalOpen(true);
@@ -1544,21 +1376,18 @@ function HomeScreen() {
 
   return (
     <div style={styles.container} ref={containerRef}>
-      {/* Background Selection Logic */}
-      {useAudioBackground ? (
-        <AudioReactiveBackground 
-          colorMapping={{
-            lowFreq: '#1e3c72',
-            midFreq: '#2a5298',
-            highFreq: '#00BFFF'
-          }}
-          onPermissionDenied={handlePermissionDenied}
-        />
-      ) : (
-        <StickFigureSpeechAnimation />
-      )}
+      {/* Background */}
+      <VisualBackground 
+        colorMapping={{
+          lowFreq: '#1e3c72',
+          midFreq: '#2a5298',
+          highFreq: '#00BFFF'
+        }}
+      />
 
-      <Header onFeedbackClick={handleFeedbackClick} />
+      <Header 
+        onFeedbackClick={handleFeedbackClick} 
+      />
 
       {/* Patch Notes */}
       <PatchNotes 
@@ -1566,148 +1395,82 @@ function HomeScreen() {
         onClose={() => setIsPatchNotesVisible(false)} 
       />
 
-      {/* Enhanced Audio Disclaimer Modal - Tilt removed */}
+      {/* Privacy Policy Modal */}
       <AnimatePresence>
-        {showAudioDisclaimer && (
-          <div ref={ref} style={styles.disclaimerContainer}>
+        {isPrivacyPolicyVisible && (
+          <motion.div
+            style={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsPrivacyPolicyVisible(false)}
+          >
             <motion.div
-              style={styles.modalOverlay}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+              style={isMobile ? {...styles.privacyPolicyContent, ...styles.mobileModal} : styles.privacyPolicyContent}
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -50, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <Particles 
-                id="tsparticles-disclaimer" 
-                init={particlesInit}
-                options={particlesOptions}
-              />
+              <h2 style={styles.privacyPolicyTitle}>Privacy Policy</h2>
               
-              <motion.div
-                style={{
-                  ...styles.modalContent,
-                  boxShadow: `${20 + calcX / 5}px ${20 + calcY / 5}px 50px rgba(0, 120, 255, 0.2)`,
-                  background: `radial-gradient(circle at ${calcX}% ${calcY}%, rgba(54, 214, 231, 0.8), rgba(30, 60, 114, 0.95))`,
-                }}
-                initial={{ y: 50, opacity: 0, rotateX: -15, scale: 0.9 }}
-                animate={{ y: 0, opacity: 1, rotateX: 0, scale: 1 }}
-                exit={{ y: 50, opacity: 0, rotateX: 15, scale: 0.9 }}
-                transition={{ 
-                  type: "spring", 
-                  damping: 20, 
-                  stiffness: 100 
-                }}
-                ref={modalContentRef}
+              <div style={styles.privacyPolicySection}>
+                <h3>Data Collection</h3>
+                <p>
+                  We collect minimal user data necessary for the functioning of the application.
+                  This includes your username and login information.
+                </p>
+              </div>
+              
+              <div style={styles.privacyPolicySection}>
+                <h3>Microphone Usage</h3>
+                <p>
+                  Our app uses your microphone to create visual audio effects that react to sounds in your environment.
+                  <strong> We do not record, store, or transmit any audio data.</strong> All audio processing happens 
+                  locally in your browser and is never sent to any server.
+                </p>
+              </div>
+              
+              <div style={styles.privacyPolicySection}>
+                <h3>Cookies & Local Storage</h3>
+                <p>
+                  We use local storage to save your preferences and login information.
+                  This data remains on your device and is not shared with our servers.
+                </p>
+              </div>
+              
+              <div style={styles.privacyPolicySection}>
+                <h3>Third-Party Services</h3>
+                <p>
+                  We do not share your data with any third-party services.
+                </p>
+              </div>
+              
+              <div style={styles.privacyPolicySection}>
+                <h3>Data Security</h3>
+                <p>
+                  We implement industry-standard security measures to protect your personal information.
+                </p>
+              </div>
+              
+              <div style={styles.privacyPolicySection}>
+                <h3>Contact Us</h3>
+                <p>
+                  If you have any questions about our privacy policy, please contact us at
+                  privacy@speechapp.com
+                </p>
+              </div>
+              
+              <motion.button
+                style={styles.closeButton}
+                onClick={() => setIsPrivacyPolicyVisible(false)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <div className="animate-in" style={styles.modalIconContainer}>
-                  <animated.div style={floatingProps}>
-                    <FiMic style={styles.modalIcon} />
-                  </animated.div>
-                  <div style={styles.iconRing}></div>
-                  <div style={styles.iconRing2}></div>
-                </div>
-                
-                <motion.h2 
-                  className="animate-in"
-                  style={styles.modalTitle}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <TypeAnimation
-                    sequence={[
-                      'Microphone Privacy',
-                      1000,
-                      'Microphone Privacy Notice',
-                    ]}
-                    speed={50}
-                    style={{ display: 'inline-block' }}
-                  />
-                </motion.h2>
-                
-                <motion.div
-                  className="animate-in"
-                  style={styles.privacyBadge}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <FiShield size={18} />
-                  <span>Your Privacy Protected</span>
-                </motion.div>
-                
-                <motion.div 
-                  className="animate-in"
-                  style={styles.modalText}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <p>
-                    This app uses your microphone to create a visual audio spectrum that reacts to sounds in your environment.
-                  </p>
-                  <div style={styles.highlightBox}>
-                    <motion.div
-                      animate={{
-                        boxShadow: [
-                          "0 0 10px rgba(0, 191, 255, 0.5)",
-                          "0 0 20px rgba(0, 191, 255, 0.8)",
-                          "0 0 10px rgba(0, 191, 255, 0.5)"
-                        ]
-                      }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    >
-                      <strong>We do not record, store, or transmit any audio data.</strong>
-                    </motion.div>
-                  </div>
-                  <p>
-                    All audio processing happens locally in your browser and is never sent to any server.
-                  </p>
-                </motion.div>
-                
-                <motion.div 
-                  className="animate-in"
-                  style={styles.securityFeatures}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <div style={styles.securityFeature}>
-                    <div style={styles.featureIcon}>🔒</div>
-                    <div>Local Processing</div>
-                  </div>
-                  <div style={styles.securityFeature}>
-                    <div style={styles.featureIcon}>🛡️</div>
-                    <div>No Recording</div>
-                  </div>
-                  <div style={styles.securityFeature}>
-                    <div style={styles.featureIcon}>🔐</div>
-                    <div>No Data Sharing</div>
-                  </div>
-                </motion.div>
-                
-                <div style={styles.modalButtons}>
-                  <animated.div style={pulseProps}>
-                    <motion.button
-                      className="animate-in"
-                      style={styles.modalButton}
-                      whileHover={{ 
-                        scale: 1.05,
-                        boxShadow: "0 0 20px rgba(0, 191, 255, 0.8)"
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      onClick={closeAudioDisclaimer}
-                    >
-                      I Understand
-                    </motion.button>
-                  </animated.div>
-                </div>
-              </motion.div>
+                Close
+              </motion.button>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -1730,7 +1493,7 @@ function HomeScreen() {
           <FloatingText text={userName ? `Welcome to Speech App, ${userName}` : "Welcome to Speech App"} />
         </motion.h1>
 
-        <motion.div
+        <motion.div 
           style={isMobile ? {...styles.downArrow, ...styles.mobileDownArrow} : styles.downArrow}
           initial={{ opacity: 0, y: 20 }}
           animate={{ 
@@ -2757,6 +2520,43 @@ const styles = {
   mobileModal: {
     width: '90%',
     padding: '1rem',
+  },
+  // Privacy Policy styles
+  privacyPolicyContent: {
+    width: '80%',
+    maxWidth: '800px',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    background: 'white',
+    borderRadius: '10px',
+    padding: '2rem',
+    position: 'relative',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+    color: '#333',
+  },
+  privacyPolicyTitle: {
+    fontSize: '2rem',
+    fontWeight: '700',
+    marginBottom: '1.5rem',
+    textAlign: 'center',
+    color: '#1e3c72',
+    borderBottom: '2px solid #1e3c72',
+    paddingBottom: '0.5rem',
+  },
+  privacyPolicySection: {
+    marginBottom: '1.5rem',
+  },
+  closeButton: {
+    padding: '0.75rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#fff',
+    background: 'linear-gradient(135deg, #1e3c72, #2a5298)',
+    border: 'none',
+    borderRadius: '30px',
+    cursor: 'pointer',
+    display: 'block',
+    margin: '1.5rem auto 0',
   },
 };
 
