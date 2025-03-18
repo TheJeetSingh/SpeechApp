@@ -883,12 +883,6 @@ function Header({ onFeedbackClick }) {
     window.dispatchEvent(new CustomEvent('showPatchNotes'));
   };
   
-  // Function to show privacy policy
-  const handlePrivacyPolicyClick = () => {
-    setMenuOpen(false);
-    // Trigger privacy policy modal in the parent component
-    window.dispatchEvent(new CustomEvent('showPrivacyPolicy'));
-  };
 
   return (
     <div style={styles.header}>
@@ -959,14 +953,6 @@ function Header({ onFeedbackClick }) {
               whileTap={{ scale: 0.95 }}
             >
               Give Feedback
-            </motion.button>
-            <motion.button 
-              style={styles.dropdownButton} 
-              onClick={handlePrivacyPolicyClick}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Privacy Policy
             </motion.button>
             <motion.button 
               style={styles.dropdownButton} 
@@ -1226,7 +1212,7 @@ const RulesDisplay = ({ isVisible, onClose, eventType }) => {
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPatchNotesVisible, setIsPatchNotesVisible] = useState(false);
-  const [isPrivacyPolicyVisible, setIsPrivacyPolicyVisible] = useState(false);
+  
   const [userName, setUserName] = useState("");
   const [showRules, setShowRules] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Impromptu");
@@ -1280,17 +1266,11 @@ function HomeScreen() {
       setIsPatchNotesVisible(true);
     };
     
-    // Listen for privacy policy event from Header
-    const handleShowPrivacyPolicy = () => {
-      setIsPrivacyPolicyVisible(true);
-    };
     
     window.addEventListener('showPatchNotes', handleShowPatchNotes);
-    window.addEventListener('showPrivacyPolicy', handleShowPrivacyPolicy);
     
     return () => {
       window.removeEventListener('showPatchNotes', handleShowPatchNotes);
-      window.removeEventListener('showPrivacyPolicy', handleShowPrivacyPolicy);
     };
   }, []);
 
@@ -1395,95 +1375,8 @@ function HomeScreen() {
         onClose={() => setIsPatchNotesVisible(false)} 
       />
 
-      {/* Privacy Policy Modal */}
-      <AnimatePresence>
-        {isPrivacyPolicyVisible && (
-          <motion.div
-            style={styles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsPrivacyPolicyVisible(false)}
-          >
-            <motion.div
-              style={isMobile ? {...styles.privacyPolicyContent, ...styles.mobileModal} : styles.privacyPolicyContent}
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -50, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 style={styles.privacyPolicyTitle}>Privacy Policy</h2>
-              
-              <div style={styles.privacyPolicySection}>
-                <h3>Data Collection</h3>
-                <p>
-                  We collect minimal user data necessary for the functioning of the application.
-                  This includes your username and login information.
-                </p>
-              </div>
-              
-              <div style={styles.privacyPolicySection}>
-                <h3>Microphone Usage</h3>
-                <p>
-                  Our app uses your microphone to create visual audio effects that react to sounds in your environment.
-                  <strong> We do not record, store, or transmit any audio data.</strong> All audio processing happens 
-                  locally in your browser and is never sent to any server.
-                </p>
-              </div>
-              
-              <div style={styles.privacyPolicySection}>
-                <h3>Cookies & Local Storage</h3>
-                <p>
-                  We use local storage to save your preferences and login information.
-                  This data remains on your device and is not shared with our servers.
-                </p>
-              </div>
-              
-              <div style={styles.privacyPolicySection}>
-                <h3>Third-Party Services</h3>
-                <p>
-                  We do not share your data with any third-party services.
-                </p>
-              </div>
-              
-              <div style={styles.privacyPolicySection}>
-                <h3>Data Security</h3>
-                <p>
-                  We implement industry-standard security measures to protect your personal information.
-                </p>
-              </div>
-              
-              <div style={styles.privacyPolicySection}>
-                <h3>Contact Us</h3>
-                <p>
-                  If you have any questions about our privacy policy, please contact us at
-                  privacy@speechapp.com
-                </p>
-              </div>
-              
-              <motion.button
-                style={styles.closeButton}
-                onClick={() => setIsPrivacyPolicyVisible(false)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Close
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Welcome Screen */}
-      <motion.div 
-        style={isMobile ? {...styles.welcomeScreen, ...styles.mobileWelcomeScreen} : styles.welcomeScreen}
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1 }
-        }}
-      >
+      <motion.div style={styles.welcomeScreen}>
         <motion.h1
           style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
           initial={{ opacity: 0 }}
@@ -2413,9 +2306,6 @@ const styles = {
     padding: "1rem",
     margin: "1rem 0",
     border: "1px solid rgba(54, 214, 231, 0.3)",
-    textAlign: "center",
-    fontSize: "1.1rem",
-    fontWeight: "500",
   },
   modalText: {
     fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
@@ -2520,43 +2410,6 @@ const styles = {
   mobileModal: {
     width: '90%',
     padding: '1rem',
-  },
-  // Privacy Policy styles
-  privacyPolicyContent: {
-    width: '80%',
-    maxWidth: '800px',
-    maxHeight: '80vh',
-    overflowY: 'auto',
-    background: 'white',
-    borderRadius: '10px',
-    padding: '2rem',
-    position: 'relative',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
-    color: '#333',
-  },
-  privacyPolicyTitle: {
-    fontSize: '2rem',
-    fontWeight: '700',
-    marginBottom: '1.5rem',
-    textAlign: 'center',
-    color: '#1e3c72',
-    borderBottom: '2px solid #1e3c72',
-    paddingBottom: '0.5rem',
-  },
-  privacyPolicySection: {
-    marginBottom: '1.5rem',
-  },
-  closeButton: {
-    padding: '0.75rem 2rem',
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: '#fff',
-    background: 'linear-gradient(135deg, #1e3c72, #2a5298)',
-    border: 'none',
-    borderRadius: '30px',
-    cursor: 'pointer',
-    display: 'block',
-    margin: '1.5rem auto 0',
   },
 };
 

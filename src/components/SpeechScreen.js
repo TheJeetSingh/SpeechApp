@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
-import { FiMic, FiStopCircle, FiDownload, FiVideo, FiInfo, FiBarChart2 } from "react-icons/fi";
+import { FiMic, FiStopCircle, FiDownload, FiVideo, FiInfo, FiBarChart2, FiCpu } from "react-icons/fi";
 
 // Animation variants
 const containerVariants = {
@@ -113,8 +113,12 @@ function SpeechScreen() {
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [isPracticeMode, setIsPracticeMode] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [speechAnalysis, setSpeechAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const audioContextRef = useRef(null);
 
   useEffect(() => {
     // Check camera permission on component mount
@@ -190,6 +194,119 @@ function SpeechScreen() {
       .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
   };
 
+  const extractAudioFromStream = async (stream) => {
+    try {
+      // Create a new MediaRecorder specifically for audio
+      const audioStream = new MediaStream(stream.getAudioTracks());
+      
+      // Choose supported MIME type
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/ogg';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = '';
+        }
+      }
+      
+      const options = mimeType ? { mimeType } : {};
+      const audioRecorder = new MediaRecorder(audioStream, options);
+      
+      const audioChunks = [];
+      
+      audioRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunks.push(e.data);
+        }
+      };
+      
+      audioRecorder.onstop = () => {
+        if (audioChunks.length === 0) {
+          console.error("No audio chunks captured");
+          return;
+        }
+        
+        const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+        console.log(`Audio blob created: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+        setAudioBlob(audioBlob);
+      };
+      
+      // Request data in smaller chunks for more reliable processing
+      audioRecorder.start(1000);
+      
+      // Return the recorder so we can stop it when video recording stops
+      return audioRecorder;
+    } catch (error) {
+      console.error("Error extracting audio:", error);
+      return null;
+    }
+  };
+
+  // Helper function to reduce the audio quality/size before sending
+  const compressAudioData = async (blob) => {
+    try {
+      console.log(`Original audio size: ${(blob.size / (1024 * 1024)).toFixed(2)} MB`);
+      
+      // For Gemini API compatibility, convert to MP3 if not in a supported format
+      const supportedFormats = ['audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac'];
+      
+      let processingBlob = blob;
+      let targetMimeType = blob.type;
+      
+      // If the format is not directly supported, use webm which Gemini can handle
+      if (!supportedFormats.includes(blob.type)) {
+        console.log(`Format ${blob.type} not directly supported, using as is but marked as audio/mp3`);
+        targetMimeType = 'audio/mp3';
+      }
+      
+      // Always apply compression to reduce payload size
+      // For simplicity, we'll take the first portion of audio (maximum 15 seconds)
+      // In a production app, you would use proper audio compression algorithms
+      const MAX_DURATION_SEC = 15;
+      const MAX_SIZE_KB = 500; // Target ~500KB maximum for faster processing
+      
+      // Convert blob to array buffer
+      const arrayBuffer = await processingBlob.arrayBuffer();
+      
+      // Calculate how much to reduce (always take at most 15 seconds worth, ~16KB per second)
+      const targetSize = Math.min(arrayBuffer.byteLength, MAX_DURATION_SEC * 16000);
+      
+      // For larger files, apply more aggressive compression
+      let compressionRatio = 1;
+      if (targetSize > MAX_SIZE_KB * 1024) {
+        compressionRatio = (MAX_SIZE_KB * 1024) / targetSize;
+        console.log(`Applying compression ratio: ${compressionRatio.toFixed(2)}`);
+      }
+      
+      // Take a smaller sample for very large files
+      const sampleSize = Math.floor(targetSize * compressionRatio);
+      const truncatedBuffer = arrayBuffer.slice(0, sampleSize);
+      
+      // Create a new blob with reduced size
+      const compressedBlob = new Blob([truncatedBuffer], { type: targetMimeType });
+      console.log(`Compressed audio size: ${(compressedBlob.size / 1024).toFixed(2)} KB with MIME type ${targetMimeType}`);
+      
+      return { 
+        blob: compressedBlob, 
+        mimeType: targetMimeType 
+      };
+    } catch (error) {
+      console.error("Error compressing audio:", error);
+      // If compression fails, create a tiny sample as fallback
+      try {
+        const tinyBuffer = await blob.slice(0, 300000).arrayBuffer(); // ~300KB fallback
+        return { 
+          blob: new Blob([tinyBuffer], { type: 'audio/mp3' }),
+          mimeType: 'audio/mp3'
+        };
+      } catch {
+        return { 
+          blob, 
+          mimeType: blob.type 
+        }; // Return original as last resort
+      }
+    }
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -207,11 +324,19 @@ function SpeechScreen() {
       });
       const chunks = [];
 
+      // Extract audio in parallel
+      const audioRecorder = await extractAudioFromStream(stream);
+
       recorder.ondataavailable = (e) => chunks.push(e.data);
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type: getMimeType() });
         const url = URL.createObjectURL(blob);
         setRecordingURL(url);
+        
+        // Stop the audio recorder when video recording stops
+        if (audioRecorder && audioRecorder.state === "recording") {
+          audioRecorder.stop();
+        }
       };
 
       setMediaRecorder(recorder);
@@ -258,11 +383,125 @@ function SpeechScreen() {
     }
   };
 
+  const analyzeSpeechWithGemini = async () => {
+    if (!audioBlob) {
+      console.error("No audio available for analysis");
+      alert("No audio available for analysis. Please record your speech first.");
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      // Compress audio before processing
+      console.log(`Original audio size: ${audioBlob.size / 1024} KB`);
+      const processedAudio = await compressAudioData(audioBlob);
+      console.log(`Processed audio size: ${processedAudio.blob.size / 1024} KB`);
+      
+      // Prepare speech context based on type
+      let speechContext = "";
+      if (type === "Impromptu" || type === "Extemporaneous") {
+        speechContext = `This is an ${type} speech on the topic: "${topicName}". `;
+        console.log(`Analyzing ${type} speech on topic: ${topicName}`);
+      } else {
+        speechContext = `This is a ${type || "practice"} speech. `;
+        console.log(`Analyzing ${type || "practice"} speech`);
+      }
+      
+      // Convert the audio blob to base64
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        try {
+          // Ensure we have a valid result
+          if (!reader.result) {
+            throw new Error("Failed to read audio file");
+          }
+          
+          const base64Audio = reader.result.split(',')[1];
+          
+          if (!base64Audio) {
+            throw new Error("Failed to convert audio to base64");
+          }
+          
+          console.log(`Analyzing speech with MIME type: ${processedAudio.mimeType}`);
+          console.log(`Base64 audio data length: ${base64Audio.length} characters`);
+          
+          // Using the proxy configuration from package.json
+          console.log('Sending request to speech analysis API');
+          
+          // Prepare request to Gemini API
+          const response = await fetch('/api/analyze-speech', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              audio: base64Audio,
+              topic: topicName,
+              speechType: type,
+              speechContext: speechContext,
+              duration: timer,
+              mimeType: processedAudio.mimeType
+            }),
+          });
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("API response error:", errorText);
+            throw new Error(`Failed to analyze speech: ${response.status} ${response.statusText}`);
+          }
+          
+          const analysis = await response.json();
+          setSpeechAnalysis(analysis);
+        } catch (error) {
+          console.error("Error in audio processing:", error);
+          alert(`Analysis failed: ${error.message}. Please try again.`);
+          
+          // Set fallback analysis
+          setSpeechAnalysis({
+            contentScore: 70,
+            deliveryScore: 65,
+            feedback: "We couldn't fully analyze your speech. Try recording again with clearer audio.",
+            topic: "Speech analysis encountered an error.",
+            strengths: ["Your attempt to practice public speaking"],
+            improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"]
+          });
+        } finally {
+          setIsAnalyzing(false);
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error("FileReader error:", error);
+        alert("Failed to read audio file. Please try again.");
+        setIsAnalyzing(false);
+      };
+      
+      reader.readAsDataURL(processedAudio.blob);
+    } catch (error) {
+      console.error("Error analyzing speech:", error);
+      alert(`Speech analysis error: ${error.message}`);
+      setIsAnalyzing(false);
+      // Set a default analysis in case of error
+      setSpeechAnalysis({
+        contentScore: 70,
+        deliveryScore: 65,
+        feedback: "We couldn't fully analyze your speech. Try recording again with clearer audio.",
+        topic: "Speech analysis encountered an error.",
+        strengths: ["Your attempt to practice public speaking"],
+        improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"]
+      });
+    }
+  };
+
   const viewStats = () => {
     navigate('/stats', {
       state: {
         timeInSeconds: timer,
-        speechType: type
+        speechType: type,
+        topic: topicName,
+        speechAnalysis: speechAnalysis
       }
     });
   };
@@ -488,6 +727,42 @@ function SpeechScreen() {
             </motion.div>
           )}
 
+          {isCompleted && audioBlob && !speechAnalysis && !isAnalyzing && (
+            <motion.button
+              style={styles.analyzeButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={analyzeSpeechWithGemini}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <FiCpu size={24} />
+              <span>Analyze Speech Content & Delivery</span>
+            </motion.button>
+          )}
+
+          {isAnalyzing && (
+            <motion.div
+              style={styles.analysisLoading}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <motion.div
+                style={styles.loadingSpinner}
+                animate={{ 
+                  rotate: 360,
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+              <p>Analyzing your speech with AI...</p>
+              <p style={styles.smallText}>This may take up to 30 seconds</p>
+            </motion.div>
+          )}
+
           {isCompleted && (
             <motion.button
               style={styles.statsButton}
@@ -498,7 +773,7 @@ function SpeechScreen() {
               animate={{ opacity: 1, y: 0 }}
             >
               <FiBarChart2 size={24} />
-              <span>View Speech Stats</span>
+              <span>{speechAnalysis ? "View Speech Analysis & Stats" : "View Speech Stats"}</span>
             </motion.button>
           )}
         </motion.div>
@@ -821,6 +1096,50 @@ const styles = {
     marginTop: "1.5rem",
     width: "100%",
     justifyContent: "center",
+  },
+  analyzeButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.8rem",
+    padding: "1.2rem 2rem",
+    fontSize: "1.2rem",
+    fontWeight: "600",
+    color: colors.text.primary,
+    background: colors.accent.purple,
+    border: "none",
+    borderRadius: "15px",
+    cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    transition: "all 0.3s ease",
+    marginTop: "1.5rem",
+    width: "100%",
+    justifyContent: "center",
+  },
+  analysisLoading: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "1rem",
+    marginTop: "1.5rem",
+    background: 'rgba(42, 82, 152, 0.95)',
+    padding: "1.5rem",
+    borderRadius: "15px",
+    width: "100%",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  },
+  loadingSpinner: {
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
+    border: "4px solid rgba(255, 255, 255, 0.1)",
+    borderTopColor: colors.accent.blue,
+    boxSizing: "border-box",
+  },
+  smallText: {
+    fontSize: "0.9rem",
+    opacity: 0.7,
+    margin: 0,
   },
 };
 

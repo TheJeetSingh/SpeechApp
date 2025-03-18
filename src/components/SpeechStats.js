@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { colors, animations, particlesConfig } from '../styles/theme';
-import { FiClock, FiAward, FiRotateCcw, FiHome, FiTarget, FiArrowRight, FiDownload } from 'react-icons/fi';
+import { FiClock, FiAward, FiRotateCcw, FiHome, FiTarget, FiArrowRight, FiDownload, FiCpu, FiMic, FiMessageSquare, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import Particles from 'react-tsparticles';
 import { useSpring, animated, config } from 'react-spring';
 import html2canvas from 'html2canvas';
@@ -121,7 +121,7 @@ function calculateGrade(timeInSeconds, speechType) {
 function SpeechStats() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { timeInSeconds, speechType, topic } = location.state || {};
+  const { timeInSeconds, speechType, topic, speechAnalysis } = location.state || {};
   const grade = calculateGrade(timeInSeconds, speechType);
   const [showStats, setShowStats] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -188,6 +188,9 @@ function SpeechStats() {
 
   // Motivational messages based on grade
   const getMotivationalMessage = () => {
+    if (speechAnalysis) {
+      return speechAnalysis.feedback;
+    }
     switch(grade.letter) {
       case 'A': return "Exceptional work! Your timing is spot-on!";
       case 'B': return "Impressive performance! Just a little fine-tuning needed!";
@@ -235,12 +238,12 @@ function SpeechStats() {
     // Then after a shorter delay, activate the black hole
     setTimeout(() => {
       setIsBlackHoleActive(true);
-    }, 600); // Reduced delay before black hole appears
+    }, 300); // Reduced from 600ms to 300ms for faster activation
     
     // Navigate after the complete animation finishes
     setTimeout(() => {
       navigate('/');
-    }, 3500); // Reduced delay to make the transition faster
+    }, 2000); // Reduced from 3500ms to 2000ms for faster transition
   };
 
   return (
@@ -299,12 +302,12 @@ function SpeechStats() {
                   }}
                   transition={isBlackHoleActive ? {
                     type: "tween",
-                    duration: pixel.duration,
-                    delay: pixel.delay,
+                    duration: pixel.duration * 0.6, // Multiplied by 0.6 to make it 40% faster
+                    delay: pixel.delay * 0.5, // Multiplied by 0.5 to reduce delay by half
                     ease: [0.64, 0.12, 0.34, 0.99], // Custom easing for a "sucking" effect
                   } : {
-                    duration: 0.5,
-                    delay: pixel.delay * 0.3
+                    duration: 0.3, // Reduced from 0.5s to 0.3s
+                    delay: pixel.delay * 0.2 // Reduced delay multiplier from 0.3 to 0.2
                   }}
                 />
               );
@@ -328,11 +331,11 @@ function SpeechStats() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{
               scale: { 
-                duration: 2.8, // Faster scale animation
+                duration: 1.5, // Reduced from 2.8s to 1.5s for faster scale animation
                 times: [0, 0.15, 0.3, 0.5, 0.7, 1],
                 ease: [0.16, 1, 0.3, 1] 
               },
-              rotate: { duration: 2.8, ease: "linear" } // Faster rotation
+              rotate: { duration: 1.5, ease: "linear" } // Reduced from 2.8s to 1.5s for faster rotation
             }}
           >
             <motion.div 
@@ -348,8 +351,8 @@ function SpeechStats() {
                 ]
               }}
               transition={{
-                rotate: { duration: 2.8, ease: "linear", repeat: Infinity }, // Faster rotation
-                boxShadow: { duration: 2.8, ease: "easeInOut", times: [0, 0.25, 0.5, 0.75, 1] } // Faster shadow transition
+                rotate: { duration: 1.5, ease: "linear", repeat: Infinity }, // Reduced from 2.8s to 1.5s
+                boxShadow: { duration: 1.5, ease: "easeInOut", times: [0, 0.25, 0.5, 0.75, 1] } // Reduced from 2.8s to 1.5s
               }}
             />
           </motion.div>
@@ -367,11 +370,11 @@ function SpeechStats() {
           scale: 0,
           opacity: 0,
           filter: 'blur(10px)',
-          transition: { duration: 1.2 }
+          transition: { duration: 0.8 } // Reduced from 1.2s to 0.8s
         } : pixelGridVisible ? {
           scale: 0.95,
           filter: 'blur(3px)',
-          transition: { duration: 0.5 }
+          transition: { duration: 0.3 } // Reduced from 0.5s to 0.3s
         } : {}}
       >
         {/* Step 0: Initial Welcome Screen */}
@@ -391,7 +394,7 @@ function SpeechStats() {
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
                 Speech Stats
-          </motion.h1>
+              </motion.h1>
               
               <motion.div 
                 className="welcome-decoration"
@@ -401,14 +404,14 @@ function SpeechStats() {
                 transition={{ delay: 0.8, duration: 0.6 }}
               />
               
-          <motion.p
+              <motion.p
                 style={styles.welcomeSubtitle}
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1, duration: 0.6 }}
               >
                 Let's see how you did!
-          </motion.p>
+              </motion.p>
               
               <motion.button 
                 style={styles.nextButton}
@@ -422,7 +425,7 @@ function SpeechStats() {
                 <span>See Your Grade</span>
                 <FiArrowRight size={20} />
               </motion.button>
-        </motion.div>
+            </motion.div>
           </AnimatePresence>
         )}
 
@@ -530,7 +533,7 @@ function SpeechStats() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
               >
-                Timing Details
+                {speechAnalysis ? "Speech Analysis & Timing" : "Timing Details"}
               </motion.h2>
               
               <motion.div style={styles.statsDetails}>
@@ -595,32 +598,131 @@ function SpeechStats() {
                 </motion.div>
               )}
               
-              <motion.div 
-                style={styles.feedbackCard}
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 1.4, duration: 0.5 }}
-              >
+              {speechAnalysis ? (
+                <>
+                  <motion.div 
+                    style={styles.analysisCard}
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 1.3, duration: 0.5 }}
+                  >
+                    <motion.div style={styles.analysisHeader}>
+                      <motion.div 
+                        style={styles.iconWrapper}
+                        animate={{ 
+                          rotateY: [0, 180, 360],
+                          scale: [1, 1.1, 1] 
+                        }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+                      >
+                        <FiCpu size={28} color={colors.accent.purple} />
+                      </motion.div>
+                      <h3>AI Speech Analysis</h3>
+                    </motion.div>
+                    
+                    <div style={styles.analysisContent}>
+                      <div style={styles.scoreSection}>
+                        <div style={styles.scoreCard}>
+                          <h4 style={styles.scoreLabel}>Content</h4>
+                          <div style={{
+                            ...styles.scoreCircle,
+                            background: `conic-gradient(${getScoreColor(speechAnalysis.contentScore)} ${speechAnalysis.contentScore}%, transparent ${speechAnalysis.contentScore}%, transparent 100%)`
+                          }}>
+                            <span style={styles.scoreValue}>{speechAnalysis.contentScore}</span>
+                          </div>
+                        </div>
+                        
+                        <div style={styles.scoreCard}>
+                          <h4 style={styles.scoreLabel}>Delivery</h4>
+                          <div style={{
+                            ...styles.scoreCircle,
+                            background: `conic-gradient(${getScoreColor(speechAnalysis.deliveryScore)} ${speechAnalysis.deliveryScore}%, transparent ${speechAnalysis.deliveryScore}%, transparent 100%)`
+                          }}>
+                            <span style={styles.scoreValue}>{speechAnalysis.deliveryScore}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {speechAnalysis.topic && (
+                        <div style={styles.analysisSection}>
+                          <h4 style={styles.analysisSectionTitle}>
+                            <FiMessageSquare size={18} color={colors.accent.blue} />
+                            <span>Topic Analysis</span>
+                          </h4>
+                          <p style={styles.analysisSectionText}>{speechAnalysis.topic}</p>
+                        </div>
+                      )}
+                      
+                      <div style={styles.analysisSection}>
+                        <h4 style={styles.analysisSectionTitle}>
+                          <FiTrendingUp size={18} color={colors.accent.green} />
+                          <span>Strengths</span>
+                        </h4>
+                        <ul style={styles.analysisList}>
+                          {speechAnalysis.strengths.map((strength, index) => (
+                            <motion.li 
+                              key={index}
+                              style={styles.analysisListItem}
+                              initial={{ x: -20, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: 1.5 + (index * 0.1) }}
+                            >
+                              {strength}
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <div style={styles.analysisSection}>
+                        <h4 style={styles.analysisSectionTitle}>
+                          <FiTrendingDown size={18} color={colors.accent.red} />
+                          <span>Areas for Improvement</span>
+                        </h4>
+                        <ul style={styles.analysisList}>
+                          {speechAnalysis.improvements.map((improvement, index) => (
+                            <motion.li 
+                              key={index}
+                              style={styles.analysisListItem}
+                              initial={{ x: -20, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: 1.8 + (index * 0.1) }}
+                            >
+                              {improvement}
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              ) : (
                 <motion.div 
-                  style={styles.iconWrapper}
-                  animate={{ 
-                    rotateY: [0, 180, 360],
-                    scale: [1, 1.1, 1] 
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+                  style={styles.feedbackCard}
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 1.4, duration: 0.5 }}
                 >
-                  <FiAward size={28} color={grade.color} />
+                  <motion.div 
+                    style={styles.iconWrapper}
+                    animate={{ 
+                      rotateY: [0, 180, 360],
+                      scale: [1, 1.1, 1] 
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+                  >
+                    <FiAward size={28} color={grade.color} />
+                  </motion.div>
+                  <h3>Feedback</h3>
+                  <motion.p 
+                    style={styles.feedback}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.6 }}
+                  >
+                    {grade.feedback}
+                  </motion.p>
                 </motion.div>
-                <h3>Feedback</h3>
-                <motion.p 
-                  style={styles.feedback}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.6 }}
-                >
-                  {grade.feedback}
-                </motion.p>
-              </motion.div>
+              )}
 
               <motion.div 
                 style={styles.downloadContainer}
@@ -674,6 +776,15 @@ function SpeechStats() {
     </motion.div>
   );
 }
+
+// Helper function to get color based on score
+const getScoreColor = (score) => {
+  if (score >= 90) return colors.accent.green;
+  if (score >= 80) return '#4CAF50';
+  if (score >= 70) return '#FFC107';
+  if (score >= 60) return '#FF9800';
+  return colors.accent.red;
+};
 
 // Styles
 const styles = {
@@ -1002,7 +1113,96 @@ const styles = {
   },
   contentBlur: {
     filter: 'blur(3px)',
-    transition: 'all 0.5s ease',
+    transition: 'all 0.3s ease',
+  },
+  analysisCard: {
+    background: 'rgba(42, 82, 152, 0.95)',
+    padding: '2rem',
+    borderRadius: '15px',
+    width: '100%',
+    marginBottom: '1.5rem',
+    border: '1px solid rgba(255, 255, 255, 0.18)',
+    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+  },
+  analysisHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginBottom: '1rem',
+  },
+  analysisContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+  },
+  scoreSection: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    gap: '1rem',
+    flexWrap: 'wrap',
+    marginBottom: '1rem',
+  },
+  scoreCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  scoreLabel: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: colors.text.primary,
+    margin: 0,
+  },
+  scoreCircle: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    transform: 'rotate(-90deg)',
+    border: '4px solid rgba(255, 255, 255, 0.1)',
+  },
+  scoreValue: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: colors.text.primary,
+    position: 'absolute',
+    transform: 'rotate(90deg)',
+    margin: 0,
+  },
+  analysisSection: {
+    marginBottom: '1rem',
+  },
+  analysisSectionTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: colors.text.primary,
+    margin: '0 0 0.5rem 0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  analysisSectionText: {
+    fontSize: '1rem',
+    color: colors.text.secondary,
+    lineHeight: '1.6',
+    margin: 0,
+  },
+  analysisList: {
+    margin: '0.5rem 0 0 0',
+    padding: '0 0 0 1.5rem',
+  },
+  analysisListItem: {
+    fontSize: '0.95rem',
+    color: colors.text.secondary,
+    marginBottom: '0.5rem',
+    lineHeight: '1.4',
   },
 };
 
