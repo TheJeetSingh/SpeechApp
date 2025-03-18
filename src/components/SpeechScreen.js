@@ -427,11 +427,15 @@ function SpeechScreen() {
           console.log(`Analyzing speech with MIME type: ${processedAudio.mimeType}`);
           console.log(`Base64 audio data length: ${base64Audio.length} characters`);
           
-          // Using the proxy configuration from package.json
-          console.log('Sending request to speech analysis API');
+          // Use different endpoint based on environment
+          const apiUrl = process.env.NODE_ENV === 'production' 
+            ? '/api/analyze-speech' 
+            : '/api/analyze-speech';
+            
+          console.log(`Sending request to speech analysis API: ${apiUrl}`);
           
           // Prepare request to Gemini API
-          const response = await fetch('/api/analyze-speech', {
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

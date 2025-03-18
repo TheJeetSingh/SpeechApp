@@ -412,7 +412,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// For Vercel serverless environment - export the Express app
+module.exports = app;
+
+// Only listen on a port if not running on Vercel
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}

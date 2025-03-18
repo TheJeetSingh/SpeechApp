@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "Server/index.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -10,6 +14,10 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "Server/index.js"
+    },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
@@ -28,7 +36,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/$1"
     }
   ]
 } 
