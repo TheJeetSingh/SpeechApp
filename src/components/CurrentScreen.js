@@ -16,23 +16,18 @@ const CurrentScreen = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
-        console.log(`Fetching news from: ${apiUrl}`);
-        
-        // Use explicit CORS mode for better browser handling
-        const response = await fetch(apiUrl, {
+        const response = await fetch(`${config.API_URL}${config.NEWS_ENDPOINT}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
-          mode: 'cors' // Explicitly set CORS mode
+          mode: 'cors'
         });
 
         // Check if response is ok and content-type is application/json
         const contentType = response.headers.get("content-type");
         if (!response.ok || !contentType?.includes("application/json")) {
-          console.error(`Error response: ${response.status}, ${response.statusText}`);
           setError("Unable to fetch current topics. Please try again later.");
           return;
         }
