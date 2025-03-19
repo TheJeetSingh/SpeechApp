@@ -69,6 +69,33 @@ const ExtempScreen = () => {
     return articles;
   };
 
+  const setDefaultTopics = () => {
+    const defaultTopics = [
+      {
+        title: "Should governments invest more in renewable energy to combat climate change?",
+        description: "Discuss the economic and environmental implications of increased government investment in renewable energy sources."
+      },
+      {
+        title: "Is social media having a positive or negative impact on democratic processes?",
+        description: "Examine how social media platforms influence elections, public discourse, and political polarization."
+      },
+      {
+        title: "How should countries balance national security with individual privacy rights?",
+        description: "Analyze the tensions between security measures and civil liberties in the digital age."
+      },
+      {
+        title: "What role should artificial intelligence play in healthcare decision-making?",
+        description: "Evaluate the benefits and risks of using AI to diagnose conditions and recommend treatments."
+      },
+      {
+        title: "Is globalization still beneficial for developing economies?",
+        description: "Consider how global trade and economic integration affect economic growth and inequality."
+      }
+    ];
+    
+    setArticles(getRandomArticles(defaultTopics, 2));
+  };
+
   const fetchArticles = async () => {
     try {
       setIsLoading(true);
@@ -118,48 +145,20 @@ const ExtempScreen = () => {
         
         // Fallback if no articles are available or all filtering failed
         console.log("No news articles available, using fallback topics");
-        useDefaultTopics();
+        setDefaultTopics();
         
       } catch (error) {
         console.error("Error fetching news topics:", error);
         console.log("Using fallback topics due to API error");
-        useDefaultTopics();
+        setDefaultTopics();
       }
     } catch (error) {
       console.error("Unhandled error:", error);
       setError("An unexpected error occurred. Using default topics instead.");
-      useDefaultTopics();
+      setDefaultTopics();
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Provide default extemp topics as fallback
-  const useDefaultTopics = () => {
-    const defaultTopics = [
-      {
-        title: "Should governments invest more in renewable energy to combat climate change?",
-        description: "Discuss the economic and environmental implications of increased government investment in renewable energy sources."
-      },
-      {
-        title: "Is social media having a positive or negative impact on democratic processes?",
-        description: "Examine how social media platforms influence elections, public discourse, and political polarization."
-      },
-      {
-        title: "How should countries balance national security with individual privacy rights?",
-        description: "Analyze the tensions between security measures and civil liberties in the digital age."
-      },
-      {
-        title: "What role should artificial intelligence play in healthcare decision-making?",
-        description: "Evaluate the benefits and risks of using AI to diagnose conditions and recommend treatments."
-      },
-      {
-        title: "Is globalization still beneficial for developing economies?",
-        description: "Consider how global trade and economic integration affect economic growth and inequality."
-      }
-    ];
-    
-    setArticles(getRandomArticles(defaultTopics, 2));
   };
 
   const getRandomArticles = (articles, count) => {
