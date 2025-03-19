@@ -15,18 +15,58 @@ const ExtempScreen = () => {
 
   // Function to filter relevant extemp topics
   const filterExtempArticles = (articles) => {
+    // Expanded list of keywords for extemp topics
     const relevantKeywords = [
-      "politics", "election", "government", "international", "global", 
-      "climate change", "healthcare", "education", "equality", 
-      "economy", "trade", "conflict", "reform"
+      // Political and governmental topics
+      "politics", "election", "government", "democracy", "president", "congress", "senate", 
+      "parliament", "law", "policy", "minister", "campaign", "vote", "bill", "legislation",
+      
+      // International relations
+      "international", "global", "foreign", "diplomatic", "relations", "embassy", "summit",
+      "treaty", "alliance", "united nations", "NATO", "EU", "European Union", "G20", "G7",
+      
+      // Social issues
+      "climate change", "healthcare", "education", "equality", "rights", "justice",
+      "immigration", "refugee", "welfare", "poverty", "homelessness", "discrimination",
+      
+      // Economics
+      "economy", "trade", "finance", "market", "inflation", "recession", "budget", "debt",
+      "investment", "stock", "currency", "economic", "fiscal", "monetary", "tax",
+      
+      // Conflict and security
+      "conflict", "security", "war", "peace", "military", "defense", "terrorism", "cyber",
+      "intelligence", "weapon", "nuclear", "army", "troops", "soldiers", "attack",
+      
+      // Reform and policy
+      "reform", "policy", "initiative", "regulation", "deregulation", "solution",
+      "infrastructure", "development", "program", "strategy", "framework",
+      
+      // Technology and science
+      "technology", "innovation", "artificial intelligence", "AI", "digital", "data",
+      "science", "research", "discovery", "breakthrough", "space", "medical", "vaccine",
+      
+      // General news interest
+      "crisis", "controversy", "debate", "agreement", "decision", "announcement", "study",
+      "report", "analysis", "investigation", "opinion", "perspective"
     ];
 
-    return articles.filter(article =>
+    // Try to find articles with relevant keywords
+    const filteredArticles = articles.filter(article =>
       relevantKeywords.some(keyword => 
-        article.title?.toLowerCase().includes(keyword) || 
-        article.description?.toLowerCase().includes(keyword)
+        article.title?.toLowerCase().includes(keyword.toLowerCase()) || 
+        article.description?.toLowerCase().includes(keyword.toLowerCase())
       )
     );
+    
+    // If we find at least some articles, return them
+    if (filteredArticles.length > 0) {
+      return filteredArticles;
+    }
+    
+    // If no articles matched our keywords, just return all articles
+    // This ensures we always have topics even if they don't match our keywords
+    console.log("No articles matched extemp keywords, returning all articles as fallback");
+    return articles;
   };
 
   useEffect(() => {
