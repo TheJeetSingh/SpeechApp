@@ -104,6 +104,21 @@ const ExtempScreen = () => {
       const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
       console.log(`Fetching extemp topics from: ${apiUrl}`);
       
+      // First, test CORS with the test endpoint
+      try {
+        const corsTestUrl = `${config.API_URL}/api/cors-test`;
+        console.log(`Testing CORS at: ${corsTestUrl}`);
+        const corsTest = await fetch(corsTestUrl);
+        if (corsTest.ok) {
+          const corsData = await corsTest.json();
+          console.log('CORS test successful:', corsData);
+        } else {
+          console.error('CORS test failed:', corsTest.status, corsTest.statusText);
+        }
+      } catch (corsError) {
+        console.error('CORS test error:', corsError);
+      }
+      
       try {
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -111,7 +126,6 @@ const ExtempScreen = () => {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           }
-          // Let the browser handle CORS automatically
         });
 
         // Check if response is ok and content-type is application/json

@@ -10,12 +10,46 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// More permissive CORS configuration for development
+// Specific origins to allow
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://speech-app-delta.vercel.app'
+];
+
+// CORS middleware for all routes
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  } else {
+    res.header('Access-Control-Allow-Origin', '*'); // Fallback to allow all origins
+  }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
+// Also keep the cors middleware for compatibility
 app.use(cors({
-  origin: '*', // Allow all origins (more permissive for testing)
+  origin: function (origin, callback) {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      // Allow all origins as fallback
+      callback(null, true);
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  credentials: false
 }));
 
 // Handle preflight requests explicitly
@@ -62,10 +96,29 @@ app.get("/", (req, res) => {
 
 // CORS Test Endpoint
 app.get("/api/cors-test", (req, res) => {
+  // Set CORS headers explicitly on this route
+  const origin = req.headers.origin || '*';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   res.json({ 
     message: "CORS is working correctly!", 
-    origin: req.headers.origin || 'unknown',
-    time: new Date().toISOString()
+    origin: origin,
+    headers: {
+      received: {
+        origin: req.headers.origin,
+        host: req.headers.host,
+        referer: req.headers.referer
+      },
+      sent: {
+        'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
+        'access-control-allow-methods': res.getHeader('Access-Control-Allow-Methods'),
+        'access-control-allow-headers': res.getHeader('Access-Control-Allow-Headers')
+      }
+    },
+    server_time: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'not set'
   });
 });
 
@@ -146,6 +199,11 @@ app.get("/protected", (req, res) => {
 
 // News API Route
 app.get("/api/news", async (req, res) => {
+  // Set CORS headers directly on this route
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";
 
@@ -154,6 +212,7 @@ app.get("/api/news", async (req, res) => {
   }
 
   try {
+    console.log(`Fetching news from newsapi.org for category: ${category}`);
     const response = await axios.get("https://newsapi.org/v2/top-headlines", {
       params: {
         category,
@@ -163,8 +222,10 @@ app.get("/api/news", async (req, res) => {
     });
 
     if (response.data.articles.length > 0) {
+      console.log(`Successfully fetched ${response.data.articles.length} articles`);
       res.json({ articles: response.data.articles });
     } else {
+      console.log("No articles found from News API");
       res.status(404).json({ message: "No articles found" });
     }
   } catch (err) {
