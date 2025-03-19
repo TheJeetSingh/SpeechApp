@@ -24,9 +24,8 @@ const CurrentScreen = () => {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-          },
-          mode: 'cors',
-          credentials: 'omit' // Don't send credentials for this public API
+          }
+          // Let the browser handle CORS automatically
         });
 
         // Check if response is ok and content-type is application/json

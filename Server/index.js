@@ -10,16 +10,15 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Configure and enable CORS properly for all environments
+// More permissive CORS configuration for development
 app.use(cors({
-  origin: ["http://localhost:3000", "https://speech-app-delta.vercel.app"],
+  origin: '*', // Allow all origins (more permissive for testing)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  credentials: true,
   optionsSuccessStatus: 200
 }));
 
-// For preflight requests
+// Handle preflight requests explicitly
 app.options('*', cors());
 
 // Parse JSON request bodies with increased limit for audio data
@@ -59,6 +58,15 @@ const generateToken = (user) => {
 // Root Route (To Check If Backend is Running)
 app.get("/", (req, res) => {
   res.send("Welcome to the Impromptu App Server!");
+});
+
+// CORS Test Endpoint
+app.get("/api/cors-test", (req, res) => {
+  res.json({ 
+    message: "CORS is working correctly!", 
+    origin: req.headers.origin || 'unknown',
+    time: new Date().toISOString()
+  });
 });
 
 // Signup Route
