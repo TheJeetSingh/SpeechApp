@@ -35,18 +35,23 @@ const ExtempScreen = () => {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`${config.API_URL}${config.NEWS_ENDPOINT}`, {
+        const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
+        console.log(`Fetching extemp topics from: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
-          credentials: 'omit' // Prevent CORS preflight
+          mode: 'cors',
+          credentials: 'omit' // Don't send credentials for this public API
         });
 
         // Check if response is ok and content-type is application/json
         const contentType = response.headers.get("content-type");
         if (!response.ok) {
+          console.error(`Error response: ${response.status}, ${response.statusText}`);
           throw new Error(`Failed to fetch topics (${response.status})`);
         }
 

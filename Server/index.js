@@ -10,51 +10,17 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Add simple CORS headers for all requests (alternative approach)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  next();
-});
+// Configure and enable CORS properly for all environments
+app.use(cors({
+  origin: ["http://localhost:3000", "https://speech-app-delta.vercel.app"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
 
-// Allowed Origins List
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "http://localhost:3001",
-  "http://192.168.2.47:3000",  // Add your local network IP
-  "https://speech-app-delta.vercel.app"
-];
-
-// CORS Options
-const corsOptions = {
-  origin: function (origin, callback) {
-    // For development, you can be more permissive
-    if (process.env.NODE_ENV === 'development') {
-      callback(null, true);
-      return;
-    }
-    
-    // For production, use the allowed origins list
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log(`CORS blocked request from origin: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true, // Allow cookies and authentication headers
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
-};
-
-// Enable CORS with Options
-app.use(cors(corsOptions));
+// For preflight requests
+app.options('*', cors());
 
 // Parse JSON request bodies with increased limit for audio data
 app.use(express.json({ limit: '50mb' }));
