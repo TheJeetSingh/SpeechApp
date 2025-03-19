@@ -19,28 +19,14 @@ const CurrentScreen = () => {
         const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
         console.log(`Fetching news from: ${apiUrl}`);
         
-        // First, test CORS with the test endpoint
-        try {
-          const corsTestUrl = `${config.API_URL}/api/cors-test`;
-          console.log(`Testing CORS at: ${corsTestUrl}`);
-          const corsTest = await fetch(corsTestUrl);
-          if (corsTest.ok) {
-            const corsData = await corsTest.json();
-            console.log('CORS test successful:', corsData);
-          } else {
-            console.error('CORS test failed:', corsTest.status, corsTest.statusText);
-          }
-        } catch (corsError) {
-          console.error('CORS test error:', corsError);
-        }
-
-        // Now attempt the actual API request
+        // Use explicit CORS mode for better browser handling
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-          }
+          },
+          mode: 'cors' // Explicitly set CORS mode
         });
 
         // Check if response is ok and content-type is application/json
