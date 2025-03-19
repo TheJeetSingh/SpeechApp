@@ -358,15 +358,15 @@ app.post("/api/analyze-speech", async (req, res) => {
       }
     } else {
       console.warn("Could not extract JSON from response, using fallback");
-      // Fallback if we can't parse the JSON
+      // Update the fallback analysis JSON in case of parsing errors
       analysisJson = {
         topic: "Analysis could not determine the speech topic precisely",
-        contentScore: 75,
-        deliveryScore: 70,
-        strengths: ["Attempted speech delivery", "Put effort into preparation"],
-        improvements: ["Improve audio quality for better analysis", "Structure speech more clearly"],
-        feedback: "The speech was difficult to analyze due to response format. Consider recording again with better quality audio.",
-        poorQuality: false
+        contentScore: 15,
+        deliveryScore: 10,
+        strengths: ["You attempted to record a speech", "You're using tools to improve your speaking skills"],
+        improvements: ["Improve audio quality for better analysis", "Ensure you're actually giving a coherent speech", "Speak clearly and directly into the microphone"],
+        feedback: "We couldn't analyze your speech properly. Either the audio quality was too poor or no coherent speech was detected.",
+        poorQuality: true
       };
     }
 
@@ -398,12 +398,12 @@ app.post("/api/analyze-speech", async (req, res) => {
       res.status(500).json({ 
         message: `Error analyzing speech: ${err.message}`,
         error: "PROCESSING_ERROR",
-        contentScore: 65,
-        deliveryScore: 65,
-        strengths: ["Attempted speech practice", "Used the application for improvement"],
-        improvements: ["Try recording with clearer audio", "Ensure proper internet connectivity for analysis"],
-        feedback: "We encountered an error while analyzing your speech. Please try again with a clearer recording.",
-        poorQuality: false
+        contentScore: 15,
+        deliveryScore: 10,
+        strengths: ["Your attempt to practice public speaking", "Using the application for improvement"],
+        improvements: ["Try recording with clearer audio", "Ensure proper internet connectivity for analysis", "Make sure you're actually speaking during the recording"],
+        feedback: "We encountered an error while analyzing your speech. The recording may have been inaudible or contained no actual speech.",
+        poorQuality: true
       });
     }
   }

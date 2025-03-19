@@ -836,10 +836,12 @@ function SpeechStats() {
 
 // Helper function to get color based on score
 const getScoreColor = (score) => {
-  if (score >= 80) return colors.accent.green;
-  if (score >= 60) return colors.accent.blue;
-  if (score >= 40) return colors.accent.yellow;
-  return colors.accent.red;
+  if (score >= 85) return colors.accent.green; // Excellent - bright green
+  if (score >= 70) return '#4CAF50';           // Very good - standard green
+  if (score >= 55) return colors.accent.blue;  // Good - blue
+  if (score >= 40) return colors.accent.yellow; // Average - yellow
+  if (score >= 25) return '#FF9800';           // Poor - orange
+  return colors.accent.red;                    // Very poor - red
 };
 
 // Styles

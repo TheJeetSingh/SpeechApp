@@ -464,13 +464,13 @@ function SpeechScreen() {
           
           // Set fallback analysis
           setSpeechAnalysis({
-            contentScore: 70,
-            deliveryScore: 65,
-            feedback: "We couldn't fully analyze your speech. Try recording again with clearer audio.",
-            topic: "Speech analysis encountered an error.",
-            strengths: ["Your attempt to practice public speaking"],
-            improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"],
-            poorQuality: false
+            contentScore: 15,
+            deliveryScore: 10,
+            feedback: "We couldn't properly analyze your speech. The audio may be too poor quality or contain no actual speech.",
+            topic: "No coherent speech detected",
+            strengths: ["Attempting to use the speech analysis tool", "Showing interest in improving your speaking skills"],
+            improvements: ["Ensure you're actually speaking during recording", "Speak clearly and directly into the microphone", "Reduce background noise when recording"],
+            poorQuality: true
           });
         } finally {
           setIsAnalyzing(false);
@@ -490,13 +490,13 @@ function SpeechScreen() {
       setIsAnalyzing(false);
       // Set a default analysis in case of error
       setSpeechAnalysis({
-        contentScore: 70,
-        deliveryScore: 65,
-        feedback: "We couldn't fully analyze your speech. Try recording again with clearer audio.",
-        topic: "Speech analysis encountered an error.",
-        strengths: ["Your attempt to practice public speaking"],
-        improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"],
-        poorQuality: false
+        contentScore: 15,
+        deliveryScore: 10,
+        feedback: "We couldn't properly analyze your speech. The audio may be too poor quality or contain no actual speech.",
+        topic: "No coherent speech detected",
+        strengths: ["Attempting to use the speech analysis tool", "Showing interest in improving your speaking skills"],
+        improvements: ["Ensure you're actually speaking during recording", "Speak clearly and directly into the microphone", "Reduce background noise when recording"],
+        poorQuality: true
       });
     }
   };
