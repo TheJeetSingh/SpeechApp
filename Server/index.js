@@ -124,6 +124,11 @@ app.get("/api/cors-test", (req, res) => {
 
 // Signup Route
 app.post("/api/signup", async (req, res) => {
+  // Set CORS headers directly on this route
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   const { name, email, password } = req.body;
 
   // Manual input validation
@@ -156,6 +161,11 @@ app.post("/api/signup", async (req, res) => {
 
 // Login Route
 app.post("/api/login", async (req, res) => {
+  // Set CORS headers directly on this route
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -236,6 +246,11 @@ app.get("/api/news", async (req, res) => {
 
 // Speech Analysis API Route with Gemini
 app.post("/api/analyze-speech", async (req, res) => {
+  // Set CORS headers directly on this route
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   const { audio, topic, speechType, speechContext, duration, mimeType } = req.body;
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 

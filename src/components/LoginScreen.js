@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import config from "../config"; // Import config for API URLs
 
-const API_URL = "https://speech-app-server.vercel.app"; // Direct URL to your backend
+// Use config.API_URL which handles development/production environments properly
+const API_URL = config.API_URL; 
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -15,6 +17,25 @@ function Login() {
     setError("");
 
     try {
+      // Log diagnostics
+      console.log(`Attempting login to: ${API_URL}/api/login`);
+
+      // First, test CORS with the test endpoint
+      try {
+        const corsTestUrl = `${API_URL}/api/cors-test`;
+        console.log(`Testing CORS at: ${corsTestUrl}`);
+        const corsTest = await fetch(corsTestUrl);
+        if (corsTest.ok) {
+          const corsData = await corsTest.json();
+          console.log('CORS test successful:', corsData);
+        } else {
+          console.error('CORS test failed:', corsTest.status, corsTest.statusText);
+        }
+      } catch (corsError) {
+        console.error('CORS test error:', corsError);
+      }
+
+      // Now attempt the actual login
       const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { 
@@ -22,7 +43,7 @@ function Login() {
           "Accept": "application/json"
         },
         body: JSON.stringify({ email, password }),
-        credentials: 'include'
+        // Don't use credentials: 'include' as it requires additional CORS configuration
       });
 
       const data = await response.json();
