@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FiHome, FiAlertCircle } from 'react-icons/fi';
+import { FiHome, FiMic, FiAlertCircle } from 'react-icons/fi';
 import Particles from 'react-tsparticles';
 import { colors, componentStyles, particlesConfig } from '../styles/theme';
 
@@ -44,7 +44,7 @@ const NotFound = () => {
     }
   };
 
-  // Floating astronaut effect
+  // Floating microphone effect
   const glowVariants = {
     animate: {
       boxShadow: [
@@ -58,6 +58,19 @@ const NotFound = () => {
         ease: "easeInOut"
       }
     }
+  };
+
+  // Speech-related jokes for 404 page
+  const getRandomJoke = () => {
+    const jokes = [
+      "This page is like that speaker who forgot their entire speech... non-existent.",
+      "404: Your request was so boring, the server fell asleep mid-sentence.",
+      "You've found the page where all forgotten speech notes go. Unfortunately, they're still lost.",
+      "If this page were a speech, it would be 10 minutes of awkward silence and throat clearing.",
+      "Page not found: much like your confidence when you realize your fly was open during your entire presentation.",
+      "Your navigation skills are like a speech without preparation — all over the place and leading nowhere."
+    ];
+    return jokes[Math.floor(Math.random() * jokes.length)];
   };
 
   return (
@@ -97,20 +110,20 @@ const NotFound = () => {
               variants={glowVariants}
               animate="animate"
             />
-            <FiAlertCircle size={80} color={colors.accent.blue} />
+            <FiMic size={80} color={colors.accent.blue} />
           </motion.div>
           
           <motion.h1 style={styles.errorCode}>404</motion.h1>
-          <motion.h2 style={styles.errorTitle}>Houston, we have a problem!</motion.h2>
+          <motion.h2 style={styles.errorTitle}>Speech Interrupted!</motion.h2>
           <motion.p style={styles.errorMessage}>
-            The page you're looking for seems to have drifted into deep space.
+            The page you're looking for is lost like a speaker who forgot their lines.
           </motion.p>
           
           <motion.div 
             style={styles.quoteBox}
             variants={itemVariants}
           >
-            <p style={styles.quote}>"In space, no one can hear you requesting non-existent pages."</p>
+            <p style={styles.quote}>"{getRandomJoke()}"</p>
           </motion.div>
         </motion.div>
 
@@ -125,7 +138,7 @@ const NotFound = () => {
             onClick={() => navigate('/')}
           >
             <FiHome size={20} />
-            <span>Return to Mission Control</span>
+            <span>Return to the Podium</span>
           </motion.button>
         </motion.div>
       </motion.div>
