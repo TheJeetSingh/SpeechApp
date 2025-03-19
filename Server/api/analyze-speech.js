@@ -73,7 +73,7 @@ module.exports = async (req, res) => {
       `This is a ${speechType || "speech"} on the topic: "${topic || "Unknown"}". `;
     
     const promptText = `
-    You are a professional speech coach analyzing an audio recording of a speech.
+    You are a professional speech coach analyzing an audio recording of a speech. If you cannot hear audio, please dont make things up instead just tell me that there was no audio. Please grade harshly like a proffesional speech coach and be blunt with improvements with humor and also tell the indivigual what ranking they would get in a room with 7 people where 1 is the best and 7 is the worst.
     
     ${contextIntro}
     The speech duration was: ${formattedDuration}.
@@ -82,14 +82,15 @@ module.exports = async (req, res) => {
     
     1. Content analysis: What was the speech about? Was the content well-structured and informative?
     2. Delivery analysis: Assess voice modulation, pacing, clarity, pauses, and overall delivery style.
-    3. Give a content score from 0-100.
-    4. Give a delivery score from 0-100.
+    3. Give a content score from 0-100, if there  was no audio give 0.
+    4. Give a delivery score from 0-100, if there  was no audio give 0.
     5. Provide 3-5 specific strengths of the speech.
     6. Provide 3-5 areas for improvement.
     7. Write a 2-3 sentence summary of your overall feedback.
+    8. Tell us the ranking.
     
     ${speechType === "Impromptu" ? "For impromptu speeches, focus on creativity, quick thinking, and relevance to the assigned topic." : ""}
-    ${speechType === "Extemporaneous" ? "For extemporaneous speeches, focus on evidence, organization, and argument quality." : ""}
+    ${speechType === "Extemporaneous" ? "For extemporaneous speeches, focus on evidence, organization, and argument quality, and also relevance to topic." : ""}
     
     Format your response as a JSON object with the following keys:
     {
