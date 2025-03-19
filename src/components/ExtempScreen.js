@@ -104,49 +104,53 @@ const ExtempScreen = () => {
       const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
       console.log(`Fetching extemp topics from: ${apiUrl}`);
       
-      // Remove CORS test and directly fetch with CORS mode
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors' // Explicitly set CORS mode
-      });
+      // Try with standard CORS mode first
+      try {
+        console.log("Attempting fetch with standard CORS mode");
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          mode: 'cors'
+        });
 
-      // Check if response is ok and content-type is application/json
-      const contentType = response.headers.get("content-type");
-      if (!response.ok) {
-        console.error(`Error response: ${response.status}, ${response.statusText}`);
-        throw new Error(`Failed to fetch topics (${response.status})`);
-      }
+        // Process the response if successful
+        if (response.ok) {
+          const contentType = response.headers.get("content-type");
+          if (!contentType?.includes("application/json")) {
+            throw new Error("Invalid response format from server");
+          }
 
-      if (!contentType?.includes("application/json")) {
-        throw new Error("Invalid response format from server");
-      }
+          const data = await response.json();
+          
+          if (data?.articles?.length) {
+            const processedArticles = data.articles
+              .filter(article => article.title && article.description)
+              .map(article => ({
+                title: article.title.trim(),
+                description: article.description.trim()
+              }));
 
-      const data = await response.json();
-      
-      if (data?.articles?.length) {
-        const processedArticles = data.articles
-          .filter(article => article.title && article.description) // Only keep articles with both title and description
-          .map(article => ({
-            title: article.title.trim(),
-            description: article.description.trim()
-          }));
-
-        if (processedArticles.length > 0) {
-          // Filter for extemp topics and get 2 random ones
-          const filteredArticles = filterExtempArticles(processedArticles);
-          setArticles(getRandomArticles(filteredArticles, 2));
-          return;
+            if (processedArticles.length > 0) {
+              console.log(`Fetched ${processedArticles.length} topics from API`);
+              const extempTopics = filterExtempArticles(processedArticles);
+              setArticles(getRandomArticles(extempTopics, 2)); 
+              return; // Exit if successful
+            }
+          }
+          throw new Error("No topics found in API response");
+        } else {
+          throw new Error(`Server returned status ${response.status}`);
         }
+      } catch (initialError) {
+        console.error("Initial fetch attempt failed:", initialError);
+        
+        // Fall back to default topics instead of attempting no-cors mode
+        // (no-cors mode would not allow reading the response anyway)
+        throw new Error("Could not fetch topics from API");
       }
-      
-      // Fallback if no articles are available or all filtering failed
-      console.log("No news articles available, using fallback topics");
-      setDefaultTopics();
-      
     } catch (error) {
       console.error("Error fetching news topics:", error);
       console.log("Using fallback topics due to API error");

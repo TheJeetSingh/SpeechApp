@@ -100,23 +100,19 @@ app.get("/api/cors-test", (req, res) => {
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
-  res.json({ 
-    message: "CORS is working correctly!", 
+  console.log(`CORS test requested from origin: ${origin}`);
+  
+  // Return detailed information to help with debugging
+  res.status(200).json({ 
+    message: "CORS test successful",
     origin: origin,
-    headers: {
-      received: {
-        origin: req.headers.origin,
-        host: req.headers.host,
-        referer: req.headers.referer
-      },
-      sent: {
-        'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
-        'access-control-allow-methods': res.getHeader('Access-Control-Allow-Methods'),
-        'access-control-allow-headers': res.getHeader('Access-Control-Allow-Headers')
-      }
-    },
-    server_time: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'not set'
+    time: new Date().toISOString(),
+    headers: req.headers,
+    corsHeaders: {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    }
   });
 });
 
@@ -215,10 +211,25 @@ app.get("/protected", (req, res) => {
 
 // News API Route
 app.get("/api/news", async (req, res) => {
-  // Set CORS headers directly on this route
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  // Always accept requests from localhost and production domain
+  const origin = req.headers.origin;
+  const allowedOrigins = ['http://localhost:3000', 'https://speech-app-delta.vercel.app', 'https://speech-app-server.vercel.app'];
+  
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  console.log(`News API requested from origin: ${origin}`);
+  
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
   
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";
