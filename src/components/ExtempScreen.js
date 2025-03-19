@@ -69,15 +69,15 @@ const ExtempScreen = () => {
     return articles;
   };
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const fetchArticles = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
-        console.log(`Fetching extemp topics from: ${apiUrl}`);
-        
+      const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
+      console.log(`Fetching extemp topics from: ${apiUrl}`);
+      
+      try {
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
@@ -100,38 +100,67 @@ const ExtempScreen = () => {
 
         const data = await response.json();
         
-        if (!data?.articles?.length) {
-          throw new Error("No articles available");
+        if (data?.articles?.length) {
+          const processedArticles = data.articles
+            .filter(article => article.title && article.description) // Only keep articles with both title and description
+            .map(article => ({
+              title: article.title.trim(),
+              description: article.description.trim()
+            }));
+
+          if (processedArticles.length > 0) {
+            // Filter for extemp topics and get 2 random ones
+            const filteredArticles = filterExtempArticles(processedArticles);
+            setArticles(getRandomArticles(filteredArticles, 2));
+            return;
+          }
         }
-
-        const processedArticles = data.articles
-          .filter(article => article.title && article.description) // Only keep articles with both title and description
-          .map(article => ({
-            title: article.title.trim(),
-            description: article.description.trim()
-          }));
-
-        if (processedArticles.length === 0) {
-          throw new Error("No valid articles found");
-        }
-
-        // Filter for extemp topics and get 2 random ones
-        const filteredArticles = filterExtempArticles(processedArticles);
-        if (filteredArticles.length === 0) {
-          throw new Error("No relevant extemp topics found");
-        }
-
-        setArticles(getRandomArticles(filteredArticles, 2));
+        
+        // Fallback if no articles are available or all filtering failed
+        console.log("No news articles available, using fallback topics");
+        useDefaultTopics();
+        
       } catch (error) {
         console.error("Error fetching news topics:", error);
-        setError(error.message || "Failed to load topics. Please try again.");
-      } finally {
-        setIsLoading(false);
+        console.log("Using fallback topics due to API error");
+        useDefaultTopics();
       }
-    };
+    } catch (error) {
+      console.error("Unhandled error:", error);
+      setError("An unexpected error occurred. Using default topics instead.");
+      useDefaultTopics();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchArticles();
-  }, []);
+  // Provide default extemp topics as fallback
+  const useDefaultTopics = () => {
+    const defaultTopics = [
+      {
+        title: "Should governments invest more in renewable energy to combat climate change?",
+        description: "Discuss the economic and environmental implications of increased government investment in renewable energy sources."
+      },
+      {
+        title: "Is social media having a positive or negative impact on democratic processes?",
+        description: "Examine how social media platforms influence elections, public discourse, and political polarization."
+      },
+      {
+        title: "How should countries balance national security with individual privacy rights?",
+        description: "Analyze the tensions between security measures and civil liberties in the digital age."
+      },
+      {
+        title: "What role should artificial intelligence play in healthcare decision-making?",
+        description: "Evaluate the benefits and risks of using AI to diagnose conditions and recommend treatments."
+      },
+      {
+        title: "Is globalization still beneficial for developing economies?",
+        description: "Consider how global trade and economic integration affect economic growth and inequality."
+      }
+    ];
+    
+    setArticles(getRandomArticles(defaultTopics, 2));
+  };
 
   const getRandomArticles = (articles, count) => {
     if (articles.length <= count) return articles;
@@ -141,6 +170,10 @@ const ExtempScreen = () => {
     }
     return Array.from(selectedIndexes).map((index) => articles[index]);
   };
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
   useEffect(() => {
     let interval;
