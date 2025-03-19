@@ -104,71 +104,52 @@ const ExtempScreen = () => {
       const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
       console.log(`Fetching extemp topics from: ${apiUrl}`);
       
-      // First, test CORS with the test endpoint
-      try {
-        const corsTestUrl = `${config.API_URL}/api/cors-test`;
-        console.log(`Testing CORS at: ${corsTestUrl}`);
-        const corsTest = await fetch(corsTestUrl);
-        if (corsTest.ok) {
-          const corsData = await corsTest.json();
-          console.log('CORS test successful:', corsData);
-        } else {
-          console.error('CORS test failed:', corsTest.status, corsTest.statusText);
+      // Remove CORS test and directly fetch with CORS mode
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors' // Explicitly set CORS mode
+      });
+
+      // Check if response is ok and content-type is application/json
+      const contentType = response.headers.get("content-type");
+      if (!response.ok) {
+        console.error(`Error response: ${response.status}, ${response.statusText}`);
+        throw new Error(`Failed to fetch topics (${response.status})`);
+      }
+
+      if (!contentType?.includes("application/json")) {
+        throw new Error("Invalid response format from server");
+      }
+
+      const data = await response.json();
+      
+      if (data?.articles?.length) {
+        const processedArticles = data.articles
+          .filter(article => article.title && article.description) // Only keep articles with both title and description
+          .map(article => ({
+            title: article.title.trim(),
+            description: article.description.trim()
+          }));
+
+        if (processedArticles.length > 0) {
+          // Filter for extemp topics and get 2 random ones
+          const filteredArticles = filterExtempArticles(processedArticles);
+          setArticles(getRandomArticles(filteredArticles, 2));
+          return;
         }
-      } catch (corsError) {
-        console.error('CORS test error:', corsError);
       }
       
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          }
-        });
-
-        // Check if response is ok and content-type is application/json
-        const contentType = response.headers.get("content-type");
-        if (!response.ok) {
-          console.error(`Error response: ${response.status}, ${response.statusText}`);
-          throw new Error(`Failed to fetch topics (${response.status})`);
-        }
-
-        if (!contentType?.includes("application/json")) {
-          throw new Error("Invalid response format from server");
-        }
-
-        const data = await response.json();
-        
-        if (data?.articles?.length) {
-          const processedArticles = data.articles
-            .filter(article => article.title && article.description) // Only keep articles with both title and description
-            .map(article => ({
-              title: article.title.trim(),
-              description: article.description.trim()
-            }));
-
-          if (processedArticles.length > 0) {
-            // Filter for extemp topics and get 2 random ones
-            const filteredArticles = filterExtempArticles(processedArticles);
-            setArticles(getRandomArticles(filteredArticles, 2));
-            return;
-          }
-        }
-        
-        // Fallback if no articles are available or all filtering failed
-        console.log("No news articles available, using fallback topics");
-        setDefaultTopics();
-        
-      } catch (error) {
-        console.error("Error fetching news topics:", error);
-        console.log("Using fallback topics due to API error");
-        setDefaultTopics();
-      }
+      // Fallback if no articles are available or all filtering failed
+      console.log("No news articles available, using fallback topics");
+      setDefaultTopics();
+      
     } catch (error) {
-      console.error("Unhandled error:", error);
-      setError("An unexpected error occurred. Using default topics instead.");
+      console.error("Error fetching news topics:", error);
+      console.log("Using fallback topics due to API error");
       setDefaultTopics();
     } finally {
       setIsLoading(false);
