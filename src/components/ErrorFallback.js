@@ -65,6 +65,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
+      className="error-page"
     >
       <Particles
         id="tsparticles"

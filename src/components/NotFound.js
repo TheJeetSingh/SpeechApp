@@ -66,6 +66,7 @@ const NotFound = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
+      className="not-found-page"
     >
       <Particles
         id="tsparticles"

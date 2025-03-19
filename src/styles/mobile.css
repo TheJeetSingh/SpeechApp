@@ -6,12 +6,16 @@
     overflow-x: hidden;
   }
   
-  /* Fix white background issue on mobile */
+  /* Fix white background issue on mobile - but preserve HomeScreen's background */
   html, body, #root {
-    background: #1e3c72;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
     min-height: 100vh;
     height: 100%;
+  }
+  
+  /* Error pages and other pages with blue background */
+  .error-page, .not-found-page {
+    background: #1e3c72;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
   }
   
   /* Improve readability on small screens */
