@@ -469,7 +469,8 @@ function SpeechScreen() {
             feedback: "We couldn't fully analyze your speech. Try recording again with clearer audio.",
             topic: "Speech analysis encountered an error.",
             strengths: ["Your attempt to practice public speaking"],
-            improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"]
+            improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"],
+            poorQuality: false
           });
         } finally {
           setIsAnalyzing(false);
@@ -494,7 +495,8 @@ function SpeechScreen() {
         feedback: "We couldn't fully analyze your speech. Try recording again with clearer audio.",
         topic: "Speech analysis encountered an error.",
         strengths: ["Your attempt to practice public speaking"],
-        improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"]
+        improvements: ["Try recording in a quieter environment", "Speak more clearly into the microphone"],
+        poorQuality: false
       });
     }
   };

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { colors, animations, particlesConfig } from '../styles/theme';
-import { FiClock, FiAward, FiRotateCcw, FiHome, FiTarget, FiArrowRight, FiDownload, FiCpu, FiMic, FiMessageSquare, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
+import { FiClock, FiAward, FiRotateCcw, FiHome, FiTarget, FiArrowRight, FiDownload, FiCpu, FiMic, FiMessageSquare, FiTrendingUp, FiTrendingDown, FiAlertCircle } from 'react-icons/fi';
 import Particles from 'react-tsparticles';
 import { useSpring, animated, config } from 'react-spring';
 import html2canvas from 'html2canvas';
@@ -189,6 +189,19 @@ function SpeechStats() {
   // Motivational messages based on grade
   const getMotivationalMessage = () => {
     if (speechAnalysis) {
+      // If speech was flagged as poor quality, return a humorous message
+      if (speechAnalysis.poorQuality) {
+        const humiliatingMessages = [
+          "Was that your foot we heard? Because it sure wasn't a speech.",
+          "Did you just point random body parts at the microphone? Try using your mouth next time.",
+          "That wasn't a speech. That was... well, we're not sure what that was.",
+          "We're pretty sure you weren't even trying. Maybe put some effort in next time?",
+          "Our AI is crying. It's never heard something so incomprehensible.",
+          "Did you forget public speaking involves actual speaking?",
+          "We've heard better audio from a potato connected to two paperclips."
+        ];
+        return humiliatingMessages[Math.floor(Math.random() * humiliatingMessages.length)];
+      }
       return speechAnalysis.feedback;
     }
     switch(grade.letter) {
@@ -615,83 +628,127 @@ function SpeechStats() {
                         }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
                       >
-                        <FiCpu size={28} color={colors.accent.purple} />
+                        <FiCpu size={28} color={speechAnalysis.poorQuality ? colors.accent.red : colors.accent.purple} />
                       </motion.div>
-                      <h3>AI Speech Analysis</h3>
+                      <h3>{speechAnalysis.poorQuality ? "Speech Detection Failed" : "AI Speech Analysis"}</h3>
                     </motion.div>
                     
                     <div style={styles.analysisContent}>
-                      <div style={styles.scoreSection}>
-                        <div style={styles.scoreCard}>
-                          <h4 style={styles.scoreLabel}>Content</h4>
-                          <div style={{
-                            ...styles.scoreCircle,
-                            background: `conic-gradient(${getScoreColor(speechAnalysis.contentScore)} ${speechAnalysis.contentScore}%, transparent ${speechAnalysis.contentScore}%, transparent 100%)`
-                          }}>
-                            <span style={styles.scoreValue}>{speechAnalysis.contentScore}</span>
+                      {speechAnalysis.poorQuality ? (
+                        <div style={styles.poorQualityBox}>
+                          <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ 
+                              scale: [1, 1.05, 1],
+                              opacity: 1
+                            }}
+                            transition={{ 
+                              duration: 2, 
+                              repeat: Infinity,
+                              repeatType: "reverse" 
+                            }}
+                          >
+                            <FiAlertCircle size={50} color={colors.accent.red} />
+                          </motion.div>
+                          <h3 style={styles.poorQualityTitle}>Not a Speech Detected</h3>
+                          <p style={styles.poorQualityMessage}>{speechAnalysis.feedback}</p>
+                          <div style={styles.scoreSection}>
+                            <div style={styles.scoreCard}>
+                              <h4 style={styles.scoreLabel}>Content</h4>
+                              <div style={{
+                                ...styles.scoreCircle,
+                                background: `conic-gradient(${colors.accent.red} ${speechAnalysis.contentScore}%, transparent ${speechAnalysis.contentScore}%, transparent 100%)`
+                              }}>
+                                <span style={styles.scoreValue}>{speechAnalysis.contentScore}</span>
+                              </div>
+                            </div>
+                            
+                            <div style={styles.scoreCard}>
+                              <h4 style={styles.scoreLabel}>Delivery</h4>
+                              <div style={{
+                                ...styles.scoreCircle,
+                                background: `conic-gradient(${colors.accent.red} ${speechAnalysis.deliveryScore}%, transparent ${speechAnalysis.deliveryScore}%, transparent 100%)`
+                              }}>
+                                <span style={styles.scoreValue}>{speechAnalysis.deliveryScore}</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        
-                        <div style={styles.scoreCard}>
-                          <h4 style={styles.scoreLabel}>Delivery</h4>
-                          <div style={{
-                            ...styles.scoreCircle,
-                            background: `conic-gradient(${getScoreColor(speechAnalysis.deliveryScore)} ${speechAnalysis.deliveryScore}%, transparent ${speechAnalysis.deliveryScore}%, transparent 100%)`
-                          }}>
-                            <span style={styles.scoreValue}>{speechAnalysis.deliveryScore}</span>
+                      ) : (
+                        <>
+                          <div style={styles.scoreSection}>
+                            <div style={styles.scoreCard}>
+                              <h4 style={styles.scoreLabel}>Content</h4>
+                              <div style={{
+                                ...styles.scoreCircle,
+                                background: `conic-gradient(${getScoreColor(speechAnalysis.contentScore)} ${speechAnalysis.contentScore}%, transparent ${speechAnalysis.contentScore}%, transparent 100%)`
+                              }}>
+                                <span style={styles.scoreValue}>{speechAnalysis.contentScore}</span>
+                              </div>
+                            </div>
+                            
+                            <div style={styles.scoreCard}>
+                              <h4 style={styles.scoreLabel}>Delivery</h4>
+                              <div style={{
+                                ...styles.scoreCircle,
+                                background: `conic-gradient(${getScoreColor(speechAnalysis.deliveryScore)} ${speechAnalysis.deliveryScore}%, transparent ${speechAnalysis.deliveryScore}%, transparent 100%)`
+                              }}>
+                                <span style={styles.scoreValue}>{speechAnalysis.deliveryScore}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      
-                      {speechAnalysis.topic && (
-                        <div style={styles.analysisSection}>
-                          <h4 style={styles.analysisSectionTitle}>
-                            <FiMessageSquare size={18} color={colors.accent.blue} />
-                            <span>Topic Analysis</span>
-                          </h4>
-                          <p style={styles.analysisSectionText}>{speechAnalysis.topic}</p>
-                        </div>
+                          
+                          {speechAnalysis.topic && (
+                            <div style={styles.analysisSection}>
+                              <h4 style={styles.analysisSectionTitle}>
+                                <FiMessageSquare size={18} color={colors.accent.blue} />
+                                <span>Topic Analysis</span>
+                              </h4>
+                              <p style={styles.analysisSectionText}>{speechAnalysis.topic}</p>
+                            </div>
+                          )}
+                          
+                          <div style={styles.analysisSection}>
+                            <h4 style={styles.analysisSectionTitle}>
+                              <FiTrendingUp size={18} color={colors.accent.green} />
+                              <span>Strengths</span>
+                            </h4>
+                            <ul style={styles.analysisList}>
+                              {speechAnalysis.strengths.map((strength, index) => (
+                                <motion.li 
+                                  key={index}
+                                  style={styles.analysisListItem}
+                                  initial={{ x: -20, opacity: 0 }}
+                                  animate={{ x: 0, opacity: 1 }}
+                                  transition={{ delay: 1.5 + (index * 0.1) }}
+                                >
+                                  {strength}
+                                </motion.li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div style={styles.analysisSection}>
+                            <h4 style={styles.analysisSectionTitle}>
+                              <FiTrendingDown size={18} color={colors.accent.red} />
+                              <span>Areas for Improvement</span>
+                            </h4>
+                            <ul style={styles.analysisList}>
+                              {speechAnalysis.improvements.map((improvement, index) => (
+                                <motion.li 
+                                  key={index}
+                                  style={styles.analysisListItem}
+                                  initial={{ x: -20, opacity: 0 }}
+                                  animate={{ x: 0, opacity: 1 }}
+                                  transition={{ delay: 1.8 + (index * 0.1) }}
+                                >
+                                  {improvement}
+                                </motion.li>
+                              ))}
+                            </ul>
+                          </div>
+                        </>
                       )}
-                      
-                      <div style={styles.analysisSection}>
-                        <h4 style={styles.analysisSectionTitle}>
-                          <FiTrendingUp size={18} color={colors.accent.green} />
-                          <span>Strengths</span>
-                        </h4>
-                        <ul style={styles.analysisList}>
-                          {speechAnalysis.strengths.map((strength, index) => (
-                            <motion.li 
-                              key={index}
-                              style={styles.analysisListItem}
-                              initial={{ x: -20, opacity: 0 }}
-                              animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 1.5 + (index * 0.1) }}
-                            >
-                              {strength}
-                            </motion.li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      <div style={styles.analysisSection}>
-                        <h4 style={styles.analysisSectionTitle}>
-                          <FiTrendingDown size={18} color={colors.accent.red} />
-                          <span>Areas for Improvement</span>
-                        </h4>
-                        <ul style={styles.analysisList}>
-                          {speechAnalysis.improvements.map((improvement, index) => (
-                            <motion.li 
-                              key={index}
-                              style={styles.analysisListItem}
-                              initial={{ x: -20, opacity: 0 }}
-                              animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 1.8 + (index * 0.1) }}
-                            >
-                              {improvement}
-                            </motion.li>
-                          ))}
-                        </ul>
-                      </div>
                     </div>
                   </motion.div>
                 </>
@@ -779,10 +836,9 @@ function SpeechStats() {
 
 // Helper function to get color based on score
 const getScoreColor = (score) => {
-  if (score >= 90) return colors.accent.green;
-  if (score >= 80) return '#4CAF50';
-  if (score >= 70) return '#FFC107';
-  if (score >= 60) return '#FF9800';
+  if (score >= 80) return colors.accent.green;
+  if (score >= 60) return colors.accent.blue;
+  if (score >= 40) return colors.accent.yellow;
   return colors.accent.red;
 };
 
@@ -1203,6 +1259,33 @@ const styles = {
     color: colors.text.secondary,
     marginBottom: '0.5rem',
     lineHeight: '1.4',
+  },
+  poorQualityBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem',
+    textAlign: 'center',
+    backgroundColor: 'rgba(255, 100, 100, 0.1)',
+    borderRadius: '12px',
+    border: `1px solid ${colors.accent.red}`,
+    marginBottom: '1.5rem',
+  },
+  
+  poorQualityTitle: {
+    fontSize: '1.4rem',
+    fontWeight: '700',
+    color: colors.accent.red,
+    margin: '1rem 0 0.5rem',
+  },
+  
+  poorQualityMessage: {
+    fontSize: '1.1rem',
+    color: colors.text.primary,
+    margin: '0 0 1.5rem',
+    lineHeight: '1.6',
+    fontStyle: 'italic',
   },
 };
 

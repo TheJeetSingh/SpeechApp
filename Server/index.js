@@ -264,7 +264,12 @@ app.post("/api/analyze-speech", async (req, res) => {
     ${contextIntro}
     The speech duration was: ${formattedDuration}.
     
-    Based on the audio, please provide a comprehensive analysis including:
+    First, determine if this is actually a coherent speech or just random noise, background sounds, or gibberish. If it's not a coherent speech (like someone pointing their foot at the microphone, making random noises, or complete silence), respond with a JSON that has:
+    - very low scores (below 20)
+    - blunt but humorous feedback that the user wasn't even trying
+    - a "poorQuality" field set to true
+    
+    If it IS a coherent speech, provide a comprehensive analysis including:
     
     1. Content analysis: What was the speech about? Was the content well-structured and informative?
     2. Delivery analysis: Assess voice modulation, pacing, clarity, pauses, and overall delivery style.
@@ -284,7 +289,8 @@ app.post("/api/analyze-speech", async (req, res) => {
       "deliveryScore": number,
       "strengths": ["strength1", "strength2", "strength3"],
       "improvements": ["area1", "area2", "area3"],
-      "feedback": "overall feedback summary"
+      "feedback": "overall feedback summary",
+      "poorQuality": boolean (true if the audio wasn't a real speech)
     }
     `;
 
@@ -359,7 +365,8 @@ app.post("/api/analyze-speech", async (req, res) => {
         deliveryScore: 70,
         strengths: ["Attempted speech delivery", "Put effort into preparation"],
         improvements: ["Improve audio quality for better analysis", "Structure speech more clearly"],
-        feedback: "The speech was difficult to analyze due to response format. Consider recording again with better quality audio."
+        feedback: "The speech was difficult to analyze due to response format. Consider recording again with better quality audio.",
+        poorQuality: false
       };
     }
 
@@ -395,7 +402,8 @@ app.post("/api/analyze-speech", async (req, res) => {
         deliveryScore: 65,
         strengths: ["Attempted speech practice", "Used the application for improvement"],
         improvements: ["Try recording with clearer audio", "Ensure proper internet connectivity for analysis"],
-        feedback: "We encountered an error while analyzing your speech. Please try again with a clearer recording."
+        feedback: "We encountered an error while analyzing your speech. Please try again with a clearer recording.",
+        poorQuality: false
       });
     }
   }
