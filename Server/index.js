@@ -13,51 +13,49 @@ const PORT = process.env.PORT || 5001;
 // Specific origins to allow
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://speech-app-delta.vercel.app'
+  'https://speech-app-delta.vercel.app',
+  'https://speech-app-server.vercel.app'
 ];
 
-// CORS middleware for all routes
+// CORS middleware for all routes - simplified and more permissive
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-  } else {
-    res.header('Access-Control-Allow-Origin', '*'); // Fallback to allow all origins
-  }
+  // Always allow the origin that sent the request
+  res.header('Access-Control-Allow-Origin', origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Max-Age', '86400'); // 24 hours
   
   // Handle preflight
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight request');
     return res.status(200).end();
   }
   
   next();
 });
 
-// Also keep the cors middleware for compatibility
-app.use(cors({
-  origin: function (origin, callback) {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      // Allow all origins as fallback
-      callback(null, true);
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  optionsSuccessStatus: 200,
-  credentials: false
-}));
-
-// Handle preflight requests explicitly
-app.options('*', cors());
-
 // Parse JSON request bodies with increased limit for audio data
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Add debugging middleware to trace request headers
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
+  console.log('Headers:', JSON.stringify(req.headers));
+  next();
+});
+
+// Handle OPTIONS preflight for all routes explicitly
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  res.header('Access-Control-Allow-Origin', origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.status(200).end();
+});
 
 // MongoDB Connection
 mongoose
@@ -124,10 +122,14 @@ app.get("/api/cors-test", (req, res) => {
 
 // Signup Route
 app.post("/api/signup", async (req, res) => {
-  // Set CORS headers directly on this route
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const origin = req.headers.origin || '*';
+  // Always set CORS headers explicitly
+  res.header('Access-Control-Allow-Origin', origin);
   res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  console.log("Signup attempt from origin:", origin);
+  console.log("Signup request body:", JSON.stringify(req.body));
   
   const { name, email, password } = req.body;
 
@@ -161,10 +163,14 @@ app.post("/api/signup", async (req, res) => {
 
 // Login Route
 app.post("/api/login", async (req, res) => {
-  // Set CORS headers directly on this route
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const origin = req.headers.origin || '*';
+  // Always set CORS headers explicitly
+  res.header('Access-Control-Allow-Origin', origin);
   res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  console.log("Login attempt from origin:", origin);
+  console.log("Login request body:", JSON.stringify(req.body));
   
   const { email, password } = req.body;
 

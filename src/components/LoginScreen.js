@@ -20,22 +20,7 @@ function Login() {
       // Log diagnostics
       console.log(`Attempting login to: ${API_URL}/api/login`);
 
-      // First, test CORS with the test endpoint
-      try {
-        const corsTestUrl = `${API_URL}/api/cors-test`;
-        console.log(`Testing CORS at: ${corsTestUrl}`);
-        const corsTest = await fetch(corsTestUrl);
-        if (corsTest.ok) {
-          const corsData = await corsTest.json();
-          console.log('CORS test successful:', corsData);
-        } else {
-          console.error('CORS test failed:', corsTest.status, corsTest.statusText);
-        }
-      } catch (corsError) {
-        console.error('CORS test error:', corsError);
-      }
-
-      // Now attempt the actual login
+      // Now attempt the actual login with explicit CORS mode
       const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { 
@@ -43,13 +28,20 @@ function Login() {
           "Accept": "application/json"
         },
         body: JSON.stringify({ email, password }),
-        // Don't use credentials: 'include' as it requires additional CORS configuration
+        mode: 'cors', // Explicitly set CORS mode
       });
 
+      if (!response.ok) {
+        // Try to get the error message from the response
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Server error: ${response.status} ${response.statusText}`);
+        } catch (jsonError) {
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+      }
+
       const data = await response.json();
-
-      if (!response.ok) throw new Error(data.message || "Login failed");
-
       localStorage.setItem("token", data.token);
       navigate("/");
     } catch (error) {
