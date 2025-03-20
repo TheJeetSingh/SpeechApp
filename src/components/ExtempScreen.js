@@ -221,8 +221,13 @@ const ExtempScreen = () => {
             {error}
           </motion.div>
         )}
-        <motion.div style={componentStyles.timer} variants={animations.content}>
-          Time Left: {timer}s
+        <motion.div style={componentStyles.timerContainer} variants={animations.content}>
+          <div style={styles.clockIcon}>
+            {/* Clock icon SVG or image */}
+          </div>
+          <div style={styles.timer}>
+            Time Left: {timer}s
+          </div>
         </motion.div>
         <motion.h1
           style={componentStyles.heading}
@@ -230,15 +235,12 @@ const ExtempScreen = () => {
         >
           Choose an Extemp Topic
         </motion.h1>
-        <motion.ul
-          style={styles.list}
-          variants={animations.content}
-        >
+        <motion.div style={styles.topicsContainer} variants={animations.content}>
           <AnimatePresence>
             {articles.map((article, index) => (
-              <motion.li
+              <motion.div
                 key={index}
-                style={styles.listItem}
+                style={styles.newsCard}
                 variants={animations.card}
                 whileHover="hover"
                 whileTap="tap"
@@ -250,54 +252,109 @@ const ExtempScreen = () => {
                 custom={index}
                 layout
               >
-                {article.title}
-              </motion.li>
+                <h2 style={styles.newsTitle}>{article.title}</h2>
+                <p style={styles.newsDescription}>{article.description}</p>
+                <div style={styles.newsSource}>
+                  <span style={styles.newsDate}>{article.source?.name || "Unknown Source"}</span>
+                  <a style={styles.readMore} href={article.url || "#"}>Read More</a>
+                </div>
+              </motion.div>
             ))}
           </AnimatePresence>
-        </motion.ul>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
 };
 
 const styles = {
-  list: {
-    listStyle: "none",
-    padding: 0,
+  timerContainer: {
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "1rem 2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
     display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    width: "100%",
+    alignItems: "center",
+    gap: "1rem",
+    marginBottom: "2rem",
+    width: "fit-content",
+    margin: "0 auto 2rem",
+  },
+  clockIcon: {
+    color: "#FFFFFF",
+  },
+  timer: {
+    fontSize: "1.8rem",
+    fontWeight: "700",
+    transition: "color 0.3s ease",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    color: "#FFFFFF",
+  },
+  topicsContainer: {
+    padding: "1rem",
+    width: "90%",
     maxWidth: "800px",
     margin: "0 auto",
   },
-  listItem: {
-    ...componentStyles.card,
-    fontSize: "1.2rem",
-    padding: "20px 32px",
-    background: "linear-gradient(135deg, #00BFFF, rgba(0, 191, 255, 0.5))",
-    color: "#FFFFFF",
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
-    lineHeight: 1.6,
-  },
   error: {
-    padding: "15px 20px",
+    backgroundColor: "rgba(255, 82, 82, 0.9)",
+    color: "#FFFFFF",
+    padding: "1rem",
     borderRadius: "10px",
-    background: "linear-gradient(135deg, rgba(255, 82, 82, 0.27), rgba(255, 82, 82, 0.13))",
-    color: "#FF5252",
-    fontSize: "1.1rem",
-    fontWeight: "500",
     textAlign: "center",
-    marginBottom: "20px",
-    backdropFilter: "blur(5px)",
-    border: "1px solid rgba(255, 82, 82, 0.27)",
+    margin: "1rem auto",
+    width: "90%",
+    maxWidth: "600px",
   },
   loading: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
     color: "#FFFFFF",
     textAlign: "center",
-    marginBottom: "20px",
+    margin: "2rem auto",
+  },
+  newsCard: {
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "1.5rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    marginBottom: "1.5rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  newsTitle: {
+    fontSize: "1.4rem",
+    fontWeight: "600",
+    color: "#FFFFFF",
+    margin: 0,
+  },
+  newsDescription: {
+    fontSize: "1rem",
+    color: "#FFFFFF",
+    margin: 0,
+    lineHeight: 1.6,
+  },
+  newsSource: {
+    fontSize: "0.9rem",
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: "auto",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  newsDate: {
+    fontSize: "0.8rem",
+    color: "rgba(255, 255, 255, 0.7)",
+  },
+  readMore: {
+    color: "#2196F3",
+    textDecoration: "none",
+    display: "inline-block",
+    padding: "0.5rem 1rem",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: "8px",
+    transition: "all 0.3s ease",
   },
 };
 

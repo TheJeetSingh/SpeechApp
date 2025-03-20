@@ -54,8 +54,13 @@ function AbstractScreen() {
         style={componentStyles.content}
         variants={animations.content}
       >
-        <motion.div style={componentStyles.timer} variants={animations.content}>
-          Time Left: {timer}s
+        <motion.div style={componentStyles.timerContainer} variants={animations.content}>
+          <motion.div style={componentStyles.clockIcon} variants={animations.content}>
+            {/* Clock icon SVG */}
+          </motion.div>
+          <motion.div style={componentStyles.timer} variants={animations.content}>
+            Time Left: {timer}s
+          </motion.div>
         </motion.div>
         <motion.h1
           style={componentStyles.heading}
@@ -63,15 +68,12 @@ function AbstractScreen() {
         >
           Choose an Abstract Topic
         </motion.h1>
-        <motion.ul
-          style={styles.list}
-          variants={animations.content}
-        >
+        <motion.div style={componentStyles.topicsContainer} variants={animations.content}>
           <AnimatePresence>
             {topicsList.map((topic, index) => (
-              <motion.li
+              <motion.div
                 key={index}
-                style={styles.listItem}
+                style={componentStyles.topicCard}
                 variants={animations.card}
                 whileHover="hover"
                 whileTap="tap"
@@ -79,34 +81,91 @@ function AbstractScreen() {
                 custom={index}
                 layout
               >
-                {topic}
-              </motion.li>
+                <motion.div style={componentStyles.topicIconContainer} variants={animations.content}>
+                  {/* Topic icon SVG */}
+                </motion.div>
+                <motion.div style={componentStyles.topicText} variants={animations.content}>
+                  {topic}
+                </motion.div>
+                <motion.div style={componentStyles.arrowContainer} variants={animations.content}>
+                  {/* Arrow SVG */}
+                </motion.div>
+              </motion.div>
             ))}
           </AnimatePresence>
-        </motion.ul>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
 }
 
 const styles = {
-  list: {
-    listStyle: "none",
-    padding: 0,
+  timerContainer: {
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "1rem 2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+    marginBottom: "2rem",
+    width: "fit-content",
+    margin: "0 auto 2rem",
+  },
+  clockIcon: {
+    color: "#FFFFFF",
+  },
+  timer: {
+    fontSize: "1.8rem",
+    fontWeight: "700",
+    transition: "color 0.3s ease",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    color: "#FFFFFF",
+  },
+  topicsContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
-    width: "100%",
-    maxWidth: "600px",
+    gap: "2rem",
+    width: "90%",
+    maxWidth: "800px",
     margin: "0 auto",
   },
-  listItem: {
-    ...componentStyles.card,
-    fontSize: "1.2rem",
-    padding: "16px 32px",
-    background: "linear-gradient(135deg, #00BFFF, rgba(0, 191, 255, 0.5))",
+  topicCard: {
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "2rem",
+    borderRadius: "20px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "1.5rem",
+    transition: "all 0.3s ease",
+  },
+  topicIconContainer: {
     color: "#FFFFFF",
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    padding: "1rem",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  topicText: {
+    fontSize: "1.2rem",
+    color: "#FFFFFF",
+    margin: 0,
+    lineHeight: 1.6,
+    flex: 1,
+  },
+  arrowContainer: {
+    color: "#FFFFFF",
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
+    transition: "transform 0.3s ease",
   },
 };
 

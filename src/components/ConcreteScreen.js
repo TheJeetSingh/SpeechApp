@@ -164,13 +164,14 @@ const styles = {
     margin: "0 auto 3rem auto",
   },
   clockIcon: {
-    color: colors.text.primary,
+    color: "#FFFFFF",
   },
   timer: {
     fontSize: "1.8rem",
     fontWeight: "700",
     transition: "color 0.3s ease",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    color: "#FFFFFF",
   },
   topicsContainer: {
     display: "flex",
@@ -181,11 +182,11 @@ const styles = {
     margin: "0 auto",
   },
   topicCard: {
-    background: 'rgba(42, 82, 152, 0.95)',
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
     padding: "2rem",
     borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -193,8 +194,8 @@ const styles = {
     transition: "all 0.3s ease",
   },
   topicIconContainer: {
-    color: colors.text.primary,
-    background: "rgba(255, 255, 255, 0.1)",
+    color: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     padding: "1rem",
     borderRadius: "12px",
     display: "flex",
@@ -204,13 +205,13 @@ const styles = {
   },
   topicText: {
     fontSize: "1.2rem",
-    color: colors.text.primary,
+    color: "#FFFFFF",
     margin: 0,
     lineHeight: 1.6,
     flex: 1,
   },
   arrowContainer: {
-    color: colors.text.primary,
+    color: "#FFFFFF",
     display: "flex",
     alignItems: "center",
     flexShrink: 0,

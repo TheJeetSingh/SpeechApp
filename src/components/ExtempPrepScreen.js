@@ -86,11 +86,11 @@ const ExtempPrepScreen = () => {
         </motion.h1>
 
         <motion.div
-          style={styles.topicCard}
+          style={styles.topicsContainer}
           variants={animations.card}
         >
           <motion.div 
-            style={styles.topicIcon}
+            style={styles.topicCard}
             animate={{ 
               rotate: [0, 10, -10, 0],
               scale: [1, 1.1, 1]
@@ -103,12 +103,14 @@ const ExtempPrepScreen = () => {
           >
             🌍
           </motion.div>
-          <motion.h2 style={styles.topicTitle}>
-            Your Topic:
-          </motion.h2>
-          <motion.p style={styles.topicText}>
-            {topicName || "No topic selected"}
-          </motion.p>
+          <motion.div style={styles.topicContent}>
+            <motion.h2 style={styles.topicTitle}>
+              Your Topic:
+            </motion.h2>
+            <motion.p style={styles.topicText}>
+              {topicName || "No topic selected"}
+            </motion.p>
+          </motion.div>
         </motion.div>
 
         <motion.div
@@ -189,50 +191,62 @@ const ExtempPrepScreen = () => {
 
 const styles = {
   heading: {
-    ...componentStyles.heading,
-    marginBottom: "2.5rem",
-    background: "linear-gradient(45deg, #FFFFFF, #00BFFF)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
+    fontSize: "2.5rem",
+    fontWeight: "bold",
     textAlign: "center",
-    width: "100%",
+    marginBottom: "2rem",
+    padding: "1rem 2rem",
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    color: "#FFFFFF",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    width: "fit-content",
+    margin: "0 auto 2rem",
+  },
+  topicsContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2rem",
+    width: "90%",
     maxWidth: "800px",
-    margin: "0 auto 2.5rem auto",
+    margin: "0 auto",
   },
   topicCard: {
-    background: "rgba(255, 255, 255, 0.1)",
-    padding: "2.5rem",
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "2rem",
     borderRadius: "20px",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    textAlign: "center",
-    maxWidth: "800px",
-    width: "90%",
-    margin: "0 auto 3rem auto",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    display: "flex",
+    alignItems: "center",
+    gap: "1.5rem",
   },
-  topicIcon: {
-    fontSize: "3.5rem",
-    marginBottom: "1.5rem",
-    display: "block",
-    margin: "0 auto 1.5rem auto",
+  topicIconContainer: {
+    color: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    padding: "1rem",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  topicContent: {
+    flex: 1,
   },
   topicTitle: {
-    fontSize: "1.5rem",
+    fontSize: "1.4rem",
     fontWeight: "600",
     color: "#FFFFFF",
-    marginBottom: "1rem",
+    margin: "0 0 0.5rem 0",
   },
   topicText: {
-    fontSize: "1.2rem",
-    color: colors.text.secondary,
-    lineHeight: "1.6",
-    padding: "1.5rem",
-    background: "rgba(255, 255, 255, 0.1)",
-    borderRadius: "10px",
-    margin: "0 auto",
-    maxWidth: "600px",
-    textAlign: "center",
+    fontSize: "1rem",
+    color: "#FFFFFF",
+    margin: 0,
+    lineHeight: 1.6,
   },
   timerSection: {
     display: "flex",
@@ -245,27 +259,27 @@ const styles = {
     margin: "0 auto",
   },
   timerContainer: {
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "1rem 2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    gap: "1.5rem",
-    background: colors.background.glass,
-    padding: "2.5rem 3.5rem",
-    borderRadius: "20px",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    margin: "0 auto",
+    gap: "1rem",
+    marginBottom: "2rem",
+    width: "fit-content",
+    margin: "0 auto 2rem",
   },
   clockIcon: {
-    transition: "color 0.3s ease",
+    color: "#FFFFFF",
   },
   timer: {
-    fontSize: "3.5rem",
+    fontSize: "1.8rem",
     fontWeight: "700",
     transition: "color 0.3s ease",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    textAlign: "center",
+    color: "#FFFFFF",
   },
   banner: {
     background: colors.background.glass,
@@ -316,6 +330,13 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
     marginTop: "1.5rem",
+  },
+  arrowContainer: {
+    color: "#FFFFFF",
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
+    transition: "transform 0.3s ease",
   },
 };
 
