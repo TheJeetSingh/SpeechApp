@@ -141,7 +141,7 @@ const styles = {
   heading: {
     ...componentStyles.heading,
     marginBottom: "2.5rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.purple})`,
+    background: "linear-gradient(45deg, #FFFFFF, #9C27B0)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",

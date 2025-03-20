@@ -142,7 +142,7 @@ const styles = {
   heading: {
     ...componentStyles.heading,
     marginBottom: "2rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.secondary.main})`,
+    background: "linear-gradient(45deg, #FFFFFF, #87CEEB)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
@@ -159,11 +159,11 @@ const styles = {
     fontSize: "1.5rem",
     fontWeight: "600",
     marginBottom: "1rem",
-    color: colors.text.primary,
+    color: "#FFFFFF",
   },
   topicText: {
     fontSize: "1.2rem",
-    color: colors.text.secondary,
+    color: "rgba(255, 255, 255, 0.8)",
     lineHeight: "1.6",
   },
   timerSection: {

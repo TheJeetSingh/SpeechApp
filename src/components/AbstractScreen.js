@@ -104,8 +104,8 @@ const styles = {
     ...componentStyles.card,
     fontSize: "1.2rem",
     padding: "16px 32px",
-    background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.blue}88)`,
-    color: colors.text.primary,
+    background: "linear-gradient(135deg, #00BFFF, rgba(0, 191, 255, 0.5))",
+    color: "#FFFFFF",
     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
   },
 };

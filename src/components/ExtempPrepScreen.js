@@ -191,7 +191,7 @@ const styles = {
   heading: {
     ...componentStyles.heading,
     marginBottom: "2.5rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.blue})`,
+    background: "linear-gradient(45deg, #FFFFFF, #00BFFF)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
@@ -200,7 +200,7 @@ const styles = {
     margin: "0 auto 2.5rem auto",
   },
   topicCard: {
-    background: colors.background.glass,
+    background: "rgba(255, 255, 255, 0.1)",
     padding: "2.5rem",
     borderRadius: "20px",
     backdropFilter: "blur(10px)",
@@ -220,9 +220,8 @@ const styles = {
   topicTitle: {
     fontSize: "1.5rem",
     fontWeight: "600",
-    marginBottom: "1.5rem",
-    color: colors.text.primary,
-    textAlign: "center",
+    color: "#FFFFFF",
+    marginBottom: "1rem",
   },
   topicText: {
     fontSize: "1.2rem",
@@ -306,18 +305,17 @@ const styles = {
     margin: "0 auto",
   },
   startButton: {
-    padding: "1.2rem 3rem",
-    fontSize: "1.2rem",
-    fontWeight: "600",
-    color: colors.text.primary,
-    background: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.blue})`,
+    background: "linear-gradient(135deg, #00BFFF, #4169E1)",
+    color: "#FFFFFF",
     border: "none",
     borderRadius: "50px",
+    padding: "1rem 2.5rem",
+    fontSize: "1.1rem",
+    fontWeight: "600",
     cursor: "pointer",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
     transition: "all 0.3s ease",
-    margin: "1rem auto",
-    display: "block",
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+    marginTop: "1.5rem",
   },
 };
 
