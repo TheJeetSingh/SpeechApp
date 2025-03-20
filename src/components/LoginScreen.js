@@ -126,10 +126,10 @@ const styles = {
     maxWidth: "400px",
     textAlign: "center",
   },
-  title: { fontSize: "2rem", fontWeight: "700", marginBottom: "20px", color: "#333" },
+  title: { fontSize: "2rem", fontWeight: "700", marginBottom: "20px", color: "#222" },
   form: { display: "flex", flexDirection: "column", gap: "15px" },
   formGroup: { display: "flex", flexDirection: "column", gap: "5px", textAlign: "left" },
-  label: { fontSize: "0.9rem", fontWeight: "600", color: "#555" },
+  label: { fontSize: "0.9rem", fontWeight: "600", color: "#444" },
   input: {
     padding: "10px",
     fontSize: "1rem",
@@ -150,7 +150,7 @@ const styles = {
     transition: "all 0.3s ease",
   },
   errorText: { color: "red", fontSize: "0.9rem" },
-  linkText: { fontSize: "0.9rem", color: "#555", marginTop: "15px" },
+  linkText: { fontSize: "0.9rem", color: "#444", marginTop: "15px" },
   link: {
     color: "#00c853",
     fontWeight: "600",

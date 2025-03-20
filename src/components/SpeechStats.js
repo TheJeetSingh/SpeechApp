@@ -110,11 +110,11 @@ function calculateGrade(timeInSeconds, speechType) {
   score = Math.max(0, Math.min(100, score)); // Clamp between 0 and 100
 
   // Convert numerical score to letter grade and color
-  if (score >= 90) return { letter: 'A', score, feedback: 'Outstanding timing! You nailed it! 🌟', color: colors.accent.green };
+  if (score >= 90) return { letter: 'A', score, feedback: 'Outstanding timing! You nailed it! 🌟', color: '#4CAF50' };
   if (score >= 80) return { letter: 'B', score, feedback: 'Great job! Just a bit more precision and you\'ll be perfect! ✨', color: '#4CAF50' };
   if (score >= 70) return { letter: 'C', score, feedback: 'Good effort! Keep practicing to improve your timing. 💪', color: '#FFC107' };
   if (score >= 60) return { letter: 'D', score, feedback: 'You\'re getting there! Focus on hitting those time targets. 🎯', color: '#FF9800' };
-  return { letter: 'F', score, feedback: 'Keep practicing! You\'ll get better with time. 🌱', color: colors.accent.red };
+  return { letter: 'F', score, feedback: 'Keep practicing! You\'ll get better with time. 🌱', color: '#FF5252' };
 }
 
 // Main component

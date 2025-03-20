@@ -126,14 +126,14 @@ const styles = {
     width: '30px',
     height: '30px',
     borderRadius: '50%',
-    backgroundColor: '#333',
+    backgroundColor: '#333333',
     position: 'relative',
     left: '-15px',
   },
   body: {
     width: '4px',
     height: '60px',
-    backgroundColor: '#333',
+    backgroundColor: '#333333',
     position: 'relative',
     left: '-2px',
     top: '0px',
@@ -141,7 +141,7 @@ const styles = {
   leftArm: {
     width: '40px',
     height: '4px',
-    backgroundColor: '#333',
+    backgroundColor: '#333333',
     position: 'absolute',
     top: '40px',
     left: '-40px',
@@ -151,7 +151,7 @@ const styles = {
   rightArm: {
     width: '40px',
     height: '4px',
-    backgroundColor: '#333',
+    backgroundColor: '#333333',
     position: 'absolute',
     top: '40px',
     left: '2px',
@@ -161,19 +161,21 @@ const styles = {
   leftLeg: {
     width: '4px',
     height: '40px',
-    backgroundColor: '#333',
+    backgroundColor: '#333333',
     position: 'absolute',
     top: '60px',
-    left: '-12px',
+    left: '-8px',
+    transform: 'rotate(15deg)',
     transformOrigin: 'top center',
   },
   rightLeg: {
     width: '4px',
     height: '40px',
-    backgroundColor: '#333',
+    backgroundColor: '#333333',
     position: 'absolute',
     top: '60px',
-    left: '8px',
+    left: '4px',
+    transform: 'rotate(-15deg)',
     transformOrigin: 'top center',
   },
   speechBubble: {
@@ -232,7 +234,17 @@ const styles = {
     backgroundColor: '#555',
     borderRadius: '50% 50% 0 0',
     animation: 'bob 3s ease-in-out infinite',
-  }
+  },
+  podium: {
+    width: '100%',
+    height: '10%',
+    backgroundColor: '#8B4513',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.3)',
+  },
 };
 
 export default StickFigureSpeechAnimation; 
