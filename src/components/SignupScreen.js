@@ -61,8 +61,8 @@ function Signup() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 style={styles.title}>Sign Up</h2>
-        {error && <p style={styles.errorText}>{error}</p>}
+        <h2 style={styles.heading}>Sign Up</h2>
+        {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
           <InputField
             label="Name"
@@ -87,23 +87,23 @@ function Signup() {
           />
           <motion.button
             type="submit"
-            style={styles.submitButton}
-            whileHover={{ scale: 1.05 }}
+            style={styles.button}
+            whileHover={styles.buttonHover}
             whileTap={{ scale: 0.95 }}
           >
             Sign Up
           </motion.button>
         </form>
-        <p style={styles.linkText}>
+        <p style={styles.switch}>
           Already have an account?{" "}
           <span style={styles.link} onClick={() => navigate("/login")}>
             Log In
           </span>
         </p>
         <motion.button
-          style={styles.goBackButton}
+          style={styles.button}
           onClick={() => navigate("/")}
-          whileHover={{ scale: 1.05 }}
+          whileHover={styles.buttonHover}
           whileTap={{ scale: 0.95 }}
         >
           Go Back to Home
@@ -122,64 +122,85 @@ const InputField = ({ label, ...props }) => (
 
 const styles = {
   container: {
+    height: "100vh",
+    width: "100%",
+    background: "linear-gradient(135deg, #4B79A1, #283E51)",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
-    background: "#1e3c72",
-    fontFamily: "Poppins, sans-serif",
+    justifyContent: "center",
   },
   formContainer: {
-    background: "#fff",
-    padding: "30px",
-    borderRadius: "10px",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    width: "100%",
-    maxWidth: "400px",
-    textAlign: "center",
+    width: "90%",
+    maxWidth: "500px",
+    padding: "2.5rem",
+    borderRadius: "20px",
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
   },
-  title: { fontSize: "2rem", fontWeight: "700", marginBottom: "20px", color: "#222" },
-  form: { display: "flex", flexDirection: "column", gap: "15px" },
+  heading: {
+    fontSize: "2.5rem",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: "2rem",
+    color: "#FFFFFF",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+  },
   formGroup: { display: "flex", flexDirection: "column", gap: "5px", textAlign: "left" },
   label: { fontSize: "0.9rem", fontWeight: "600", color: "#444" },
   input: {
-    padding: "10px",
+    width: "100%",
+    padding: "1rem",
+    marginBottom: "1.5rem",
+    borderRadius: "10px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    color: "#FFFFFF",
     fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    outline: "none",
-    transition: "border-color 0.3s ease",
   },
-  submitButton: {
-    padding: "12px",
-    fontSize: "1rem",
-    fontWeight: "600",
+  button: {
+    width: "100%",
+    padding: "1rem",
+    borderRadius: "10px",
     border: "none",
-    borderRadius: "8px",
-    background: "#00c853",
-    color: "#fff",
+    backgroundColor: "#2196F3",
+    color: "#FFFFFF",
+    fontSize: "1.1rem",
+    fontWeight: "bold",
     cursor: "pointer",
+    marginTop: "1rem",
     transition: "all 0.3s ease",
   },
-  errorText: { color: "red", fontSize: "0.9rem" },
-  linkText: { fontSize: "0.9rem", color: "#444", marginTop: "15px" },
+  buttonHover: {
+    backgroundColor: "#0D47A1",
+  },
+  error: {
+    backgroundColor: "rgba(255, 82, 82, 0.9)",
+    color: "#FFFFFF",
+    padding: "1rem",
+    borderRadius: "10px",
+    textAlign: "center",
+    marginBottom: "1.5rem",
+  },
+  switch: {
+    marginTop: "2rem",
+    textAlign: "center",
+    color: "#FFFFFF",
+  },
   link: {
-    color: "#00c853",
-    fontWeight: "600",
-    cursor: "pointer",
-    textDecoration: "underline",
-  },
-  goBackButton: {
-    padding: "12px",
-    fontSize: "1rem",
-    fontWeight: "600",
-    border: "none",
-    borderRadius: "8px",
-    background: "#f39c12",
-    color: "#fff",
-    cursor: "pointer",
+    color: "#2196F3",
+    textDecoration: "none",
+    fontWeight: "bold",
     transition: "all 0.3s ease",
-    marginTop: "15px",
+    cursor: "pointer",
+  },
+  linkHover: {
+    color: "#0D47A1",
   },
 };
 

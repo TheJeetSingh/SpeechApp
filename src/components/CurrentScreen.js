@@ -3,7 +3,65 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
 import config from "../config";
-import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
+import { colors, animations, particlesConfig } from "../styles/theme";
+
+const componentStyles = {
+  container: {
+    height: "100vh",
+    width: "100%",
+    background: "linear-gradient(135deg, #4B79A1, #283E51)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: {
+    width: "90%",
+    maxWidth: "1200px",
+    padding: "2rem",
+    borderRadius: "20px",
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+  },
+  heading: {
+    fontSize: "2.5rem",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: "2rem",
+    padding: "1rem 2rem",
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    color: "#FFFFFF",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    width: "fit-content",
+    margin: "0 auto 2rem",
+  },
+  timerContainer: {
+    backgroundColor: "rgba(42, 82, 152, 0.95)",
+    padding: "1rem 2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.5)",
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+    marginBottom: "2rem",
+    width: "fit-content",
+    margin: "0 auto 2rem",
+  },
+  clockIcon: {
+    color: "#FFFFFF",
+  },
+  timer: {
+    fontSize: "1.8rem",
+    fontWeight: "700",
+    transition: "color 0.3s ease",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    color: "#FFFFFF",
+  },
+};
 
 const CurrentScreen = () => {
   const [articles, setArticles] = useState([]);
@@ -118,8 +176,13 @@ const CurrentScreen = () => {
             {error}
           </motion.div>
         )}
-        <motion.div style={componentStyles.timer} variants={animations.content}>
-          Time Left: {timer}s
+        <motion.div style={componentStyles.timerContainer} variants={animations.content}>
+          <motion.div style={componentStyles.clockIcon} variants={animations.content}>
+            {/* Clock icon SVG */}
+          </motion.div>
+          <motion.div style={componentStyles.timer} variants={animations.content}>
+            Time Left: {timer}s
+          </motion.div>
         </motion.div>
         <motion.h1
           style={componentStyles.heading}
@@ -192,6 +255,23 @@ const styles = {
     justifyContent: "center",
     margin: "3rem 0",
     color: "#ffffff",
+  },
+  error: {
+    backgroundColor: "rgba(255, 82, 82, 0.9)",
+    color: "#FFFFFF",
+    padding: "1rem",
+    borderRadius: "10px",
+    textAlign: "center",
+    margin: "1rem auto",
+    width: "90%",
+    maxWidth: "600px",
+  },
+  loading: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    color: "#FFFFFF",
+    textAlign: "center",
+    margin: "2rem auto",
   },
 };
 
