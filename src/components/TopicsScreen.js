@@ -14,28 +14,28 @@ const TopicsScreen = () => {
       description: "Interpret and discuss meaningful quotes from various sources",
       icon: <FiMessageSquare size={24} />,
       path: "/quote",
-      gradient: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.blue})`,
+      gradient: "linear-gradient(135deg, #6a3093 0%, #4169E1 100%)",
     },
     {
       title: "Abstract",
       description: "Explore philosophical and conceptual topics",
       icon: <FiBook size={24} />,
       path: "/abstract",
-      gradient: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.green})`,
+      gradient: "linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)",
     },
     {
       title: "Concrete",
       description: "Discuss tangible, real-world subjects",
       icon: <FiBox size={24} />,
       path: "/concrete",
-      gradient: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.yellow})`,
+      gradient: "linear-gradient(135deg, #16a085 0%, #3498db 100%)",
     },
     {
       title: "Current Events",
       description: "Address contemporary issues and news",
       icon: <FiGlobe size={24} />,
       path: "/current",
-      gradient: `linear-gradient(135deg, ${colors.accent.red}, ${colors.accent.purple})`,
+      gradient: "linear-gradient(135deg, #ff5e62 0%, #ff9966 100%)",
     },
   ];
 

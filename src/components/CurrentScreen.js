@@ -100,7 +100,7 @@ const CurrentScreen = () => {
       >
         {isLoading && (
           <motion.div
-            style={styles.loading}
+            style={styles.loadingContainer}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -110,7 +110,7 @@ const CurrentScreen = () => {
         )}
         {error && (
           <motion.div
-            style={styles.error}
+            style={styles.errorMessage}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -161,40 +161,37 @@ const styles = {
   list: {
     listStyle: "none",
     padding: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
     width: "100%",
-    maxWidth: "800px",
-    margin: "0 auto",
+    margin: "1rem 0",
   },
   listItem: {
-    ...componentStyles.card,
-    fontSize: "1.2rem",
-    padding: "20px 32px",
-    background: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.purple}88)`,
-    color: colors.text.primary,
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
-    lineHeight: 1.6,
-  },
-  error: {
-    padding: "15px 20px",
-    borderRadius: "10px",
-    background: `linear-gradient(135deg, ${colors.accent.red}44, ${colors.accent.red}22)`,
-    color: colors.accent.red,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(5px)",
+    margin: "0.75rem 0",
+    padding: "1.5rem",
+    borderRadius: "12px",
+    cursor: "pointer",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    color: "#ffffff",
     fontSize: "1.1rem",
     fontWeight: "500",
-    textAlign: "center",
-    marginBottom: "20px",
-    backdropFilter: "blur(5px)",
-    border: `1px solid ${colors.accent.red}44`,
+    textAlign: "left",
+    position: "relative",
   },
-  loading: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    color: colors.text.primary,
+  errorMessage: {
+    color: "#FF5252",
+    fontSize: "1.2rem",
     textAlign: "center",
-    marginBottom: "20px",
+    margin: "2rem 0",
+  },
+  loadingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "3rem 0",
+    color: "#ffffff",
   },
 };
 
