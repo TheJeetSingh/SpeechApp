@@ -1251,21 +1251,10 @@ function HomeScreen() {
       }
     }
     
-    // Check if it's the first visit of the day
-    const lastVisit = localStorage.getItem("lastVisit");
-    const today = new Date().toDateString();
-    
-    if (!lastVisit || lastVisit !== today) {
-      // First visit of the day - show patch notes
-      setIsPatchNotesVisible(true);
-      localStorage.setItem("lastVisit", today);
-    }
-    
     // Listen for patch notes button click
     const handleShowPatchNotes = () => {
       setIsPatchNotesVisible(true);
     };
-    
     
     window.addEventListener('showPatchNotes', handleShowPatchNotes);
     

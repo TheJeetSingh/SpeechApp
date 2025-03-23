@@ -96,10 +96,10 @@ const ExtempScreen = () => {
     setArticles(getRandomArticles(defaultTopics, 2));
   };
 
-  const fetchArticles = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+    const fetchArticles = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
       const apiUrl = `${config.API_URL}${config.NEWS_ENDPOINT}`;
       console.log(`Fetching extemp topics from: ${apiUrl}`);
@@ -118,20 +118,20 @@ const ExtempScreen = () => {
 
         // Process the response if successful
         if (response.ok) {
-          const contentType = response.headers.get("content-type");
-          if (!contentType?.includes("application/json")) {
-            throw new Error("Invalid response format from server");
-          }
+        const contentType = response.headers.get("content-type");
+        if (!contentType?.includes("application/json")) {
+          throw new Error("Invalid response format from server");
+        }
 
-          const data = await response.json();
-          
+        const data = await response.json();
+        
           if (data?.articles?.length) {
-            const processedArticles = data.articles
+        const processedArticles = data.articles
               .filter(article => article.title && article.description)
-              .map(article => ({
-                title: article.title.trim(),
-                description: article.description.trim()
-              }));
+          .map(article => ({
+            title: article.title.trim(),
+            description: article.description.trim()
+          }));
 
             if (processedArticles.length > 0) {
               console.log(`Fetched ${processedArticles.length} topics from API`);
@@ -151,14 +151,14 @@ const ExtempScreen = () => {
         // (no-cors mode would not allow reading the response anyway)
         throw new Error("Could not fetch topics from API");
       }
-    } catch (error) {
-      console.error("Error fetching news topics:", error);
+      } catch (error) {
+        console.error("Error fetching news topics:", error);
       console.log("Using fallback topics due to API error");
       setDefaultTopics();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const getRandomArticles = (articles, count) => {
     if (articles.length <= count) return articles;
@@ -226,7 +226,7 @@ const ExtempScreen = () => {
             {/* Clock icon SVG or image */}
           </div>
           <div style={styles.timer}>
-            Time Left: {timer}s
+          Time Left: {timer}s
           </div>
         </motion.div>
         <motion.h1
