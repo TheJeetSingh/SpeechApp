@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import Particles from "react-tsparticles";
-import { Engine } from "tsparticles-engine";
-import { FiArrowDown, FiArrowUp, FiBookOpen, FiMic, FiShield } from "react-icons/fi";
-import { loadBubblesPreset } from "tsparticles-preset-bubbles";
+import { FaMicrophone, FaLightbulb, FaChartLine, FaClipboardList, FaUserGraduate, FaUserCog } from "react-icons/fa";
+import { FiLogOut, FiLogIn, FiArrowDown, FiTrash2, FiRefreshCw, FiStar } from "react-icons/fi";
+import { SiZoom } from "react-icons/si";
+import { analytics } from "../firebase";
+import { logEvent } from "firebase/analytics";
+import jwtDecode from "jwt-decode";
+import AudioVisualizer from "./AudioVisualizer";
+import VisualBackground from "./VisualBackground";
+import { useMediaQuery } from "react-responsive";
 import { useSpring, animated } from 'react-spring';
 import { useMouse, useWindowSize } from 'react-use';
 import { gsap } from 'gsap';
 import { TypeAnimation } from 'react-type-animation';
-import VisualBackground from "./AudioReactiveBackground";
-import PatchNotes from "./PatchNotes";
 
 // StickFigureSpeechAnimation component for fallback when audio permissions are denied
 const StickFigureSpeechAnimation = () => {
@@ -876,27 +878,10 @@ function Header({ onFeedbackClick }) {
     navigate(path);
   };
 
-  // Function to open patch notes
-  const handlePatchNotesClick = () => {
-    setMenuOpen(false);
-    // Trigger the patch notes modal in the parent component
-    window.dispatchEvent(new CustomEvent('showPatchNotes'));
-  };
-  
-
   return (
     <div style={styles.header}>
       <h1 style={styles.headerTitle}>ARTICULATE</h1>
       <div style={styles.settingsContainer}>
-        <motion.div 
-          style={styles.patchNotesIcon} 
-          onClick={handlePatchNotesClick}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          title="Patch Notes"
-        >
-          <FiBookOpen />
-        </motion.div>
         <motion.div 
           style={styles.settingsIcon} 
           onClick={toggleMenu}
@@ -953,14 +938,6 @@ function Header({ onFeedbackClick }) {
               whileTap={{ scale: 0.95 }}
             >
               Give Feedback
-            </motion.button>
-            <motion.button 
-              style={styles.dropdownButton} 
-              onClick={handlePatchNotesClick}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Patch Notes
             </motion.button>
           </motion.div>
         )}
@@ -1211,33 +1188,21 @@ const RulesDisplay = ({ isVisible, onClose, eventType }) => {
 // HomeScreen Component
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPatchNotesVisible, setIsPatchNotesVisible] = useState(false);
-  
-  const [userName, setUserName] = useState("");
+  const [feedbackText, setFeedbackText] = useState("");
   const [showRules, setShowRules] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Impromptu");
+  const [userName, setUserName] = useState("");
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({ 
-    target: containerRef, 
-    offset: ["start start", "end end"] 
-  });
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
   const navigate = useNavigate();
-  
-  // Check for mobile devices and apply responsive styling
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-  // Mouse position for dynamic effects in sections
-  const mouse = useMouse(containerRef);
-  const { width, height } = useWindowSize();
-
-  // Parallax effect with Framer Motion
-  const y1 = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const y2 = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const y3 = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
-
-  // Initialize particles
+  // Initialize tsParticles
   const particlesInit = async (engine) => {
-    await loadBubblesPreset(engine);
+    try {
+      await loadFull(engine);
+    } catch (error) {
+      console.error("Failed to load tsParticles:", error);
+    }
   };
 
   useEffect(() => {
@@ -1250,28 +1215,6 @@ function HomeScreen() {
         console.error("Error decoding token", error);
       }
     }
-    
-    // Check if it's the first visit of the day
-    const lastVisit = localStorage.getItem("lastVisit");
-    const today = new Date().toDateString();
-    
-    if (!lastVisit || lastVisit !== today) {
-      // First visit of the day - show patch notes
-      setIsPatchNotesVisible(true);
-      localStorage.setItem("lastVisit", today);
-    }
-    
-    // Listen for patch notes button click
-    const handleShowPatchNotes = () => {
-      setIsPatchNotesVisible(true);
-    };
-    
-    
-    window.addEventListener('showPatchNotes', handleShowPatchNotes);
-    
-    return () => {
-      window.removeEventListener('showPatchNotes', handleShowPatchNotes);
-    };
   }, []);
 
   const handleFeedbackClick = () => {
@@ -1279,8 +1222,8 @@ function HomeScreen() {
   };
 
   const handleConfirm = () => {
+    // Process feedback submission here
     setIsModalOpen(false);
-    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSe4OOpOy9YXIis2tJIfMBpcQ6yIQQetQ9gm91YgdCt6dbpzbw/viewform?usp=dialog";
   };
 
   const handleClose = () => {
@@ -1367,12 +1310,6 @@ function HomeScreen() {
 
       <Header 
         onFeedbackClick={handleFeedbackClick} 
-      />
-
-      {/* Patch Notes */}
-      <PatchNotes 
-        isVisible={isPatchNotesVisible} 
-        onClose={() => setIsPatchNotesVisible(false)} 
       />
 
       {/* Welcome Screen */}
@@ -1682,23 +1619,14 @@ const styles = {
     zIndex: 5000,
   },
   settingsIcon: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: "1.8rem",
+    fontSize: "24px",
     cursor: "pointer",
-    filter: "drop-shadow(0 0 5px rgba(255, 255, 255, 0.3))",
-    transition: "all 0.3s ease",
-  },
-  patchNotesIcon: {
+    marginLeft: "15px",
+    color: "white",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
-    fontSize: "1.5rem",
-    cursor: "pointer",
-    color: "#fff",
-    filter: "drop-shadow(0 0 5px rgba(255, 255, 255, 0.3))",
-    transition: "all 0.3s ease",
+    justifyContent: "center",
+    position: "relative",
   },
   settingsDropdown: {
     position: "absolute",
