@@ -1,18 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaMicrophone, FaLightbulb, FaChartLine, FaClipboardList, FaUserGraduate, FaUserCog } from "react-icons/fa";
-import { FiLogOut, FiLogIn, FiArrowDown, FiTrash2, FiRefreshCw, FiStar } from "react-icons/fi";
-import { SiZoom } from "react-icons/si";
-import { analytics } from "../firebase";
-import { logEvent } from "firebase/analytics";
-import jwtDecode from "jwt-decode";
-import AudioVisualizer from "./AudioVisualizer";
-import VisualBackground from "./VisualBackground";
-import { useMediaQuery } from "react-responsive";
+import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+import { jwtDecode } from "jwt-decode";
 import { useSpring, animated } from 'react-spring';
-import { useMouse, useWindowSize } from 'react-use';
-import { gsap } from 'gsap';
 import { TypeAnimation } from 'react-type-animation';
 
 // StickFigureSpeechAnimation component for fallback when audio permissions are denied
@@ -804,43 +795,28 @@ function Modal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
 
   return (
-    <motion.div
-      style={styles.modalOverlay}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        style={styles.modalContent}
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -50, opacity: 0 }}
-      >
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
         <h2 style={styles.modalTitle}>Feedback</h2>
         <p style={styles.modalText}>
-          Is the problem really urgent and not a matter of your own input? If so, text me at{" "}
-          <strong>‪(650) 273-6590‬</strong>.
+          We value your feedback! Click the button below to open our feedback form.
         </p>
         <div style={styles.modalButtons}>
-          <motion.button
+          <button 
             style={styles.modalButton}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={onConfirm}
           >
-            Continue
-          </motion.button>
-          <motion.button
-            style={styles.modalButtonCancel}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            Open Form
+          </button>
+          <button 
+            style={{...styles.modalButton, background: "#6c757d"}}
             onClick={onClose}
           >
             Cancel
-          </motion.button>
+          </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -1188,22 +1164,12 @@ const RulesDisplay = ({ isVisible, onClose, eventType }) => {
 // HomeScreen Component
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [feedbackText, setFeedbackText] = useState("");
   const [showRules, setShowRules] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Impromptu");
   const [userName, setUserName] = useState("");
   const containerRef = useRef(null);
-  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
   const navigate = useNavigate();
-
-  // Initialize tsParticles
-  const particlesInit = async (engine) => {
-    try {
-      await loadFull(engine);
-    } catch (error) {
-      console.error("Failed to load tsParticles:", error);
-    }
-  };
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -1222,7 +1188,6 @@ function HomeScreen() {
   };
 
   const handleConfirm = () => {
-    // Process feedback submission here
     setIsModalOpen(false);
   };
 
@@ -1299,14 +1264,16 @@ function HomeScreen() {
 
   return (
     <div style={styles.container} ref={containerRef}>
-      {/* Background */}
-      <VisualBackground 
-        colorMapping={{
-          lowFreq: '#1e3c72',
-          midFreq: '#2a5298',
-          highFreq: '#00BFFF'
-        }}
-      />
+      {/* Background - replaced VisualBackground with simple background color */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(to bottom, #1e3c72, #2a5298)',
+        zIndex: -1
+      }} />
 
       <Header 
         onFeedbackClick={handleFeedbackClick} 
@@ -1988,7 +1955,9 @@ const styles = {
     background: 'rgba(42, 82, 152, 0.95)',
     padding: "2rem",
     borderRadius: "15px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "rgba(255, 255, 255, 0.18)",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     textAlign: "center",
     height: "100%",
@@ -2002,7 +1971,9 @@ const styles = {
     background: 'rgba(42, 82, 152, 0.95)',
     padding: "2rem",
     borderRadius: "15px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "rgba(255, 255, 255, 0.18)",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     textAlign: "center",
     height: "100%",
@@ -2016,7 +1987,9 @@ const styles = {
     background: 'rgba(42, 82, 152, 0.95)',
     padding: "2rem",
     borderRadius: "15px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "rgba(255, 255, 255, 0.18)",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     textAlign: "center",
     height: "100%",
@@ -2144,21 +2117,20 @@ const styles = {
     zIndex: 5000,
     perspective: 1000,
   },
-  modalOverlay: {
+  customModalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background: "rgba(0, 20, 50, 0.7)",
-    backdropFilter: "blur(10px)",
+    background: "rgba(0, 0, 0, 0.7)",
     zIndex: 5000,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     perspective: 1000,
   },
-  modalContent: {
+  customModalContent: {
     width: "min(90%, 500px)",
     background: "rgba(30, 60, 114, 0.95)",
     backdropFilter: "blur(10px)",
@@ -2174,6 +2146,44 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "1.5rem",
+  },
+  customModalTitle: {
+    fontSize: "clamp(1.5rem, 5vw, 2rem)",
+    fontWeight: "700",
+    background: "linear-gradient(135deg, #fff, #36D6E7)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textAlign: "center",
+    marginBottom: "0.5rem",
+    filter: "drop-shadow(0 0 5px rgba(54, 214, 231, 0.5))",
+  },
+  customModalText: {
+    fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
+    lineHeight: "1.6",
+    textAlign: "center",
+    maxWidth: "100%",
+  },
+  customModalButtons: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "1rem",
+    width: "100%",
+  },
+  customModalButton: {
+    padding: "0.75rem 2rem",
+    fontSize: "1rem",
+    fontWeight: "600",
+    color: "#fff",
+    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+    border: "none",
+    borderRadius: "30px",
+    cursor: "pointer",
+    outline: "none",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(54, 214, 231, 0.5)",
+    transition: "all 0.3s ease",
+    minWidth: "200px",
+    position: "relative",
+    overflow: "hidden",
   },
   modalIconContainer: {
     position: "relative",
@@ -2206,16 +2216,6 @@ const styles = {
     border: "2px solid rgba(54, 214, 231, 0.3)",
     animation: "pulse 2s infinite ease-in-out 0.5s",
   },
-  modalTitle: {
-    fontSize: "clamp(1.5rem, 5vw, 2rem)",
-    fontWeight: "700",
-    background: "linear-gradient(135deg, #fff, #36D6E7)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    textAlign: "center",
-    marginBottom: "0.5rem",
-    filter: "drop-shadow(0 0 5px rgba(54, 214, 231, 0.5))",
-  },
   privacyBadge: {
     display: "flex",
     alignItems: "center",
@@ -2234,12 +2234,6 @@ const styles = {
     padding: "1rem",
     margin: "1rem 0",
     border: "1px solid rgba(54, 214, 231, 0.3)",
-  },
-  modalText: {
-    fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
-    lineHeight: "1.6",
-    textAlign: "center",
-    maxWidth: "100%",
   },
   securityFeatures: {
     display: "flex",
