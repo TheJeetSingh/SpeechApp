@@ -5,6 +5,7 @@ import Particles from "react-tsparticles";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 import { FiMic, FiStopCircle, FiDownload, FiVideo, FiInfo, FiBarChart2, FiCpu } from "react-icons/fi";
 import ScriptModal from "./ScriptModal"; // Import the new ScriptModal component
+import RateLimitPopup from './RateLimitPopup';
 
 // Animation variants
 const containerVariants = {
@@ -192,6 +193,7 @@ function SpeechScreen() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
+  const [showRateLimitPopup, setShowRateLimitPopup] = useState(false);
 
   useEffect(() => {
     // Check camera permission on component mount
@@ -543,6 +545,10 @@ function SpeechScreen() {
           if (!response.ok) {
             const errorText = await response.text();
             console.error("API response error:", errorText);
+            if (response.status === 500) {
+              setShowRateLimitPopup(true);
+              throw new Error(`Failed to analyze speech: Internal Server Error`);
+            }
             throw new Error(`Failed to analyze speech: ${response.status} ${response.statusText}`);
           }
           
@@ -550,7 +556,9 @@ function SpeechScreen() {
           setSpeechAnalysis(analysis);
         } catch (error) {
           console.error("Error in audio processing:", error);
-          alert(`Analysis failed: ${error.message}. Please try again.`);
+          if (!error.message?.includes('Internal Server Error')) {
+            alert(`Analysis failed: ${error.message}. Please try again.`);
+          }
           
           // Set fallback analysis
           setSpeechAnalysis({
@@ -925,6 +933,11 @@ function SpeechScreen() {
           Back to Home
         </motion.button>
       </motion.div>
+
+      <RateLimitPopup 
+        isOpen={showRateLimitPopup} 
+        onClose={() => setShowRateLimitPopup(false)} 
+      />
     </motion.div>
   );
 }

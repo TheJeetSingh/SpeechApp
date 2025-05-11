@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import VisualBackground from "./VisualBackground";
 import { generateChatResponse } from "../utils/geminiApi";
 import ReactMarkdown from "react-markdown";
+import RateLimitPopup from './RateLimitPopup';
 
 function ChatSession() {
   const [messages, setMessages] = useState([
@@ -12,6 +13,7 @@ function ChatSession() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
+  const [showRateLimitPopup, setShowRateLimitPopup] = useState(false);
   
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
@@ -55,6 +57,9 @@ function ChatSession() {
       };
       
       setMessages(prevMessages => [...prevMessages, errorResponse]);
+      if (err.message?.includes('429') || err.message?.includes('quota') || err.message?.includes('rate limit')) {
+        setShowRateLimitPopup(true);
+      }
     } finally {
       setIsTyping(false);
     }
@@ -206,6 +211,11 @@ function ChatSession() {
           </form>
         </div>
       </div>
+      
+      <RateLimitPopup 
+        isOpen={showRateLimitPopup} 
+        onClose={() => setShowRateLimitPopup(false)} 
+      />
     </div>
   );
 }

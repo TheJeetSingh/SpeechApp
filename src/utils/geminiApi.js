@@ -15,6 +15,17 @@ const getGeminiProModel = () => {
   return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 };
 
+// Helper function to check if error is rate limit related
+const isRateLimitError = (error) => {
+  const errorMessage = error.message?.toLowerCase() || '';
+  return (
+    errorMessage.includes('429') ||
+    errorMessage.includes('quota') ||
+    errorMessage.includes('rate limit') ||
+    errorMessage.includes('too many requests')
+  );
+};
+
 // Function to generate a response from Gemini
 export const generateChatResponse = async (messages) => {
   if (!API_KEY) {
@@ -111,6 +122,9 @@ export const generateChatResponse = async (messages) => {
     return response.text();
   } catch (error) {
     console.error("Error generating chat response:", error);
+    if (isRateLimitError(error)) {
+      throw new Error("Rate limit exceeded. Please try again later.");
+    }
     throw error;
   }
 };
@@ -146,6 +160,9 @@ export const generateSpeechAnalysis = async (transcript) => {
     return response.text();
   } catch (error) {
     console.error("Error generating speech analysis:", error);
+    if (isRateLimitError(error)) {
+      throw new Error("Rate limit exceeded. Please try again later.");
+    }
     throw error;
   }
 }; 
