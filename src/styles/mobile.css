@@ -1,0 +1,120 @@
+/* Mobile Optimization CSS */
+
+/* General mobile optimizations */
+@media screen and (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Fix white background issue on mobile - but preserve HomeScreen's background */
+  html, body, #root {
+    min-height: 100vh;
+    height: 100%;
+  }
+  
+  /* Error pages and other pages with blue background */
+  .error-page, .not-found-page {
+    background: #1e3c72;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+  }
+  
+  /* Improve readability on small screens */
+  p, li, button, input, textarea {
+    font-size: 16px !important; /* Prevent auto-zoom on iOS */
+  }
+  
+  /* Make buttons easier to tap */
+  button, 
+  .button, 
+  [role="button"],
+  a.button,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 15px;
+    touch-action: manipulation;
+  }
+  
+  /* Improve form elements on mobile */
+  input, select, textarea {
+    font-size: 16px !important;
+    padding: 10px !important;
+  }
+  
+  /* Fix container widths for mobile */
+  .container, 
+  div[style*="max-width"] {
+    width: 100% !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix modal/dialog positioning */
+  div[role="dialog"],
+  .modal {
+    position: fixed !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Improve card layouts */
+  div[style*="display: flex"] {
+    flex-wrap: wrap !important;
+  }
+  
+  /* Better spacing for stacked elements */
+  div[style*="display: flex"] > * {
+    margin-bottom: 15px !important;
+  }
+  
+  /* Make sure content doesn't overflow */
+  img, video, canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* iPhone SE and small screens */
+@media screen and (max-width: 375px) {
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Reduce padding on very small screens */
+  div[style*="padding"] {
+    padding: 10px !important;
+  }
+}
+
+/* Ensure glass backgrounds work on mobile */
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+  .glass-bg {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background-color: rgba(30, 60, 114, 0.5) !important;
+  }
+}
+
+/* Fallback for browsers that don't support backdrop-filter */
+@supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+  .glass-bg {
+    background-color: rgba(30, 60, 114, 0.9) !important;
+  }
+} 
