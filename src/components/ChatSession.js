@@ -375,9 +375,9 @@ How would you like me to help you improve your speech?
             style={styles.backButton}
             whileHover={{ scale: 1.05, background: "rgba(255, 255, 255, 0.25)" }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/ai-coach")}
+            onClick={() => navigate("/")}
           >
-            Back to Coach Hub
+            Back to Home
           </motion.button>
         </div>
       </header>

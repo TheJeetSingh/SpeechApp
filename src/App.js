@@ -16,7 +16,6 @@ import ExtempPrepScreen from "./components/ExtempPrepScreen";
 import LoginScreen from "./components/LoginScreen"; // Import the new LoginScreen
 import SignupScreen from "./components/SignupScreen";
 import SpeechStats from "./components/SpeechStats"; // Add import for SpeechStats
-import AICoachScreen from "./components/AICoachScreen"; // Import the new AICoachScreen
 import ChatSession from "./components/ChatSession"; // Import the ChatSession component
 import NotFound from "./components/NotFound"; // Import the NotFound component
 import ErrorFallback from "./components/ErrorFallback"; // Import the ErrorFallback component
@@ -49,7 +48,6 @@ function App() {
           <Route path="/extemp" element={<ExtempScreen />} />
           <Route path="/extempPrep" element={<ExtempPrepScreen />} />
           <Route path="/stats" element={<SpeechStats />} /> {/* Add route for SpeechStats */}
-          <Route path="/ai-coach" element={<AICoachScreen />} /> {/* Add route for AICoachScreen */}
           <Route path="/chat-session" element={<ChatSession />} /> {/* Add route for ChatSession */}
           <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 errors */}
         </Routes>
