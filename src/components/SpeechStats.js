@@ -277,6 +277,25 @@ function SpeechStats() {
     return text.length > 150 ? text.substring(0, 150) + "..." : text;
   };
 
+  // Function to discuss with AI coach
+  const discussWithAICoach = () => {
+    // Prepare the data to send to the AI coach
+    const analysisData = {
+      speechType,
+      topic,
+      duration: timeInSeconds,
+      transcript: speechAnalysis?.transcript || "",
+      feedback: speechAnalysis?.feedback || "",
+      strengths: speechAnalysis?.strengths || [],
+      improvements: speechAnalysis?.improvements || [],
+      grade: grade.letter,
+      score: grade.score
+    };
+    
+    // Navigate to the chat session with the analysis data
+    navigate('/chat-session', { state: { analysisData } });
+  };
+
   return (
     <motion.div
       style={styles.container}
@@ -868,6 +887,37 @@ function SpeechStats() {
                   <span>Try Again</span>
                 </motion.button>
               </motion.div>
+
+              <div style={styles.actionButtonsContainer}>
+                <motion.button
+                  style={{...styles.actionButton, background: colors.accent.blue}}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={downloadAsPDF}
+                  disabled={isDownloading}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.8, duration: 0.5 }}
+                >
+                  <FiDownload size={20} />
+                  <span>{isDownloading ? "Generating PDF..." : "Download Report"}</span>
+                </motion.button>
+
+                {speechAnalysis && (
+                  <motion.button
+                    style={{...styles.actionButton, background: colors.accent.purple}}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={discussWithAICoach}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 2.0, duration: 0.5 }}
+                  >
+                    <FiMessageSquare size={20} />
+                    <span>Discuss with AI Coach</span>
+                  </motion.button>
+                )}
+              </div>
             </motion.div>
           </AnimatePresence>
           )}
@@ -1365,6 +1415,28 @@ const styles = {
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
     fontWeight: '500',
     transition: 'all 0.2s ease',
+  },
+  actionButtonsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '1rem',
+    marginTop: '2rem',
+    flexWrap: 'wrap',
+  },
+  
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 1.5rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: colors.text.primary,
+    border: 'none',
+    borderRadius: '15px',
+    cursor: 'pointer',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+    transition: 'all 0.3s ease',
   },
 };
 

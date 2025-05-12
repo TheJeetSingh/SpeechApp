@@ -68,7 +68,7 @@ function AICoachScreen() {
               <div style={styles.featureIcon}>🎤</div>
               <div style={styles.featureContent}>
                 <h3>Speech Analysis</h3>
-                <p>Upload a recording or speak live for instant feedback on your delivery, content, and structure.</p>
+                <p>Chat with our AI coach for instant feedback on your speaking skills and techniques.</p>
               </div>
             </div>
             
@@ -99,20 +99,12 @@ function AICoachScreen() {
           
           <div style={styles.actionButtons}>
             <motion.button 
-              style={styles.recordButton}
+              style={{...styles.recordButton, width: "100%", maxWidth: "400px"}}
               whileHover={{ scale: 1.05, boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)" }}
               whileTap={{ scale: 0.98 }}
               onClick={handleStartSession}
             >
               Start Live Session
-            </motion.button>
-            
-            <motion.button 
-              style={styles.uploadButton}
-              whileHover={{ scale: 1.05, boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Upload Recording
             </motion.button>
           </div>
           
@@ -259,16 +251,6 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
     boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
-  },
-  uploadButton: {
-    padding: "1rem 2rem",
-    background: "rgba(0, 119, 182, 0.1)",
-    color: "#0077B6",
-    border: "1px solid #0077B6",
-    borderRadius: "30px",
-    fontSize: "1.1rem",
-    fontWeight: "600",
-    cursor: "pointer",
   },
   comingSoon: {
     marginTop: "2rem",

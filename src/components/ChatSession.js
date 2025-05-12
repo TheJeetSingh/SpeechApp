@@ -1,15 +1,75 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import VisualBackground from "./VisualBackground";
 import { generateChatResponse } from "../utils/geminiApi";
 import ReactMarkdown from "react-markdown";
 import RateLimitPopup from './RateLimitPopup';
 
 function ChatSession() {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "👋 Hello! I'm ARTICULATE, your AI speech coach. How can I help you improve your speaking skills today?", sender: "ai" }
-  ]);
+  const location = useLocation();
+  const { analysisData } = location.state || {};
+  
+  // Format time in minutes and seconds
+  const formatTime = (seconds) => {
+    if (!seconds) return "N/A";
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+  
+  // Initialize messages with a welcome message or speech analysis data if available
+  const initialMessages = () => {
+    if (analysisData) {
+      // Format the speech analysis data into a welcome message
+      const speechInfo = `
+## Speech Analysis Summary
+
+**Type:** ${analysisData.speechType || "N/A"}
+**Topic:** ${analysisData.topic || "N/A"}
+**Duration:** ${formatTime(analysisData.duration) || "N/A"}
+**Grade:** ${analysisData.grade || "N/A"} (${analysisData.score || 0}/100)
+
+### Transcript:
+${analysisData.transcript || "No transcript available."}
+
+### Feedback:
+${analysisData.feedback || "No feedback available."}
+
+### Strengths:
+${analysisData.strengths?.map(strength => `- ${strength}`).join('\n') || "- None identified"}
+
+### Areas for Improvement:
+${analysisData.improvements?.map(improvement => `- ${improvement}`).join('\n') || "- None identified"}
+
+How would you like me to help you improve your speech?
+      `;
+      
+      return [
+        { 
+          id: 1, 
+          text: "👋 Hello! I'm ARTICULATE, your AI speech coach. I see you've shared your speech analysis with me.", 
+          sender: "ai" 
+        },
+        { 
+          id: 2, 
+          text: speechInfo, 
+          sender: "ai" 
+        }
+      ];
+    } else {
+      // Default welcome message
+      return [
+        { 
+          id: 1, 
+          text: "👋 Hello! I'm ARTICULATE, your AI speech coach. How can I help you improve your speaking skills today?", 
+          sender: "ai" 
+        }
+      ];
+    }
+  };
+
+  const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
@@ -63,6 +123,33 @@ function ChatSession() {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  // Function to handle suggestion click
+  const handleSuggestionClick = (suggestion) => {
+    setInput(suggestion);
+    // Optional: Auto-submit the form
+    const form = document.getElementById("chat-form");
+    if (form) form.dispatchEvent(new Event("submit", { cancelable: true }));
+  };
+
+  // Custom suggestions based on speech analysis
+  const getSuggestions = () => {
+    if (analysisData) {
+      const customSuggestions = [
+        "How can I improve my " + (analysisData.speechType || "speech") + " delivery?",
+        "What techniques can help with my areas for improvement?",
+        "Can you give me exercises to practice?"
+      ];
+      return customSuggestions;
+    }
+    
+    // Default suggestions
+    return [
+      "How to reduce filler words?",
+      "Tips for speaking confidently",
+      "Help with presentation anxiety"
+    ];
   };
 
   return (
@@ -187,25 +274,27 @@ function ChatSession() {
         <div style={styles.inputContainer}>
           <div style={styles.inputButtons}>
             <div style={styles.inputSuggestions}>
-              <div style={styles.suggestionPill}>How to reduce filler words?</div>
-              <div style={styles.suggestionPill}>Tips for speaking confidently</div>
-              <div style={styles.suggestionPill}>Help with presentation anxiety</div>
+              {getSuggestions().map((suggestion, index) => (
+                <div 
+                  key={index}
+                  style={styles.suggestionPill}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
             </div>
           </div>
           
-          <form style={styles.inputForm} onSubmit={handleSendMessage}>
+          <form id="chat-form" style={styles.inputForm} onSubmit={handleSendMessage}>
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask your speech coach a question..."
+              placeholder="Type your message..."
               style={styles.textInput}
             />
-            <button 
-              type="submit" 
-              style={styles.sendButton} 
-              disabled={input.trim() === ""}
-            >
+            <button type="submit" style={styles.sendButton}>
               Send
             </button>
           </form>
