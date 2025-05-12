@@ -1,135 +1,39 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import VisualBackground from "./VisualBackground";
 import { generateChatResponse } from "../utils/geminiApi";
 import ReactMarkdown from "react-markdown";
 import RateLimitPopup from './RateLimitPopup';
 
-// Theme colors - refined palette
+// Theme colors
 const themeColors = {
   primary: {
-    main: '#2c5282',
-    dark: '#1a365d',
-    light: '#4299e1',
+    main: '#3949ab',
+    dark: '#1a237e',
+    light: '#5c6bc0',
   },
   accent: {
-    blue: '#3182ce',
-    purple: '#6b46c1',
-    green: '#38a169',
-    red: '#e53e3e',
+    blue: '#2196f3',
+    purple: '#7a43c9',
+    green: '#4caf50',
+    red: '#f44336',
   },
   text: {
-    primary: '#2d3748',
-    secondary: '#4a5568',
+    primary: '#2c3e50',
+    secondary: '#546e7a',
     bright: '#ffffff',
   },
   background: {
-    main: '#f7fafc',
+    main: '#f5f7fa',
     card: '#ffffff',
-    dark: '#1a202c',
-    light: '#f5f7fa',
+    dark: '#121212',
+    light: '#f9fafc',
   },
   ui: {
-    border: 'rgba(0, 0, 0, 0.1)',
-    shadow: 'rgba(0, 0, 0, 0.15)',
+    border: 'rgba(0, 0, 0, 0.08)',
+    shadow: 'rgba(0, 0, 0, 0.1)',
   }
-};
-
-// Confirmation Modal Component
-const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
-  if (!isOpen) return null;
-  
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-        }}
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.8, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.8, y: 20 }}
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            maxWidth: '450px',
-            width: '90%',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-            position: 'relative',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h3 style={{ 
-            color: themeColors.primary.main, 
-            marginTop: 0,
-            fontSize: '1.3rem',
-            fontWeight: '600',
-          }}>
-            Start New Conversation
-          </h3>
-          <p style={{ 
-            marginBottom: '24px', 
-            lineHeight: '1.6',
-            color: themeColors.text.secondary
-          }}>
-            Are you sure you want to start a new conversation? Your current chat history will be cleared.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                padding: '10px 16px',
-                borderRadius: '8px',
-                backgroundColor: '#e2e8f0',
-                color: themeColors.text.secondary,
-                border: 'none',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}
-              onClick={onClose}
-            >
-              Cancel
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                padding: '10px 16px',
-                borderRadius: '8px',
-                backgroundColor: themeColors.primary.main,
-                color: 'white',
-                border: 'none',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-              }}
-              onClick={onConfirm}
-            >
-              Start New Conversation
-            </motion.button>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
 };
 
 // Maximum number of tokens to keep in conversation history (approx)
@@ -250,7 +154,6 @@ How would you like me to help you improve your speech?
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
   const [showRateLimitPopup, setShowRateLimitPopup] = useState(false);
-  const [showNewChatConfirm, setShowNewChatConfirm] = useState(false);
   
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
@@ -341,24 +244,34 @@ How would you like me to help you improve your speech?
 
   // Function to start a new chat
   const handleNewChat = () => {
-    setShowNewChatConfirm(true);
-  };
-  
-  // Function to confirm new chat
-  const confirmNewChat = () => {
-    const newConversation = createNewConversation();
-    setMessages(newConversation);
-    localStorage.setItem('chatHistory', JSON.stringify(newConversation));
-    setShowNewChatConfirm(false);
+    if (window.confirm("Are you sure you want to start a new conversation? Your current chat history will be cleared.")) {
+      const newConversation = createNewConversation();
+      setMessages(newConversation);
+      localStorage.setItem('chatHistory', JSON.stringify(newConversation));
+    }
   };
   
   return (
     <div style={styles.container}>
+      {/* Background */}
+      <VisualBackground 
+        colorMapping={{
+          lowFreq: themeColors.primary.dark,
+          midFreq: themeColors.primary.main,
+          highFreq: themeColors.primary.light
+        }}
+        intensity={0.5}
+      />
+      
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.logoContainer}>
           <div style={styles.logoIcon}>
-            <span style={styles.micIcon}>🎙️</span>
+            <motion.span 
+              style={styles.micIcon}
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 4 }}
+            >🎙️</motion.span>
           </div>
           <h1 style={styles.logo} onClick={() => navigate("/")}>ARTICULATE</h1>
         </div>
@@ -375,9 +288,9 @@ How would you like me to help you improve your speech?
             style={styles.backButton}
             whileHover={{ scale: 1.05, background: "rgba(255, 255, 255, 0.25)" }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/ai-coach")}
           >
-            Back to Home
+            Back to Coach Hub
           </motion.button>
         </div>
       </header>
@@ -388,6 +301,7 @@ How would you like me to help you improve your speech?
           <h2 style={styles.chatTitle}>AI Speech Coach</h2>
           <div style={styles.tabContainer}>
             <div style={styles.activeTab}>Live Coaching</div>
+            <div style={styles.inactiveTab}>Speech History</div>
             <div style={styles.inactiveTab}>Resources</div>
           </div>
         </div>
@@ -538,16 +452,9 @@ How would you like me to help you improve your speech?
         </div>
       </div>
       
-      {/* Modals */}
       <RateLimitPopup 
         isOpen={showRateLimitPopup} 
         onClose={() => setShowRateLimitPopup(false)} 
-      />
-      
-      <ConfirmModal
-        isOpen={showNewChatConfirm}
-        onClose={() => setShowNewChatConfirm(false)}
-        onConfirm={confirmNewChat}
       />
     </div>
   );
@@ -562,6 +469,7 @@ const styles = {
     fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
     backgroundColor: themeColors.background.main,
     position: "relative",
+    overflow: "hidden",
   },
   header: {
     width: "100%",
@@ -569,11 +477,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: themeColors.primary.main,
+    background: `linear-gradient(135deg, ${themeColors.primary.main} 0%, ${themeColors.primary.dark} 100%)`,
     position: "sticky",
     top: 0,
     zIndex: 100,
-    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
   },
   logoContainer: {
     display: "flex",
@@ -591,10 +499,10 @@ const styles = {
   },
   logo: {
     fontSize: "1.5rem",
-    fontWeight: "700",
+    fontWeight: "800",
     margin: 0,
     color: themeColors.text.bright,
-    letterSpacing: "0.5px",
+    letterSpacing: "1px",
     cursor: "pointer",
   },
   headerButtons: {
@@ -605,49 +513,50 @@ const styles = {
   backButton: {
     padding: "0.6rem 1.2rem",
     background: "rgba(255, 255, 255, 0.15)",
-    border: "none",
-    borderRadius: "6px",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    borderRadius: "8px",
     color: themeColors.text.bright,
     fontSize: "0.9rem",
-    fontWeight: "500",
+    fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s ease",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
   newChatButton: {
     padding: "0.6rem 1.2rem",
     backgroundColor: themeColors.accent.blue,
     color: themeColors.text.bright,
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
     fontSize: "0.9rem",
-    fontWeight: "500",
+    fontWeight: "600",
     transition: "all 0.2s ease",
-    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.15)",
+    boxShadow: "0 2px 8px rgba(33, 150, 243, 0.3)",
   },
   chatContainer: {
     width: "100%",
-    maxWidth: "1000px",
+    maxWidth: "1100px",
     height: "calc(100vh - 80px)",
     display: "flex",
     flexDirection: "column",
     background: themeColors.background.card,
-    borderRadius: "12px",
+    borderRadius: "16px",
     margin: "1rem",
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
     overflow: "hidden",
     border: "1px solid rgba(0, 0, 0, 0.05)",
   },
   chatHeader: {
     padding: "1.5rem",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
     backgroundColor: themeColors.background.light,
   },
   chatTitle: {
     margin: 0,
     color: themeColors.primary.main,
-    fontSize: "1.5rem",
-    fontWeight: "600",
+    fontSize: "1.6rem",
+    fontWeight: "700",
     textAlign: "center",
     marginBottom: "1rem",
   },
@@ -659,17 +568,17 @@ const styles = {
   },
   activeTab: {
     padding: "0.6rem 1.2rem",
-    borderRadius: "6px",
+    borderRadius: "8px",
     backgroundColor: themeColors.primary.main,
     color: themeColors.text.bright,
-    fontWeight: "500",
+    fontWeight: "600",
     fontSize: "0.9rem",
-    boxShadow: `0 2px 6px ${themeColors.primary.main}50`,
+    boxShadow: `0 2px 8px ${themeColors.primary.main}50`,
   },
   inactiveTab: {
     padding: "0.6rem 1.2rem",
-    borderRadius: "6px",
-    backgroundColor: "#edf2f7",
+    borderRadius: "8px",
+    backgroundColor: "#f0f2f5",
     color: themeColors.text.secondary,
     fontWeight: "500",
     fontSize: "0.9rem",
@@ -679,12 +588,12 @@ const styles = {
   errorContainer: {
     padding: "0.8rem 1.2rem",
     margin: "0.8rem",
-    backgroundColor: "#fff5f5",
-    borderRadius: "6px",
-    borderLeft: "4px solid " + themeColors.accent.red,
+    backgroundColor: "rgba(253, 237, 237, 1)",
+    borderRadius: "8px",
+    borderLeft: "4px solid #ef5350",
   },
   errorMessage: {
-    color: themeColors.accent.red,
+    color: "#d32f2f",
     margin: 0,
     fontSize: "0.9rem",
     fontWeight: "500",
@@ -701,8 +610,8 @@ const styles = {
   dateIndicator: {
     alignSelf: "center",
     padding: "0.4rem 0.8rem",
-    backgroundColor: "#edf2f7",
-    borderRadius: "6px",
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    borderRadius: "8px",
     fontSize: "0.8rem",
     color: themeColors.text.secondary,
     marginBottom: "1rem",
@@ -715,16 +624,16 @@ const styles = {
     gap: "0.8rem",
   },
   avatarContainer: {
-    width: "34px",
-    height: "34px",
+    width: "36px",
+    height: "36px",
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
   avatar: {
-    width: "34px",
-    height: "34px",
+    width: "36px",
+    height: "36px",
     backgroundColor: themeColors.primary.main,
     borderRadius: "50%",
     display: "flex",
@@ -732,12 +641,12 @@ const styles = {
     justifyContent: "center",
     color: themeColors.text.bright,
     fontWeight: "600",
-    fontSize: "0.9rem",
-    boxShadow: `0 2px 6px ${themeColors.primary.main}40`,
+    fontSize: "1rem",
+    boxShadow: `0 2px 8px ${themeColors.primary.main}50`,
   },
   userAvatar: {
-    width: "34px",
-    height: "34px",
+    width: "36px",
+    height: "36px",
     backgroundColor: themeColors.accent.blue,
     borderRadius: "50%",
     display: "flex",
@@ -746,12 +655,12 @@ const styles = {
     color: themeColors.text.bright,
     fontWeight: "500",
     fontSize: "0.7rem",
-    boxShadow: `0 2px 6px ${themeColors.accent.blue}40`,
+    boxShadow: `0 2px 8px ${themeColors.accent.blue}50`,
   },
   message: {
     maxWidth: "70%",
     padding: "1rem 1.2rem",
-    borderRadius: "12px",
+    borderRadius: "14px",
     fontSize: "0.95rem",
     lineHeight: 1.6,
     letterSpacing: "0.01em",
@@ -768,16 +677,16 @@ const styles = {
     color: "rgba(0, 0, 0, 0.4)",
   },
   userMessage: {
-    backgroundColor: "#ebf8ff",
-    color: themeColors.primary.dark,
+    backgroundColor: "#e1f5fe",
+    color: "#01579b",
     borderBottomRightRadius: "4px",
-    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.05)",
+    boxShadow: "0 2px 8px rgba(3, 169, 244, 0.1)",
   },
   aiMessage: {
-    backgroundColor: "#f0f5fa",
-    color: themeColors.primary.dark,
+    backgroundColor: "#e8eaf6",
+    color: "#283593",
     borderBottomLeftRadius: "4px",
-    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.05)",
+    boxShadow: "0 2px 8px rgba(40, 53, 147, 0.08)",
   },
   typingIndicator: {
     display: "flex",
@@ -785,8 +694,8 @@ const styles = {
     padding: "0.5rem 1rem",
   },
   typingDot: {
-    width: "6px",
-    height: "6px",
+    width: "8px",
+    height: "8px",
     borderRadius: "50%",
     backgroundColor: themeColors.primary.main,
     opacity: 0.6,
@@ -814,14 +723,15 @@ const styles = {
   },
   suggestionPill: {
     padding: "0.5rem 1rem",
-    backgroundColor: "#edf2f7",
+    backgroundColor: "#e8eaf6",
     color: themeColors.primary.main,
-    borderRadius: "6px",
+    borderRadius: "8px",
     fontSize: "0.8rem",
     whiteSpace: "nowrap",
     cursor: "pointer",
     transition: "all 0.2s ease",
     fontWeight: "500",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
     marginBottom: "6px",
   },
   inputForm: {
@@ -830,13 +740,13 @@ const styles = {
   },
   textInput: {
     flex: 1,
-    padding: "0.9rem 1.2rem",
+    padding: "1rem 1.2rem",
     fontSize: "0.95rem",
-    borderRadius: "8px",
+    borderRadius: "10px",
     border: `1px solid ${themeColors.ui.border}`,
     outline: "none",
     transition: "all 0.2s ease",
-    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.03)",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
     fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
   },
   sendButton: {
@@ -844,30 +754,27 @@ const styles = {
     backgroundColor: themeColors.primary.main,
     color: "white",
     border: "none",
-    borderRadius: "8px",
-    fontSize: "0.9rem",
+    borderRadius: "10px",
+    fontSize: "0.95rem",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+    boxShadow: `0 4px 12px ${themeColors.primary.main}40`,
   },
   mdHeading1: {
-    fontSize: "1.4rem",
+    fontSize: "1.5rem",
     fontWeight: "700",
     marginBottom: "1rem",
-    color: themeColors.primary.dark,
   },
   mdHeading2: {
-    fontSize: "1.1rem",
+    fontSize: "1.2rem",
     fontWeight: "600",
     marginBottom: "0.5rem",
-    color: themeColors.primary.dark,
   },
   mdHeading3: {
     fontSize: "1rem",
     fontWeight: "500",
     marginBottom: "0.25rem",
-    color: themeColors.primary.dark,
   },
   mdParagraph: {
     marginBottom: "1rem",
@@ -884,27 +791,21 @@ const styles = {
     textDecoration: "underline",
   },
   mdInlineCode: {
-    backgroundColor: "#edf2f7",
+    backgroundColor: "#f0f0f0",
     padding: "0.2rem 0.4rem",
     borderRadius: "4px",
-    fontSize: "0.85rem",
-    fontFamily: "'Menlo', 'Monaco', 'Courier New', monospace",
   },
   mdCodeBlock: {
-    backgroundColor: "#edf2f7",
+    backgroundColor: "#f0f0f0",
     padding: "1rem",
-    borderRadius: "6px",
+    borderRadius: "8px",
     marginBottom: "1rem",
-    fontSize: "0.85rem",
-    fontFamily: "'Menlo', 'Monaco', 'Courier New', monospace",
-    overflowX: "auto",
   },
   mdBlockquote: {
-    backgroundColor: "#edf2f7",
+    backgroundColor: "#f0f0f0",
     padding: "1rem",
-    borderRadius: "6px",
+    borderRadius: "8px",
     marginBottom: "1rem",
-    borderLeft: `4px solid ${themeColors.primary.light}`,
   },
   mdBold: {
     fontWeight: "600",

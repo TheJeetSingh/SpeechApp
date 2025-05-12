@@ -924,590 +924,7 @@ function Header({ onFeedbackClick }) {
   );
 }
 
-// Rules Display Component
-const RulesDisplay = ({ isVisible, onClose, eventType }) => {
-  const rulesContent = {
-    Impromptu: {
-      title: "Impromptu Rules",
-      rules: [
-        {
-          title: "Time Limit",
-          content: "You have 5 minutes to deliver your speech"
-        },
-        {
-          title: "Preparation",
-          content: "No preparation time - speak immediately after receiving your topic"
-        },
-        {
-          title: "Structure",
-          content: "Introduction, 2-3 main points, and conclusion recommended"
-        },
-        {
-          title: "Topic Types",
-          content: [
-            "• Quotes - Interpret and discuss meaningful quotes",
-            "• Abstract - Philosophical and conceptual topics",
-            "• Concrete - Real-world subjects and scenarios",
-            "• Current Events - Contemporary issues and news"
-          ]
-        },
-        {
-          title: "Scoring Criteria",
-          content: [
-            "• Content Development",
-            "• Organization",
-            "• Delivery",
-            "• Language Use",
-            "• Time Management"
-          ]
-        },
-        {
-          title: "Tips",
-          content: [
-            "• Stay calm and confident",
-            "• Use personal experiences and examples",
-            "• Maintain eye contact",
-            "• Practice vocal variety",
-            "• End with a strong conclusion"
-          ]
-        }
-      ]
-    },
-    Interp: {
-      title: "Interpretation Rules",
-      rules: [
-        {
-          title: "Time Limit",
-          content: "10 minutes maximum performance time"
-        },
-        {
-          title: "Selection",
-          content: "Choose from published prose, poetry, or dramatic literature"
-        },
-        {
-          title: "Performance",
-          content: "Develop character voices, gestures, and emotional connection"
-        },
-        {
-          title: "Requirements",
-          content: [
-            "• Must use a published work",
-            "• Clear distinction between characters",
-            "• Maintain consistent character portrayal",
-            "• Limited movement/gestures",
-            "• No props or costumes allowed"
-          ]
-        },
-        {
-          title: "Scoring Criteria",
-          content: [
-            "• Character Development",
-            "• Vocal Variety",
-            "• Physical Presence",
-            "• Interpretation Choices",
-            "• Overall Impact"
-          ]
-        },
-        {
-          title: "Tips",
-          content: [
-            "• Choose material that resonates with you",
-            "• Practice transitions between characters",
-            "• Use varied vocal techniques",
-            "• Connect with your audience",
-            "• Tell the story authentically"
-          ]
-        }
-      ]
-    },
-    Original: {
-      title: "Original Speech Rules",
-      rules: [
-        {
-          title: "Time Limit",
-          content: "10 minutes maximum speech time"
-        },
-        {
-          title: "Content",
-          content: "Must be original content written by you"
-        },
-        {
-          title: "Structure",
-          content: "Clear introduction, body, and conclusion required"
-        },
-        {
-          title: "Requirements",
-          content: [
-            "• Original research and writing",
-            "• Proper citation of sources",
-            "• Clear thesis statement",
-            "• Supporting evidence",
-            "• Persuasive argument"
-          ]
-        },
-        {
-          title: "Scoring Criteria",
-          content: [
-            "• Content Organization",
-            "• Research Quality",
-            "• Delivery Style",
-            "• Persuasiveness",
-            "• Overall Impact"
-          ]
-        },
-        {
-          title: "Tips",
-          content: [
-            "• Choose a passionate topic",
-            "• Use credible sources",
-            "• Practice delivery techniques",
-            "• Engage your audience",
-            "• End with a strong call to action"
-          ]
-        }
-      ]
-    },
-    Extemp: {
-      title: "Extemporaneous Rules",
-      rules: [
-        {
-          title: "Time Limit",
-          content: "7 minutes maximum speech time"
-        },
-        {
-          title: "Preparation",
-          content: "30 minutes prep time with access to research materials"
-        },
-        {
-          title: "Structure",
-          content: "Introduction, analysis points, and conclusion required"
-        },
-        {
-          title: "Requirements",
-          content: [
-            "• Current events focus",
-            "• Use of recent sources",
-            "• Clear analysis",
-            "• Supported arguments",
-            "• Organized structure"
-          ]
-        },
-        {
-          title: "Scoring Criteria",
-          content: [
-            "• Analysis Depth",
-            "• Source Usage",
-            "• Organization",
-            "• Delivery",
-            "• Time Management"
-          ]
-        },
-        {
-          title: "Tips",
-          content: [
-            "• Stay updated on current events",
-            "• Organize research effectively",
-            "• Use specific examples",
-            "• Practice time management",
-            "• Develop clear analysis"
-          ]
-        }
-      ]
-    }
-  };
-
-  const currentRules = rulesContent[eventType];
-
-  return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={styles.rulesOverlay}
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            style={styles.rulesContent}
-            onClick={e => e.stopPropagation()}
-          >
-            <motion.h2 style={styles.rulesTitle}>{currentRules.title}</motion.h2>
-            <motion.div style={styles.rulesList}>
-              {currentRules.rules.map((rule, index) => (
-                <motion.div 
-                  key={index}
-                  style={styles.ruleItem}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <h3>{rule.title}</h3>
-                  {Array.isArray(rule.content) ? (
-                    rule.content.map((item, i) => (
-                      <p key={i}>{item}</p>
-                    ))
-                  ) : (
-                    <p>{rule.content}</p>
-                  )}
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-// HomeScreen Component
-function HomeScreen() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showRules, setShowRules] = useState(false);
-  const [selectedEventType, setSelectedEventType] = useState("Impromptu");
-  const [userName, setUserName] = useState("");
-  const containerRef = useRef(null);
-  const navigate = useNavigate();
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        setUserName(decodedToken.name);
-      } catch (error) {
-        console.error("Error decoding token", error);
-      }
-    }
-  }, []);
-
-  const handleFeedbackClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleConfirm = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleClose = () => {
-    setIsModalOpen(false);
-  };
-
-  const scrollToSection = (id) => {
-    const section = document.getElementById(id);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const sections = [
-    {
-      id: "impromptu",
-      title: "Impromptu",
-      description: "Quick thinking, spontaneous speeches. 2 minutes",
-      background: "linear-gradient(135deg, #1e3c72, #2a5298)",
-      navigateTo: "/topics",
-      icon: "⚡️",
-      type: "Impromptu",
-      onClick: () => {
-        setSelectedEventType("Impromptu");
-        setShowRules(true);
-      },
-      nextSection: "interp"
-    },
-    {
-      id: "interp",
-      title: "Interp",
-      description: "Perform your own interpretation of a piece.",
-      background: "linear-gradient(135deg, #6a11cb, #2575fc)",
-      navigateTo: "/speech",
-      icon: "🎭",
-      type: "Interp",
-      defaultTopic: "Choose a piece of literature, poem, or dramatic work to interpret",
-      onClick: () => {
-        setSelectedEventType("Interp");
-        setShowRules(true);
-      },
-      nextSection: "original"
-    },
-    {
-      id: "original",
-      title: "Original",
-      description: "Craft and present original content.",
-      background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
-      navigateTo: "/speech",
-      icon: "✏️",
-      type: "Original",
-      defaultTopic: "Present your original speech on a topic of your choice",
-      onClick: () => {
-        setSelectedEventType("Original");
-        setShowRules(true);
-      },
-      nextSection: "extemp"
-    },
-    {
-      id: "extemp",
-      title: "Extemp",
-      description: "Speak on current events with depth.",
-      background: "linear-gradient(135deg, #00c853, #00e676)",
-      navigateTo: "/beta",
-      icon: "🌎",
-      type: "Extemp",
-      onClick: () => {
-        setSelectedEventType("Extemp");
-        setShowRules(true);
-      }
-    },
-  ];
-
-  return (
-    <div style={styles.container} ref={containerRef}>
-      {/* Background - restored audio-reactive visualization */}
-      <VisualBackground 
-        colorMapping={{
-          lowFreq: '#1e3c72',
-          midFreq: '#2a5298',
-          highFreq: '#00BFFF'
-        }}
-      />
-
-      <Header 
-        onFeedbackClick={handleFeedbackClick} 
-      />
-
-      {/* Welcome Screen */}
-      <motion.div style={styles.welcomeScreen}>
-        <motion.h1
-          style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          <FloatingText text={userName ? `Welcome to Speech App, ${userName}` : "Welcome to Speech App"} />
-        </motion.h1>
-
-        <motion.div 
-          style={isMobile ? {...styles.downArrow, ...styles.mobileDownArrow} : styles.downArrow}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ 
-            opacity: [0.4, 1, 0.4],
-            y: [0, 10, 0],
-            scale: [1, 1.1, 1],
-            rotate: [0, 5, 0]
-          }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          whileHover={{
-            scale: 1.2,
-            rotate: [0, -10, 10, -10, 0],
-            transition: { duration: 0.5 }
-          }}
-          onClick={() => scrollToSection(sections[0].id)}
-        >
-          <FiArrowDown size={isMobile ? 42 : 52.5} />
-        </motion.div>
-      </motion.div>
-
-      {/* RulesDisplay component */}
-      <RulesDisplay 
-        isVisible={showRules} 
-        onClose={() => setShowRules(false)} 
-        eventType={selectedEventType}
-      />
-
-      {/* Full-page sections */}
-      {sections.map((section, index) => (
-        <motion.div
-          key={section.id}
-          id={section.id}
-          style={isMobile ? 
-            {...styles.fullPageSection, ...styles.mobileFullPageSection, background: section.background} : 
-            {...styles.fullPageSection, background: section.background}
-          }
-          initial={{ opacity: 0 }}
-          whileInView={{ 
-            opacity: 1,
-            transition: {
-              duration: 0.8,
-              staggerChildren: 0.2
-            }
-          }}
-          viewport={{ once: false, amount: 0.3 }}
-          onClick={section.onClick}
-        >
-          <motion.div 
-            style={isMobile ? {...styles.sectionContent, ...styles.mobileSectionContent} : styles.sectionContent}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            whileHover={{
-              scale: isMobile ? 1.01 : 1.02,
-              transition: { duration: 0.3 }
-            }}
-            viewport={{ once: false, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div style={styles.sectionHeader}>
-              <motion.div
-                style={styles.sectionIcon}
-                initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-                whileHover={{
-                  scale: 1.2,
-                  rotate: 360,
-                  transition: { duration: 0.5 }
-                }}
-                transition={{ 
-                  duration: 0.6,
-                  delay: 0.3,
-                  type: "spring",
-                  stiffness: 200
-                }}
-              >
-                {section.icon}
-              </motion.div>
-              <motion.h2
-                style={styles.sectionTitle}
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                whileHover={{
-                  scale: 1.05,
-                  textShadow: "0 0 15px rgba(255,255,255,0.8)",
-                  transition: { duration: 0.3 }
-                }}
-                transition={{ 
-                  duration: 0.6,
-                  delay: 0.4,
-                  type: "spring",
-                  stiffness: 100
-                }}
-              >
-                {section.title}
-              </motion.h2>
-            </div>
-            <motion.p
-              style={styles.sectionDescription}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{
-                scale: 1.02,
-                transition: { duration: 0.2 }
-              }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              {section.description}
-            </motion.p>
-            <motion.button
-              style={styles.ctaButton}
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 0.6,
-                delay: 0.6,
-                type: "spring",
-                stiffness: 200
-              }}
-              onClick={() => navigate(section.navigateTo, { 
-                state: { 
-                  topicName: section.defaultTopic || null,
-                  type: section.type 
-                }
-              })}
-            >
-              <motion.span
-                animate={{ 
-                  x: [0, 5, 0],
-                  textShadow: [
-                    "0 0 5px rgba(255,255,255,0.5)",
-                    "0 0 20px rgba(255,255,255,0.8)",
-                    "0 0 5px rgba(255,255,255,0.5)"
-                  ]
-                }}
-                transition={{ 
-                  repeat: Infinity, 
-                  duration: 2,
-                  ease: "easeInOut"
-                }}
-              >
-                Begin Journey
-              </motion.span>
-              <motion.span 
-                style={styles.buttonArrow}
-                animate={{ 
-                  x: [0, 8, 0],
-                  opacity: [1, 0.6, 1]
-                }}
-                transition={{ 
-                  repeat: Infinity, 
-                  duration: 2,
-                  ease: "easeInOut"
-                }}
-              >
-                →
-              </motion.span>
-            </motion.button>
-            
-            {/* Add navigation buttons */}
-            {section.nextSection && (
-              <motion.div
-                style={styles.centeredNavButton}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                whileHover={{
-                  scale: 1.2,
-                  rotate: [0, -5, 5, -5, 0],
-                  transition: { duration: 0.5 }
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering section's onClick
-                  scrollToSection(section.nextSection);
-                }}
-              >
-                <FiArrowDown size={30} />
-              </motion.div>
-            )}
-            
-            {section.id === "extemp" && (
-              <motion.div
-                style={styles.centeredNavButton}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                whileHover={{
-                  scale: 1.2,
-                  rotate: [0, -5, 5, -5, 0],
-                  transition: { duration: 0.5 }
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering section's onClick
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              >
-                <FiArrowUp size={30} />
-              </motion.div>
-            )}
-          </motion.div>
-        </motion.div>
-      ))}
-
-      <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
-    </div>
-  );
-}
-
-// Styles
+// Define styles first, before the HomeScreen component
 const styles = {
   container: {
     display: "flex",
@@ -1690,61 +1107,8 @@ const styles = {
       transform: "scale(1.2)",
     }
   },
-  "@keyframes bounce": {
-    "0%": {
-      transform: "translateY(0)",
-    },
-    "20%": {
-      transform: "translateY(-80px)",
-    },
-    "30%": {
-      transform: "translateY(-40px)",
-    },
-    "40%": {
-      transform: "translateY(-100px)",
-    },
-    "50%": {
-      transform: "translateY(-60px)",
-    },
-    "60%": {
-      transform: "translateY(-90px)",
-    },
-    "70%": {
-      transform: "translateY(-30px)",
-    },
-    "80%": {
-      transform: "translateY(-70px)",
-    },
-    "90%": {
-      transform: "translateY(-20px)",
-    },
-    "100%": {
-      transform: "translateY(0)",
-    }
-  },
-  "@keyframes gradientText": {
-    "0%": {
-      backgroundPosition: "0% 50%",
-      backgroundSize: "200% 200%",
-    },
-    "50%": {
-      backgroundPosition: "100% 50%",
-      backgroundSize: "200% 200%",
-    },
-    "100%": {
-      backgroundPosition: "0% 50%",
-      backgroundSize: "200% 200%",
-    }
-  },
-  "@keyframes glow": {
-    "from": {
-      textShadow: "0 0 10px #fff, 0 0 20px #87CEEB, 0 0 30px #1E90FF",
-    },
-    "to": {
-      textShadow: "0 0 20px #fff, 0 0 30px #87CEEB, 0 0 40px #1E90FF",
-    }
-  },
-  fullPageSection: {
+  // Additional styles for the new layout
+  mainContent: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -1754,585 +1118,539 @@ const styles = {
     padding: "clamp(1rem, 5vw, 3rem)",
     textAlign: "center",
     position: "relative",
-    transition: "transform 0.3s ease",
-    '@media (hover: hover)': {
-      "&:hover": {
-        transform: "scale(1.02)",
-      },
-    },
-    '@media (max-width: 768px)': {
-      padding: "2rem 1rem",
-      minHeight: "auto",
-      marginBottom: "2rem",
-    },
+    marginTop: "clamp(60px, 10vh, 80px)",
   },
-  sectionContent: {
-    maxWidth: "min(800px, 90%)",
+  tagline: {
+    fontSize: "clamp(1rem, 3vw, 1.5rem)",
+    maxWidth: "800px",
+    marginBottom: "3rem",
+    color: "#000",
+    lineHeight: 1.6,
+    fontWeight: "500",
+  },
+  optionsContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "stretch",
     width: "100%",
+    maxWidth: "1200px",
+    gap: "2rem",
     margin: "0 auto",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: "clamp(10px, 2vw, 20px)",
-    padding: "clamp(1rem, 4vw, 2rem)",
-    '@media (max-width: 768px)': {
-      width: "95%",
-      padding: "1.5rem",
-    },
-  },
-  sectionHeader: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-    position: "relative",
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      bottom: "-10px",
-      width: "50%",
-      height: "2px",
-      background: "linear-gradient(90deg, transparent, #fff, transparent)",
-    }
-  },
-  sectionIcon: {
-    fontSize: "clamp(2.5rem, 8vw, 4rem)",
-    marginBottom: "clamp(0.5rem, 2vw, 1rem)",
-    filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))",
-    display: "inline-block",
-  },
-  sectionTitle: {
-    fontSize: "clamp(1.2rem, 5vw, 3rem)",
-    fontWeight: "700",
-    marginBottom: "clamp(0.5rem, 2vw, 1rem)",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    background: "linear-gradient(45deg, #fff, #87CEEB)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  },
-  sectionDescription: {
-    fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)",
-    maxWidth: "100%",
-    lineHeight: "1.6",
-    marginBottom: "clamp(1rem, 3vw, 1.5rem)",
-    padding: "0 clamp(0.5rem, 2vw, 1rem)",
-  },
-  ctaButton: {
-    padding: "clamp(0.6rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem)",
-    fontSize: "clamp(0.8rem, 2.5vw, 1rem)",
-    fontWeight: "600",
-    width: "fit-content",
-    minWidth: "150px",
-    border: "none",
-    borderRadius: "clamp(8px, 2vw, 15px)",
-    background: "linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-    backdropFilter: "blur(5px)",
-    border: "1px solid rgba(255,255,255,0.2)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "0.5rem",
-    margin: "0 auto",
-    position: "relative",
-    overflow: "hidden",
-    '@media (hover: hover)': {
-      "&:hover": {
-        transform: "translateY(-2px)",
-        boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.3)",
-      },
-    },
-    '@media (max-width: 768px)': {
-      width: "100%",
-      maxWidth: "300px",
-    },
-  },
-  buttonArrow: {
-    fontSize: "1.8rem",
-    fontWeight: "bold",
-    filter: "drop-shadow(0 0 5px rgba(255,255,255,0.5))",
-  },
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0, 0, 0, 0.6)",
-    backdropFilter: "blur(5px)",
-    zIndex: 1000,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    background: "rgba(255, 255, 255, 0.9)",
-    borderRadius: "clamp(8px, 2vw, 12px)",
-    padding: "clamp(1rem, 4vw, 1.5rem)",
-    width: "min(90%, 450px)",
-    margin: "1rem",
-    textAlign: "center",
-    boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.2)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    '@media (max-width: 768px)': {
-      width: "95%",
-      margin: "0.5rem",
-    },
-  },
-  modalTitle: {
-    fontSize: "clamp(1.2rem, 5vw, 1.8rem)",
-    marginBottom: "1rem",
-    fontWeight: "bold",
-    color: "#333",
-  },
-  modalText: {
-    fontSize: "clamp(0.8rem, 3vw, 1rem)",
-    marginBottom: "1.5rem",
-    color: "#555",
-    lineHeight: "1.5",
-  },
-  modalButtons: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "clamp(0.5rem, 2vw, 1rem)",
-    flexWrap: "wrap",
     '@media (max-width: 768px)': {
       flexDirection: "column",
-      gap: "0.5rem",
+      gap: "1.5rem",
     },
   },
-  modalButton: {
-    padding: "clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem)",
-    fontSize: "clamp(0.8rem, 2.5vw, 1rem)",
-    minWidth: "120px",
-    '@media (max-width: 768px)': {
-      width: "100%",
-    },
-  },
-  modalButtonCancel: {
-    padding: "clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem)",
-    fontSize: "clamp(0.8rem, 2.5vw, 1rem)",
-    minWidth: "120px",
-    '@media (max-width: 768px)': {
-      width: "100%",
-    },
-  },
-  '@media (hover: none)': {
-    ctaButton: {
-      "&:active": {
-        transform: "scale(0.98)",
-      },
-    },
-    navDot: {
-      "&:active": {
-        backgroundColor: "#fff",
-        transform: "scale(1.2)",
-      },
-    },
-  },
-  card: {
-    background: 'rgba(42, 82, 152, 0.95)',
+  optionCard: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "center",
     padding: "2rem",
     borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    cursor: "pointer",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "1.5rem",
-    transition: "all 0.3s ease",
-    textAlign: "center",
-    maxWidth: "400px",
-    width: "100%",
-  },
-  featureCard: {
-    background: 'rgba(42, 82, 152, 0.95)',
-    padding: "2rem",
-    borderRadius: "15px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    textAlign: "center",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "1rem",
-  },
-  testimonialCard: {
-    background: 'rgba(42, 82, 152, 0.95)',
-    padding: "2rem",
-    borderRadius: "15px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    textAlign: "center",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "1rem",
-  },
-  pricingCard: {
-    background: 'rgba(42, 82, 152, 0.95)',
-    padding: "2rem",
-    borderRadius: "15px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    textAlign: "center",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "1rem",
-  },
-  rulesOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(30, 60, 114, 0.97)",
-    zIndex: 5000,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "2rem",
-    overflow: "auto",
-  },
-  rulesContent: {
-    width: "100%",
-    maxWidth: "1000px",
-    background: "rgba(255, 255, 255, 0.1)",
-    borderRadius: "20px",
-    padding: "2rem",
+    background: "linear-gradient(135deg, rgba(42, 82, 152, 0.8), rgba(30, 60, 114, 0.8))",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
     color: "#fff",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    transition: "all 0.3s ease",
   },
-  rulesTitle: {
-    fontSize: "2.5rem",
+  optionHeader: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    marginBottom: "1.5rem",
+    width: "100%",
+  },
+  optionIcon: {
+    fontSize: "3rem",
+    marginBottom: "1rem",
+    filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))",
+  },
+  optionTitle: {
+    fontSize: "1.8rem",
     fontWeight: "700",
-    marginBottom: "2rem",
-    textAlign: "center",
+    marginBottom: "0.5rem",
     background: "linear-gradient(45deg, #fff, #87CEEB)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
   },
-  rulesList: {
+  optionDescription: {
+    fontSize: "1.1rem",
+    marginBottom: "2rem",
+    lineHeight: 1.6,
+  },
+  practiceTypes: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "2rem",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "1rem",
+    width: "100%",
+    marginBottom: "1.5rem",
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: "1fr",
+    },
+  },
+  practiceTypeButton: {
     padding: "1rem",
-  },
-  ruleItem: {
-    background: "rgba(255, 255, 255, 0.05)",
-    padding: "1.5rem",
-    borderRadius: "15px",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    "& h3": {
-      fontSize: "1.2rem",
-      fontWeight: "600",
-      marginBottom: "1rem",
-      color: "#87CEEB",
-    },
-    "& p": {
-      fontSize: "1rem",
-      lineHeight: "1.6",
-      marginBottom: "0.5rem",
-    },
-  },
-  toggleButton: {
-    position: 'fixed',
-    bottom: '20px',
-    right: '20px',
-    zIndex: 1000,
-    background: 'rgba(30, 60, 114, 0.8)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '20px',
-    padding: '10px 15px',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)',
-    cursor: 'pointer',
-    backdropFilter: 'blur(5px)',
-  },
-  welcomeToggleButton: {
-    background: 'rgba(30, 60, 114, 0.8)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '20px',
-    padding: '10px 20px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)',
-    cursor: 'pointer',
-    backdropFilter: 'blur(5px)',
-    marginTop: '20px',
-    marginBottom: '30px',
-    zIndex: 100,
-  },
-  centeredNavButton: {
-    width: "50px",
-    height: "50px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "50%",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    backdropFilter: "blur(5px)",
-    cursor: "pointer",
-    color: "#000",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-    zIndex: 10,
-    transition: "all 0.3s ease",
-    marginTop: "30px",
-    alignSelf: "center",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.4)",
-      boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
-    }
-  },
-  // Add new styles for the enhanced disclaimer modal
-  disclaimerContainer: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    zIndex: 5000,
-    perspective: 1000,
-  },
-  customModalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0, 0, 0, 0.7)",
-    zIndex: 5000,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    perspective: 1000,
-  },
-  customModalContent: {
-    width: "min(90%, 500px)",
-    background: "rgba(30, 60, 114, 0.95)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "20px",
-    padding: "clamp(1.5rem, 4vw, 2.5rem)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     color: "#fff",
-    border: "1px solid rgba(54, 214, 231, 0.3)",
-    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-    overflow: "hidden",
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "1.5rem",
-  },
-  customModalTitle: {
-    fontSize: "clamp(1.5rem, 5vw, 2rem)",
-    fontWeight: "700",
-    background: "linear-gradient(135deg, #fff, #36D6E7)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    textAlign: "center",
-    marginBottom: "0.5rem",
-    filter: "drop-shadow(0 0 5px rgba(54, 214, 231, 0.5))",
-  },
-  customModalText: {
-    fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
-    lineHeight: "1.6",
-    textAlign: "center",
-    maxWidth: "100%",
-  },
-  customModalButtons: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "1rem",
-    width: "100%",
-  },
-  customModalButton: {
-    padding: "0.75rem 2rem",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    borderRadius: "12px",
     fontSize: "1rem",
     fontWeight: "600",
-    color: "#fff",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
-    border: "none",
-    borderRadius: "30px",
     cursor: "pointer",
-    outline: "none",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(54, 214, 231, 0.5)",
-    transition: "all 0.3s ease",
-    minWidth: "200px",
-    position: "relative",
-    overflow: "hidden",
-  },
-  modalIconContainer: {
-    position: "relative",
-    width: "80px",
-    height: "80px",
+    transition: "all 0.2s ease",
     display: "flex",
+    alignItems: "center",
     justifyContent: "center",
-    alignItems: "center",
-    marginBottom: "1rem",
-  },
-  modalIcon: {
-    fontSize: "2.5rem",
-    color: "#fff",
-    filter: "drop-shadow(0 0 8px rgba(54, 214, 231, 0.8))",
-    zIndex: 1,
-  },
-  iconRing: {
-    position: "absolute",
-    width: "60px",
-    height: "60px",
-    borderRadius: "50%",
-    border: "2px solid rgba(54, 214, 231, 0.5)",
-    animation: "pulse 2s infinite ease-in-out",
-  },
-  iconRing2: {
-    position: "absolute",
-    width: "80px",
-    height: "80px",
-    borderRadius: "50%",
-    border: "2px solid rgba(54, 214, 231, 0.3)",
-    animation: "pulse 2s infinite ease-in-out 0.5s",
-  },
-  privacyBadge: {
-    display: "flex",
-    alignItems: "center",
+    flexDirection: "column",
     gap: "0.5rem",
-    padding: "0.5rem 1rem",
-    background: "rgba(0, 191, 255, 0.2)",
+  },
+  buttonIcon: {
+    fontSize: "1.5rem",
+    marginBottom: "0.5rem",
+  },
+  viewRulesButton: {
+    padding: "0.75rem 1.5rem",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    color: "#fff",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
     borderRadius: "30px",
     fontSize: "0.9rem",
-    color: "#fff",
-    fontWeight: "500",
-    borderLeft: "3px solid #00BFFF",
+    fontWeight: "600",
+    cursor: "pointer",
+    marginTop: "auto",
+    transition: "all 0.2s ease",
   },
-  highlightBox: {
-    background: "rgba(0, 0, 0, 0.2)",
-    borderRadius: "10px",
-    padding: "1rem",
-    margin: "1rem 0",
-    border: "1px solid rgba(54, 214, 231, 0.3)",
+  aiFeaturesList: {
+      width: "100%",
+    listStyle: "none",
+    padding: 0,
+    margin: "0 0 2rem 0",
+    textAlign: "left",
   },
-  securityFeatures: {
+  aiFeature: {
     display: "flex",
-    justifyContent: "space-around",
-    width: "100%",
-    margin: "1rem 0",
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  securityFeature: {
-    display: "flex",
-    flexDirection: "column",
     alignItems: "center",
-    gap: "0.5rem",
-    fontSize: "0.9rem",
-    flex: "1 1 28%",
-    textAlign: "center",
+    gap: "1rem",
+    marginBottom: "1rem",
+    fontSize: "1.05rem",
   },
   featureIcon: {
-    fontSize: "1.5rem",
-    marginBottom: "0.25rem",
-    filter: "drop-shadow(0 0 5px rgba(54, 214, 231, 0.5))",
+    fontSize: "1.2rem",
+    filter: "drop-shadow(0 0 5px rgba(255, 255, 255, 0.3))",
   },
-  modalButtons: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "1rem",
-    width: "100%",
-  },
-  modalButton: {
-    padding: "0.75rem 2rem",
-    fontSize: "1rem",
-    fontWeight: "600",
+  aiHelpButton: {
+    padding: "1rem 2rem",
+    backgroundColor: "rgba(0, 191, 255, 0.7)",
     color: "#fff",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
     border: "none",
     borderRadius: "30px",
+    fontSize: "1.1rem",
+    fontWeight: "600",
     cursor: "pointer",
-    outline: "none",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(54, 214, 231, 0.5)",
-    transition: "all 0.3s ease",
-    minWidth: "200px",
-    position: "relative",
-    overflow: "hidden",
+    marginTop: "auto",
+    transition: "all 0.2s ease",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  "@keyframes pulse": {
-    "0%": {
-      transform: "scale(1)",
-      opacity: 1,
-    },
-    "50%": {
-      transform: "scale(1.2)",
-      opacity: 0.5,
-    },
-    "100%": {
-      transform: "scale(1)",
-      opacity: 1,
-    },
-  },
-  "@keyframes shineEffect": {
-    "0%": {
-      left: "-100%",
-    },
-    "100%": {
-      left: "100%",
-    },
-  },
-  // Mobile responsive styles
-  mobileWelcomeScreen: {
-    padding: '1rem',
-    minHeight: '90vh', // Adjust for mobile viewports
-  },
-  mobileHeading: {
-    fontSize: 'clamp(2rem, 8vw, 3rem)',
-    marginBottom: '1rem',
-  },
-  mobileDownArrow: {
-    fontSize: '2.5rem',
-    marginTop: '1rem',
-  },
-  mobileFullPageSection: {
-    minHeight: '85vh', // Shorter for mobile
-    padding: '1rem',
-  },
-  mobileSectionContent: {
-    width: '95%',
-    padding: '1rem',
-  },
-  mobileHeader: {
-    padding: '0.5rem 1rem',
-  },
-  mobileSettingsDropdown: {
-    right: '5px',
-    width: '180px',
-  },
-  mobileModal: {
-    width: '90%',
-    padding: '1rem',
-  },
+  rulesOverlay: undefined,
+  rulesContent: undefined,
+  rulesTitle: undefined, 
+  rulesList: undefined,
+  ruleItem: undefined,
 };
+
+// HomeScreen Component
+function HomeScreen() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userName, setUserName] = useState("");
+  const navigate = useNavigate();
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserName(decodedToken.name);
+      } catch (error) {
+        console.error("Error decoding token", error);
+      }
+    }
+  }, []);
+
+  const handleFeedbackClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
+  // Navigate to practice screen with selected type
+  const handlePractice = (type, defaultTopic = null) => {
+    if (type === "Extemp") {
+      navigate("/beta", { 
+        state: { type }
+      });
+    } else if (type === "Impromptu") {
+      navigate("/topics", { 
+        state: { type }
+      });
+    } else {
+      navigate("/speech", { 
+        state: { 
+          topicName: defaultTopic || `Practice ${type} speech`,
+          type 
+        }
+      });
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      {/* Background visualization */}
+      <VisualBackground 
+        colorMapping={{
+          lowFreq: '#1e3c72',
+          midFreq: '#2a5298',
+          highFreq: '#00BFFF'
+        }}
+      />
+
+      <Header onFeedbackClick={handleFeedbackClick} />
+
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        <motion.h1
+          style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <FloatingText text={userName ? `Welcome to Articulate, ${userName}` : "Welcome to Articulate"} />
+        </motion.h1>
+        
+        <motion.p 
+          style={{
+            fontSize: "1.2rem",
+            maxWidth: "800px",
+            margin: "0 auto 3rem auto",
+            color: "#000",
+            lineHeight: 1.6
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          Improve your public speaking skills with practice and AI-powered feedback
+        </motion.p>
+
+        {/* Two Main Options */}
+        <div style={{
+    display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+    justifyContent: "center",
+          alignItems: "stretch",
+          width: "100%",
+          maxWidth: "1200px",
+          gap: "2rem",
+          margin: "0 auto"
+        }}>
+          {/* Practice Option */}
+          <motion.div 
+            style={{
+              flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    padding: "2rem",
+              borderRadius: "20px",
+              background: "linear-gradient(135deg, rgba(42, 82, 152, 0.8), rgba(30, 60, 114, 0.8))",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#fff"
+            }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)"
+            }}
+          >
+            <div style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+              marginBottom: "1.5rem"
+            }}>
+              <span style={{
+                fontSize: "3rem",
+                marginBottom: "1rem"
+              }}>🎯</span>
+              <h2 style={{
+                fontSize: "1.8rem",
+    fontWeight: "700",
+                marginBottom: "0.5rem",
+    background: "linear-gradient(45deg, #fff, #87CEEB)",
+    WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent"
+              }}>Practice Speaking</h2>
+            </div>
+            
+            <p style={{
+              fontSize: "1.1rem",
+              marginBottom: "2rem",
+              textAlign: "center"
+            }}>
+              Choose a speech format and start practicing right away
+            </p>
+            
+            {/* Practice Options */}
+            <div style={{
+    display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
+              gap: "1rem",
+              width: "100%",
+              marginBottom: "1.5rem"
+            }}>
+              <motion.button 
+                style={{
+    padding: "1rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "#fff",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "12px",
+                  fontSize: "1rem",
+      fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "0.5rem"
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#1e3c72" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handlePractice("Impromptu")}
+              >
+                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>⚡️</span>
+                Impromptu
+              </motion.button>
+              
+              <motion.button 
+                style={{
+                  padding: "1rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "#fff",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "12px",
+      fontSize: "1rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "0.5rem"
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#6a11cb" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
+              >
+                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>🎭</span>
+                Interp
+              </motion.button>
+              
+              <motion.button 
+                style={{
+                  padding: "1rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "#fff",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "12px",
+                  fontSize: "1rem",
+                  fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+                  alignItems: "center",
+    justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "0.5rem"
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#ff416c" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
+              >
+                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>✏️</span>
+                Original
+              </motion.button>
+              
+              <motion.button 
+                style={{
+                  padding: "1rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "#fff",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "12px",
+                  fontSize: "1rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+    alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "0.5rem"
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#00c853" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handlePractice("Extemp")}
+              >
+                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>🌎</span>
+                Extemp
+              </motion.button>
+            </div>
+          </motion.div>
+          
+          {/* AI Help Option */}
+          <motion.div 
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              padding: "2rem",
+    borderRadius: "20px",
+              background: "linear-gradient(135deg, rgba(0, 119, 182, 0.8), rgba(0, 180, 216, 0.8))",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#fff"
+            }}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)"
+            }}
+          >
+            <div style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+              marginBottom: "1.5rem"
+            }}>
+              <span style={{
+                fontSize: "3rem",
+                marginBottom: "1rem"
+              }}>🤖</span>
+              <h2 style={{
+                fontSize: "1.8rem",
+    fontWeight: "700",
+    marginBottom: "0.5rem",
+                background: "linear-gradient(45deg, #fff, #87CEEB)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent"
+              }}>AI Speech Coach</h2>
+            </div>
+            
+            <p style={{
+              fontSize: "1.1rem",
+              marginBottom: "2rem",
+              textAlign: "center"
+            }}>
+              Get personalized feedback and analysis to improve your speaking skills
+            </p>
+            
+            <ul style={{
+    width: "100%",
+              listStyle: "none",
+              padding: 0,
+              margin: "0 0 2rem 0",
+              textAlign: "left"
+            }}>
+              <li style={{
+    display: "flex",
+    alignItems: "center",
+                gap: "1rem",
+    marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>🎤</span>
+                <span>Real-time speech analysis</span>
+              </li>
+              <li style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>📊</span>
+                <span>Detailed performance metrics</span>
+              </li>
+              <li style={{
+    display: "flex",
+    alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>💡</span>
+                <span>Personalized improvement tips</span>
+              </li>
+              <li style={{
+    display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>🔄</span>
+                <span>Progress tracking over time</span>
+              </li>
+            </ul>
+            
+            <motion.button
+              style={{
+                padding: "1rem 2rem",
+                backgroundColor: "rgba(0, 191, 255, 0.7)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "30px",
+                fontSize: "1.1rem",
+                fontWeight: "600",
+    cursor: "pointer",
+                alignSelf: "center",
+                marginTop: "auto",
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+              whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/ai-coach")}
+            >
+              Start AI Coaching <span style={{ marginLeft: '8px' }}>→</span>
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+
+      <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
+    </div>
+  );
+}
 
 export default HomeScreen;
