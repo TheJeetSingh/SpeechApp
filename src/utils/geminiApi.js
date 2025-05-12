@@ -59,25 +59,38 @@ export const generateChatResponse = async (messages) => {
     8. If asked about non-speech topics, say: "As your speech coach, I'm here to help you with public speaking skills. Let's focus on how I can help you become a better speaker."
     `;
     
+    // Format the message history for the Gemini API
+    const formattedHistory = messages.map(msg => ({
+      role: msg.sender === "user" ? "user" : "model",
+      parts: [{ text: msg.text }]
+    }));
+
+    // Start with default history
+    let chatHistory = [
+      {
+        role: "user",
+        parts: [{ text: "Hello, can you help me with my public speaking?" }],
+      },
+      {
+        role: "model",
+        parts: [{ text: "Absolutely! I'm ARTICULATE, your dedicated AI speech coach. I'm here to help you develop and refine your public speaking skills. Whether you're preparing for a presentation, working on speech delivery, or wanting to overcome stage fright, I can provide guidance tailored to your specific needs. What aspect of public speaking would you like to focus on today?" }],
+      },
+      {
+        role: "user", 
+        parts: [{ text: "Can you tell me about current events?" }],
+      },
+      {
+        role: "model",
+        parts: [{ text: "As your speech coach, I'm here to help you with public speaking skills, not current events. However, I can help you prepare a speech about current events! Would you like tips on how to structure a speech about a timely topic, how to engage an audience when discussing news, or how to research effectively for a current events presentation? Let's focus on how I can help you become a better speaker." }],
+      }
+    ];
+    
+    // Add user conversation history (keeping only the latest 20 messages to avoid context overflow)
+    const recentHistory = formattedHistory.slice(-20);
+    
+    // Create chat with combined history
     const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: "Hello, can you help me with my public speaking?" }],
-        },
-        {
-          role: "model",
-          parts: [{ text: "Absolutely! I'm ARTICULATE, your dedicated AI speech coach. I'm here to help you develop and refine your public speaking skills. Whether you're preparing for a presentation, working on speech delivery, or wanting to overcome stage fright, I can provide guidance tailored to your specific needs. What aspect of public speaking would you like to focus on today?" }],
-        },
-        {
-          role: "user", 
-          parts: [{ text: "Can you tell me about current events?" }],
-        },
-        {
-          role: "model",
-          parts: [{ text: "As your speech coach, I'm here to help you with public speaking skills, not current events. However, I can help you prepare a speech about current events! Would you like tips on how to structure a speech about a timely topic, how to engage an audience when discussing news, or how to research effectively for a current events presentation? Let's focus on how I can help you become a better speaker." }],
-        }
-      ],
+      history: chatHistory,
       generationConfig: {
         temperature: 0.7, // Controls randomness: lower is more deterministic
         topK: 40,         // Limits vocabulary to top K options
@@ -104,20 +117,28 @@ export const generateChatResponse = async (messages) => {
       ]
     });
 
-    // Format the message history for the Gemini API
-    const formattedHistory = messages.map(msg => ({
-      role: msg.sender === "user" ? "user" : "model",
-      parts: [{ text: msg.text }]
-    }));
-
-    // If it's a new chat, just use the latest message
-    const lastMessage = formattedHistory[formattedHistory.length - 1];
+    // Send the conversation history and get a response
+    // Get the last user message
+    const lastUserMessage = recentHistory[recentHistory.length - 1];
     
-    // Enhanced prompt to keep focus on speech coaching
-    const enhancedPrompt = `${systemPrompt}\n\nUser message: ${lastMessage.parts[0].text}`;
+    // Prepare context for the AI
+    let messageWithContext;
     
-    // If we have message history, use that with the chat object
-    const result = await chat.sendMessage(enhancedPrompt);
+    // If we have multiple messages, provide conversation context
+    if (recentHistory.length > 1) {
+      // Extract just the conversation flow (without the very latest message which we'll send separately)
+      const conversationContext = recentHistory.slice(0, -1)
+        .map(msg => `${msg.role}: ${msg.parts[0].text}`)
+        .join('\n\n');
+      
+      messageWithContext = `${systemPrompt}\n\nHere's our conversation so far:\n${conversationContext}\n\nNew user message: ${lastUserMessage.parts[0].text}`;
+    } else {
+      // If it's just one message, use it directly
+      messageWithContext = `${systemPrompt}\n\nUser message: ${lastUserMessage.parts[0].text}`;
+    }
+    
+    // Send the message and get the response
+    const result = await chat.sendMessage(messageWithContext);
     const response = result.response;
     return response.text();
   } catch (error) {

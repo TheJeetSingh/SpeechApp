@@ -86,7 +86,11 @@ export const analyzeSpeech = async (audioBlob, topic, speechType, speechContext,
     `;
     
     // Get analysis from Gemini
-    const analysisText = await generateChatResponse([{ sender: "user", text: prompt }]);
+    const analysisText = await generateChatResponse([{ 
+      id: Date.now(),
+      sender: "user", 
+      text: prompt 
+    }]);
     console.log("Received analysis from Gemini");
     
     // Extract JSON from the response

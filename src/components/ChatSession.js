@@ -1,10 +1,163 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import VisualBackground from "./VisualBackground";
 import { generateChatResponse } from "../utils/geminiApi";
 import ReactMarkdown from "react-markdown";
 import RateLimitPopup from './RateLimitPopup';
+
+// Theme colors - refined palette
+const themeColors = {
+  primary: {
+    main: '#2c5282',
+    dark: '#1a365d',
+    light: '#4299e1',
+  },
+  accent: {
+    blue: '#3182ce',
+    purple: '#6b46c1',
+    green: '#38a169',
+    red: '#e53e3e',
+  },
+  text: {
+    primary: '#2d3748',
+    secondary: '#4a5568',
+    bright: '#ffffff',
+  },
+  background: {
+    main: '#f7fafc',
+    card: '#ffffff',
+    dark: '#1a202c',
+    light: '#f5f7fa',
+  },
+  ui: {
+    border: 'rgba(0, 0, 0, 0.1)',
+    shadow: 'rgba(0, 0, 0, 0.15)',
+  }
+};
+
+// Confirmation Modal Component
+const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.8, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.8, y: 20 }}
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+            position: 'relative',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 style={{ 
+            color: themeColors.primary.main, 
+            marginTop: 0,
+            fontSize: '1.3rem',
+            fontWeight: '600',
+          }}>
+            Start New Conversation
+          </h3>
+          <p style={{ 
+            marginBottom: '24px', 
+            lineHeight: '1.6',
+            color: themeColors.text.secondary
+          }}>
+            Are you sure you want to start a new conversation? Your current chat history will be cleared.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '8px',
+                backgroundColor: '#e2e8f0',
+                color: themeColors.text.secondary,
+                border: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+              onClick={onClose}
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '8px',
+                backgroundColor: themeColors.primary.main,
+                color: 'white',
+                border: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+              }}
+              onClick={onConfirm}
+            >
+              Start New Conversation
+            </motion.button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+// Maximum number of tokens to keep in conversation history (approx)
+const MAX_TOKENS = 6000;
+
+// Utility to estimate token count (rough estimate)
+const estimateTokens = (text) => Math.ceil(text.length / 4);
+
+// Utility to trim conversation if it gets too long
+const trimConversationIfNeeded = (messages) => {
+  // Always keep at least 4 messages if possible
+  if (messages.length <= 4) return messages;
+  
+  let totalTokens = 0;
+  let startIndex = 0;
+  
+  // Calculate tokens from newest to oldest
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const tokens = estimateTokens(messages[i].text);
+    if (totalTokens + tokens > MAX_TOKENS && i > 0) {
+      startIndex = i;
+      break;
+    }
+    totalTokens += tokens;
+  }
+  
+  return messages.slice(startIndex);
+};
 
 function ChatSession() {
   const location = useLocation();
@@ -20,6 +173,29 @@ function ChatSession() {
   
   // Initialize messages with a welcome message or speech analysis data if available
   const initialMessages = () => {
+    // Try to load saved messages from localStorage first
+    const savedMessages = localStorage.getItem('chatHistory');
+    
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        // If we have analysisData and saved messages don't start with analysis data,
+        // we'll create a new conversation with the analysis
+        if (analysisData && parsedMessages.length > 0 && !parsedMessages[0].text.includes("AI speech coach")) {
+          return createNewConversation();
+        }
+        return parsedMessages;
+      } catch (e) {
+        console.error("Error parsing saved messages:", e);
+        return createNewConversation();
+      }
+    } else {
+      return createNewConversation();
+    }
+  };
+  
+  // Create a new conversation with welcome message or analysis data
+  const createNewConversation = () => {
     if (analysisData) {
       // Format the speech analysis data into a welcome message
       const speechInfo = `
@@ -69,14 +245,24 @@ How would you like me to help you improve your speech?
     }
   };
 
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState(initialMessages());
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
   const [showRateLimitPopup, setShowRateLimitPopup] = useState(false);
+  const [showNewChatConfirm, setShowNewChatConfirm] = useState(false);
   
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    const trimmedMessages = trimConversationIfNeeded(messages);
+    localStorage.setItem('chatHistory', JSON.stringify(trimmedMessages));
+    if (trimmedMessages.length !== messages.length) {
+      setMessages(trimmedMessages);
+    }
+  }, [messages]);
 
   // Scroll to bottom of chat when messages change
   useEffect(() => {
@@ -90,14 +276,15 @@ How would you like me to help you improve your speech?
     
     // Add user message
     const newUserMessage = { id: Date.now(), text: input, sender: "user" };
-    setMessages(prevMessages => [...prevMessages, newUserMessage]);
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
     setError(null);
     
-    // Get AI response
+    // Get AI response - send entire conversation history
     try {
-      const aiResponseText = await generateChatResponse([...messages, newUserMessage]);
+      const aiResponseText = await generateChatResponse(updatedMessages);
       
       const aiResponse = { 
         id: Date.now() + 1, 
@@ -105,7 +292,7 @@ How would you like me to help you improve your speech?
         sender: "ai" 
       };
       
-      setMessages(prevMessages => [...prevMessages, aiResponse]);
+      setMessages([...updatedMessages, aiResponse]);
     } catch (err) {
       console.error("Error getting response from Gemini API:", err);
       setError(`Failed to get response: ${err.message || "Unknown error"}`);
@@ -116,7 +303,7 @@ How would you like me to help you improve your speech?
         sender: "ai" 
       };
       
-      setMessages(prevMessages => [...prevMessages, errorResponse]);
+      setMessages([...updatedMessages, errorResponse]);
       if (err.message?.includes('429') || err.message?.includes('quota') || err.message?.includes('rate limit')) {
         setShowRateLimitPopup(true);
       }
@@ -152,32 +339,47 @@ How would you like me to help you improve your speech?
     ];
   };
 
+  // Function to start a new chat
+  const handleNewChat = () => {
+    setShowNewChatConfirm(true);
+  };
+  
+  // Function to confirm new chat
+  const confirmNewChat = () => {
+    const newConversation = createNewConversation();
+    setMessages(newConversation);
+    localStorage.setItem('chatHistory', JSON.stringify(newConversation));
+    setShowNewChatConfirm(false);
+  };
+  
   return (
     <div style={styles.container}>
-      {/* Background */}
-      <VisualBackground 
-        colorMapping={{
-          lowFreq: '#1a237e',
-          midFreq: '#283593',
-          highFreq: '#3949ab'
-        }}
-      />
-      
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.logoContainer}>
           <div style={styles.logoIcon}>
-            <motion.span 
-              style={styles.micIcon}
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 4 }}
-            >🎙️</motion.span>
+            <span style={styles.micIcon}>🎙️</span>
           </div>
           <h1 style={styles.logo} onClick={() => navigate("/")}>ARTICULATE</h1>
         </div>
-        <button style={styles.backButton} onClick={() => navigate("/ai-coach")}>
-          Back to Coach Hub
-        </button>
+        <div style={styles.headerButtons}>
+          <motion.button 
+            style={styles.newChatButton}
+            whileHover={{ scale: 1.05, boxShadow: `0 4px 12px ${themeColors.accent.blue}60` }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleNewChat}
+          >
+            New Chat
+          </motion.button>
+          <motion.button 
+            style={styles.backButton}
+            whileHover={{ scale: 1.05, background: "rgba(255, 255, 255, 0.25)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate("/ai-coach")}
+          >
+            Back to Coach Hub
+          </motion.button>
+        </div>
       </header>
       
       {/* Chat Container */}
@@ -186,7 +388,6 @@ How would you like me to help you improve your speech?
           <h2 style={styles.chatTitle}>AI Speech Coach</h2>
           <div style={styles.tabContainer}>
             <div style={styles.activeTab}>Live Coaching</div>
-            <div style={styles.inactiveTab}>Speech History</div>
             <div style={styles.inactiveTab}>Resources</div>
           </div>
         </div>
@@ -224,7 +425,31 @@ How would you like me to help you improve your speech?
                 ...(message.sender === "user" ? styles.userMessage : styles.aiMessage)
               }}>
                 <div style={styles.messageContent}>
-                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                  {message.sender === "ai" ? (
+                    <ReactMarkdown 
+                      components={{
+                        h1: ({node, ...props}) => <h1 style={styles.mdHeading1} {...props} />,
+                        h2: ({node, ...props}) => <h2 style={styles.mdHeading2} {...props} />,
+                        h3: ({node, ...props}) => <h3 style={styles.mdHeading3} {...props} />,
+                        p: ({node, ...props}) => <p style={styles.mdParagraph} {...props} />,
+                        ul: ({node, ...props}) => <ul style={styles.mdList} {...props} />,
+                        ol: ({node, ...props}) => <ol style={styles.mdList} {...props} />,
+                        li: ({node, ...props}) => <li style={styles.mdListItem} {...props} />,
+                        a: ({node, ...props}) => <a style={styles.mdLink} {...props} />,
+                        code: ({node, inline, ...props}) => 
+                          inline ? 
+                            <code style={styles.mdInlineCode} {...props} /> : 
+                            <code style={styles.mdCodeBlock} {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote style={styles.mdBlockquote} {...props} />,
+                        strong: ({node, ...props}) => <strong style={styles.mdBold} {...props} />,
+                        em: ({node, ...props}) => <em style={styles.mdItalic} {...props} />
+                      }}
+                    >
+                      {message.text}
+                    </ReactMarkdown>
+                  ) : (
+                    <p style={styles.userText}>{message.text}</p>
+                  )}
                 </div>
                 <div style={styles.messageTime}>
                   {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -275,13 +500,15 @@ How would you like me to help you improve your speech?
           <div style={styles.inputButtons}>
             <div style={styles.inputSuggestions}>
               {getSuggestions().map((suggestion, index) => (
-                <div 
+                <motion.div 
                   key={index}
                   style={styles.suggestionPill}
+                  whileHover={{ scale: 1.05, backgroundColor: '#c5cae9' }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -294,16 +521,33 @@ How would you like me to help you improve your speech?
               placeholder="Type your message..."
               style={styles.textInput}
             />
-            <button type="submit" style={styles.sendButton}>
+            <motion.button 
+              type="submit" 
+              style={styles.sendButton}
+              whileHover={{ 
+                scale: 1.05, 
+                backgroundColor: themeColors.primary.dark,
+                boxShadow: `0 6px 16px ${themeColors.primary.main}60`
+              }}
+              whileTap={{ scale: 0.95 }}
+              disabled={isTyping}
+            >
               Send
-            </button>
+            </motion.button>
           </form>
         </div>
       </div>
       
+      {/* Modals */}
       <RateLimitPopup 
         isOpen={showRateLimitPopup} 
         onClose={() => setShowRateLimitPopup(false)} 
+      />
+      
+      <ConfirmModal
+        isOpen={showNewChatConfirm}
+        onClose={() => setShowNewChatConfirm(false)}
+        onConfirm={confirmNewChat}
       />
     </div>
   );
@@ -315,8 +559,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    fontFamily: "'Poppins', sans-serif",
-    backgroundColor: "#f5f7fa",
+    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
+    backgroundColor: themeColors.background.main,
+    position: "relative",
   },
   header: {
     width: "100%",
@@ -324,11 +569,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: "linear-gradient(135deg, #3949ab 0%, #1a237e 100%)",
+    background: themeColors.primary.main,
     position: "sticky",
     top: 0,
     zIndex: 100,
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
   },
   logoContainer: {
     display: "flex",
@@ -346,50 +591,63 @@ const styles = {
   },
   logo: {
     fontSize: "1.5rem",
-    fontWeight: "800",
+    fontWeight: "700",
     margin: 0,
-    color: "#ffffff",
-    letterSpacing: "1px",
+    color: themeColors.text.bright,
+    letterSpacing: "0.5px",
     cursor: "pointer",
+  },
+  headerButtons: {
+    display: 'flex',
+    gap: '1rem',
+    alignItems: 'center',
   },
   backButton: {
     padding: "0.6rem 1.2rem",
     background: "rgba(255, 255, 255, 0.15)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-    borderRadius: "24px",
-    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    color: themeColors.text.bright,
     fontSize: "0.9rem",
-    fontWeight: "600",
+    fontWeight: "500",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-    "&:hover": {
-      background: "rgba(255, 255, 255, 0.25)",
-    },
+  },
+  newChatButton: {
+    padding: "0.6rem 1.2rem",
+    backgroundColor: themeColors.accent.blue,
+    color: themeColors.text.bright,
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    fontWeight: "500",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.15)",
   },
   chatContainer: {
     width: "100%",
-    maxWidth: "1100px",
+    maxWidth: "1000px",
     height: "calc(100vh - 80px)",
     display: "flex",
     flexDirection: "column",
-    background: "#ffffff",
-    borderRadius: "16px",
+    background: themeColors.background.card,
+    borderRadius: "12px",
     margin: "1rem",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
     overflow: "hidden",
     border: "1px solid rgba(0, 0, 0, 0.05)",
   },
   chatHeader: {
     padding: "1.5rem",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
-    backgroundColor: "#fafbfc",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+    backgroundColor: themeColors.background.light,
   },
   chatTitle: {
     margin: 0,
-    color: "#303f9f",
-    fontSize: "1.6rem",
-    fontWeight: "700",
+    color: themeColors.primary.main,
+    fontSize: "1.5rem",
+    fontWeight: "600",
     textAlign: "center",
     marginBottom: "1rem",
   },
@@ -401,35 +659,32 @@ const styles = {
   },
   activeTab: {
     padding: "0.6rem 1.2rem",
-    borderRadius: "20px",
-    backgroundColor: "#3949ab",
-    color: "white",
-    fontWeight: "600",
+    borderRadius: "6px",
+    backgroundColor: themeColors.primary.main,
+    color: themeColors.text.bright,
+    fontWeight: "500",
     fontSize: "0.9rem",
-    boxShadow: "0 2px 8px rgba(57, 73, 171, 0.3)",
+    boxShadow: `0 2px 6px ${themeColors.primary.main}50`,
   },
   inactiveTab: {
     padding: "0.6rem 1.2rem",
-    borderRadius: "20px",
-    backgroundColor: "#f0f2f5",
-    color: "#5f6368",
+    borderRadius: "6px",
+    backgroundColor: "#edf2f7",
+    color: themeColors.text.secondary,
     fontWeight: "500",
     fontSize: "0.9rem",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    "&:hover": {
-      backgroundColor: "#e4e6eb",
-    },
   },
   errorContainer: {
     padding: "0.8rem 1.2rem",
     margin: "0.8rem",
-    backgroundColor: "rgba(253, 237, 237, 1)",
-    borderRadius: "8px",
-    borderLeft: "4px solid #ef5350",
+    backgroundColor: "#fff5f5",
+    borderRadius: "6px",
+    borderLeft: "4px solid " + themeColors.accent.red,
   },
   errorMessage: {
-    color: "#d32f2f",
+    color: themeColors.accent.red,
     margin: 0,
     fontSize: "0.9rem",
     fontWeight: "500",
@@ -441,15 +696,15 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "1rem",
-    backgroundColor: "#f9fafc",
+    backgroundColor: themeColors.background.light,
   },
   dateIndicator: {
     alignSelf: "center",
     padding: "0.4rem 0.8rem",
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderRadius: "12px",
+    backgroundColor: "#edf2f7",
+    borderRadius: "6px",
     fontSize: "0.8rem",
-    color: "#5f6368",
+    color: themeColors.text.secondary,
     marginBottom: "1rem",
     fontWeight: "500",
   },
@@ -460,46 +715,46 @@ const styles = {
     gap: "0.8rem",
   },
   avatarContainer: {
-    width: "36px",
-    height: "36px",
+    width: "34px",
+    height: "34px",
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
   avatar: {
-    width: "36px",
-    height: "36px",
-    backgroundColor: "#3949ab",
+    width: "34px",
+    height: "34px",
+    backgroundColor: themeColors.primary.main,
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "white",
+    color: themeColors.text.bright,
     fontWeight: "600",
-    fontSize: "1rem",
-    boxShadow: "0 2px 8px rgba(57, 73, 171, 0.3)",
+    fontSize: "0.9rem",
+    boxShadow: `0 2px 6px ${themeColors.primary.main}40`,
   },
   userAvatar: {
-    width: "36px",
-    height: "36px",
-    backgroundColor: "#303f9f",
+    width: "34px",
+    height: "34px",
+    backgroundColor: themeColors.accent.blue,
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "white",
+    color: themeColors.text.bright,
     fontWeight: "500",
     fontSize: "0.7rem",
-    boxShadow: "0 2px 8px rgba(48, 63, 159, 0.3)",
+    boxShadow: `0 2px 6px ${themeColors.accent.blue}40`,
   },
   message: {
     maxWidth: "70%",
     padding: "1rem 1.2rem",
-    borderRadius: "18px",
-    fontSize: "1rem",
+    borderRadius: "12px",
+    fontSize: "0.95rem",
     lineHeight: 1.6,
-    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
+    letterSpacing: "0.01em",
     position: "relative",
   },
   messageContent: {
@@ -513,18 +768,16 @@ const styles = {
     color: "rgba(0, 0, 0, 0.4)",
   },
   userMessage: {
-    backgroundColor: "#e1f5fe",
-    color: "#01579b",
+    backgroundColor: "#ebf8ff",
+    color: themeColors.primary.dark,
     borderBottomRightRadius: "4px",
-    borderTopLeftRadius: "18px",
-    boxShadow: "0 2px 8px rgba(3, 169, 244, 0.1)",
+    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.05)",
   },
   aiMessage: {
-    backgroundColor: "#e8eaf6",
-    color: "#283593",
+    backgroundColor: "#f0f5fa",
+    color: themeColors.primary.dark,
     borderBottomLeftRadius: "4px",
-    borderTopRightRadius: "18px",
-    boxShadow: "0 2px 8px rgba(40, 53, 147, 0.08)",
+    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.05)",
   },
   typingIndicator: {
     display: "flex",
@@ -532,10 +785,10 @@ const styles = {
     padding: "0.5rem 1rem",
   },
   typingDot: {
-    width: "8px",
-    height: "8px",
+    width: "6px",
+    height: "6px",
     borderRadius: "50%",
-    backgroundColor: "#3949ab",
+    backgroundColor: themeColors.primary.main,
     opacity: 0.6,
   },
   inputContainer: {
@@ -544,7 +797,7 @@ const styles = {
     gap: "0.8rem",
     padding: "1.2rem",
     borderTop: "1px solid rgba(0, 0, 0, 0.05)",
-    background: "white",
+    background: themeColors.background.card,
   },
   inputButtons: {
     display: "flex",
@@ -557,21 +810,19 @@ const styles = {
     overflowX: "auto",
     padding: "0.3rem 0",
     marginTop: "0.3rem",
+    flexWrap: "wrap",
   },
   suggestionPill: {
     padding: "0.5rem 1rem",
-    backgroundColor: "#e8eaf6",
-    color: "#3949ab",
-    borderRadius: "16px",
+    backgroundColor: "#edf2f7",
+    color: themeColors.primary.main,
+    borderRadius: "6px",
     fontSize: "0.8rem",
     whiteSpace: "nowrap",
     cursor: "pointer",
     transition: "all 0.2s ease",
     fontWeight: "500",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    "&:hover": {
-      backgroundColor: "#c5cae9",
-    },
+    marginBottom: "6px",
   },
   inputForm: {
     display: "flex",
@@ -579,47 +830,122 @@ const styles = {
   },
   textInput: {
     flex: 1,
-    padding: "1rem 1.2rem",
-    fontSize: "1rem",
-    border: "1px solid rgba(0, 0, 0, 0.08)",
-    borderRadius: "24px",
+    padding: "0.9rem 1.2rem",
+    fontSize: "0.95rem",
+    borderRadius: "8px",
+    border: `1px solid ${themeColors.ui.border}`,
     outline: "none",
     transition: "all 0.2s ease",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    fontFamily: "'Poppins', sans-serif",
-    "&:focus": {
-      borderColor: "#3949ab",
-      boxShadow: "0 2px 12px rgba(57, 73, 171, 0.15)",
-    },
-    "&:disabled": {
-      backgroundColor: "#f5f5f5",
-      color: "#9e9e9e",
-      cursor: "not-allowed",
-    },
+    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.03)",
+    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
   },
   sendButton: {
-    padding: "1rem 1.5rem",
-    backgroundColor: "#4e42d4",
+    padding: "0.8rem 1.5rem",
+    backgroundColor: themeColors.primary.main,
     color: "white",
     border: "none",
-    borderRadius: "24px",
-    fontSize: "1rem",
+    borderRadius: "8px",
+    fontSize: "0.9rem",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: "0 4px 12px rgba(78, 66, 212, 0.2)",
-    "&:hover": {
-      backgroundColor: "#3832a8",
-      transform: "translateY(-2px)",
-      boxShadow: "0 6px 16px rgba(78, 66, 212, 0.25)",
-    },
-    "&:disabled": {
-      backgroundColor: "#c5cae9",
-      cursor: "not-allowed",
-      transform: "none",
-      boxShadow: "none",
-    },
+    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
   },
+  mdHeading1: {
+    fontSize: "1.4rem",
+    fontWeight: "700",
+    marginBottom: "1rem",
+    color: themeColors.primary.dark,
+  },
+  mdHeading2: {
+    fontSize: "1.1rem",
+    fontWeight: "600",
+    marginBottom: "0.5rem",
+    color: themeColors.primary.dark,
+  },
+  mdHeading3: {
+    fontSize: "1rem",
+    fontWeight: "500",
+    marginBottom: "0.25rem",
+    color: themeColors.primary.dark,
+  },
+  mdParagraph: {
+    marginBottom: "1rem",
+  },
+  mdList: {
+    marginLeft: "1.5rem",
+    marginBottom: "1rem",
+  },
+  mdListItem: {
+    marginBottom: "0.5rem",
+  },
+  mdLink: {
+    color: themeColors.accent.blue,
+    textDecoration: "underline",
+  },
+  mdInlineCode: {
+    backgroundColor: "#edf2f7",
+    padding: "0.2rem 0.4rem",
+    borderRadius: "4px",
+    fontSize: "0.85rem",
+    fontFamily: "'Menlo', 'Monaco', 'Courier New', monospace",
+  },
+  mdCodeBlock: {
+    backgroundColor: "#edf2f7",
+    padding: "1rem",
+    borderRadius: "6px",
+    marginBottom: "1rem",
+    fontSize: "0.85rem",
+    fontFamily: "'Menlo', 'Monaco', 'Courier New', monospace",
+    overflowX: "auto",
+  },
+  mdBlockquote: {
+    backgroundColor: "#edf2f7",
+    padding: "1rem",
+    borderRadius: "6px",
+    marginBottom: "1rem",
+    borderLeft: `4px solid ${themeColors.primary.light}`,
+  },
+  mdBold: {
+    fontWeight: "600",
+  },
+  mdItalic: {
+    fontStyle: "italic",
+  },
+  userText: {
+    margin: 0,
+    fontSize: "0.95rem",
+    lineHeight: 1.6,
+  },
+  // Media query handling for mobile
+  '@media (max-width: 768px)': {
+    chatContainer: {
+      width: "100%",
+      margin: "0",
+      borderRadius: "0",
+      maxWidth: "none",
+    },
+    message: {
+      maxWidth: "85%",
+    },
+    header: {
+      padding: "0.8rem 1rem",
+    },
+    sendButton: {
+      padding: "0.8rem 1rem",
+    },
+    headerButtons: {
+      gap: "0.5rem",
+    },
+    newChatButton: {
+      padding: "0.5rem 0.8rem",
+      fontSize: "0.8rem",
+    },
+    backButton: {
+      padding: "0.5rem 0.8rem",
+      fontSize: "0.8rem",
+    },
+  }
 };
 
 export default ChatSession; 
