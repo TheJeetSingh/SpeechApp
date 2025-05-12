@@ -16,60 +16,79 @@ const RateLimitPopup = ({ isOpen, onClose }) => {
           left: 0,
           right: 0,
           bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           zIndex: 1000,
         }}
         onClick={onClose}
       >
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.8, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.8, y: 20 }}
           style={{
-            background: 'white',
-            padding: '2rem',
-            borderRadius: '15px',
-            maxWidth: '400px',
-            textAlign: 'center',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            padding: '20px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            position: 'relative',
+            color: '#333',
           }}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <h3 style={{ 
-            color: '#1a365d', 
+            color: '#e74c3c', 
             marginTop: 0,
-            marginBottom: '1rem',
-            fontSize: '1.5rem' 
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
           }}>
-            Rate Limit Reached
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 8V12" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 16H12.01" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Server Error or API Limit Reached
           </h3>
-          <p style={{ 
-            color: '#4a5568',
-            marginBottom: '1.5rem',
+          <p style={{ marginBottom: '20px', lineHeight: '1.5' }}>
+            We're experiencing an issue with our speech analysis service. This could be due to:
+          </p>
+          <ul style={{ 
+            marginBottom: '20px', 
+            paddingLeft: '20px',
             lineHeight: '1.5'
           }}>
-            Oops! There are too many people using this feature right now. Please try again in a few minutes.
+            <li>API rate limits being reached (too many requests)</li>
+            <li>Server connectivity issues</li>
+            <li>Problems with the audio processing</li>
+          </ul>
+          <p style={{ marginBottom: '20px', lineHeight: '1.5' }}>
+            Please wait a moment and try again. If the problem persists, try recording a shorter speech or contact support.
           </p>
-          <button
-            onClick={onClose}
-            style={{
-              background: '#4299e1',
-              color: 'white',
-              border: 'none',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.target.style.background = '#3182ce'}
-            onMouseOut={e => e.target.style.background = '#4299e1'}
-          >
-            Close
-          </button>
+          <div style={{ textAlign: 'right' }}>
+            <button
+              onClick={onClose}
+              style={{
+                backgroundColor: '#3498db',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                padding: '10px 20px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '500',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2980b9'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3498db'}
+            >
+              Close
+            </button>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

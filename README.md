@@ -4,11 +4,11 @@ A modern, interactive web application for practicing and improving public speaki
 
 ## New Feature: AI Speech Analysis
 
-SpeechApp now includes AI-powered speech analysis using Google's Gemini API. When recording a speech, you can:
+SpeechApp now includes AI-powered speech analysis using AssemblyAI for transcription and Google's Gemini API for coaching. When recording a speech, you can:
 
 1. Record your speech
 2. Click "Analyze Speech Content & Delivery" 
-3. The app will extract the audio and send it to Gemini for analysis
+3. The app will extract the audio, transcribe it with AssemblyAI, and analyze it with Gemini
 4. View detailed AI feedback on your speech content and delivery
 
 ### Analysis includes:
@@ -28,12 +28,15 @@ cp .env.example .env
 
 2. Get your API keys:
    - Get a Google Gemini API key from https://aistudio.google.com/app/apikey
-   - Add your API key to the `.env` file:
+   - Get an AssemblyAI API key from https://www.assemblyai.com/dashboard/
+   - Add your API keys to the `.env` file:
    ```
-   REACT_APP_GEMINI_API_KEY=your_api_key_here
+   REACT_APP_GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
+   REACT_APP_ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
    ```
 
-3. Never commit your `.env` file to version control!
+3. **IMPORTANT**: Never commit your `.env` file to version control! It contains sensitive API keys.
 
 ## Installation
 
@@ -58,20 +61,23 @@ npm run build
 - Framer Motion
 - Express
 - Google Gemini API
+- AssemblyAI API
 - MongoDB
 
 ## Note
-The speech analysis feature requires an active internet connection and a valid Gemini API key.
+The speech analysis feature requires an active internet connection and valid API keys.
 
-# Speech App with Gemini AI Integration
+# Speech App with AI Integration
 
-## Gemini API Integration
+## AI Integration
 
-This application now uses Google's Gemini AI API to power the chat interface, providing intelligent responses to user questions about public speaking and analyzing speech recordings.
+This application uses:
+- **AssemblyAI** for high-quality speech transcription
+- **Google's Gemini AI** for speech coaching and analysis
 
-### Getting Started with Gemini API
+### Getting Started with API Keys
 
-To use the Gemini API functionality, you'll need to:
+To use the AI functionality, you'll need to:
 
 1. **Get a Gemini API Key**:
    - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
@@ -79,31 +85,40 @@ To use the Gemini API functionality, you'll need to:
    - Create a new API key
    - Copy the key to your clipboard
 
-2. **Set up your environment variables**:
-   - Open the `.env` file in the root of the project
-   - Replace `your_gemini_api_key_here` with your actual API key:
+2. **Get an AssemblyAI API Key**:
+   - Visit [AssemblyAI Dashboard](https://www.assemblyai.com/dashboard/)
+   - Sign up or sign in to your account
+   - Create a new API key
+   - Copy the key to your clipboard
+
+3. **Set up your environment variables**:
+   - Copy the `.env.example` file to create a new `.env` file
+   - Replace the placeholder values with your actual API keys:
      ```
-     REACT_APP_GEMINI_API_KEY=your_actual_api_key_here
+     REACT_APP_GEMINI_API_KEY=your_actual_gemini_api_key_here
+     GEMINI_API_KEY=your_actual_gemini_api_key_here
+     REACT_APP_ASSEMBLYAI_API_KEY=your_actual_assemblyai_api_key_here
      ```
 
-3. **Restart your development server** after updating the environment variables.
+4. **Restart your development server** after updating the environment variables.
 
 ### Features
 
-The Gemini-powered AI coach provides:
+The AI-powered speech coach provides:
 
-- **Intelligent Chat Responses**: Ask questions about public speaking techniques, speech preparation, delivery, and receive expert guidance.
+- **Intelligent Chat Responses**: Ask questions about public speaking techniques, speech preparation, delivery, and receive expert guidance from Gemini.
 - **Speech Analysis**: Record your speech directly in the app and receive detailed feedback on:
   - Clarity and articulation
   - Pacing and rhythm
   - Filler words usage
   - Structure and coherence
   - Delivery style
+  - The app uses AssemblyAI for accurate speech-to-text transcription and Gemini for expert analysis
 
 ### Technical Implementation
 
 - Uses the `@google/generative-ai` SDK to interact with the Gemini API
-- Implements the Speech Recognition API for real-time speech-to-text transcription
+- Uses AssemblyAI's REST API for high-quality speech transcription
 - Supports Markdown formatting in AI responses for better readability
 - Provides error handling for API and speech recognition issues
 
@@ -115,15 +130,15 @@ The Gemini-powered AI coach provides:
 
 ### Limitations
 
-- The Speech Recognition API is only available in Chrome, Edge, Safari, and some other Chromium-based browsers
-- The Gemini API has rate limits that may apply depending on your usage
+- Speech analysis requires an internet connection
+- The Gemini and AssemblyAI APIs have rate limits that may apply depending on your usage
 - Speech transcription quality may vary depending on your microphone and environment
 
 ### Troubleshooting
 
 If you experience issues:
 
-1. Check that your API key is correctly set in the `.env` file
-2. Ensure your browser supports the Speech Recognition API
+1. Check that your API keys are correctly set in the `.env` file
+2. Ensure you have an active internet connection
 3. Check your browser's microphone permissions
 4. Check the browser console for specific error messages

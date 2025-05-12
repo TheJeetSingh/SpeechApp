@@ -6,6 +6,7 @@ import { colors, animations, particlesConfig, componentStyles } from "../styles/
 import { FiMic, FiStopCircle, FiDownload, FiVideo, FiInfo, FiBarChart2, FiCpu } from "react-icons/fi";
 import ScriptModal from "./ScriptModal"; // Import the new ScriptModal component
 import RateLimitPopup from './RateLimitPopup';
+import { analyzeSpeech } from '../utils/speechAnalysisService';
 
 // Animation variants
 const containerVariants = {
@@ -498,90 +499,40 @@ function SpeechScreen() {
         
         console.log(`Analyzing ${type || "practice"} speech`);
       }
-      
-      // Convert the audio blob to base64
-      const reader = new FileReader();
-      
-      reader.onloadend = async () => {
-        try {
-          // Ensure we have a valid result
-          if (!reader.result) {
-            throw new Error("Failed to read audio file");
-          }
-          
-          const base64Audio = reader.result.split(',')[1];
-          
-          if (!base64Audio) {
-            throw new Error("Failed to convert audio to base64");
-          }
-          
-          console.log(`Analyzing speech with MIME type: ${processedAudio.mimeType}`);
-          console.log(`Base64 audio data length: ${base64Audio.length} characters`);
-          
-          // Use different endpoint based on environment
-          const apiUrl = process.env.NODE_ENV === 'production' 
-            ? '/api/analyze-speech' 
-            : '/api/analyze-speech';
-            
-          console.log(`Sending request to speech analysis API: ${apiUrl}`);
-          
-          // Prepare request to Gemini API
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              audio: base64Audio,
-              topic: topicName,
-              speechType: type,
-              speechContext: speechContext,
-              duration: timer,
-              mimeType: processedAudio.mimeType,
-              script: scriptContent || null // Include script content if available
-            }),
-          });
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error("API response error:", errorText);
-            if (response.status === 500) {
-              setShowRateLimitPopup(true);
-              throw new Error(`Failed to analyze speech: Internal Server Error`);
-            }
-            throw new Error(`Failed to analyze speech: ${response.status} ${response.statusText}`);
-          }
-          
-          const analysis = await response.json();
-          setSpeechAnalysis(analysis);
-        } catch (error) {
-          console.error("Error in audio processing:", error);
-          if (!error.message?.includes('Internal Server Error')) {
-            alert(`Analysis failed: ${error.message}. Please try again.`);
-          }
-          
-          // Set fallback analysis
-          setSpeechAnalysis({
-            contentScore: 15,
-            deliveryScore: 10,
-            feedback: "We couldn't properly analyze your speech. The audio may be too poor quality or contain no actual speech.",
-            topic: "No coherent speech detected",
-            strengths: ["Attempting to use the speech analysis tool", "Showing interest in improving your speaking skills"],
-            improvements: ["Ensure you're actually speaking during recording", "Speak clearly and directly into the microphone", "Reduce background noise when recording"],
-            poorQuality: true
-          });
-        } finally {
-          setIsAnalyzing(false);
+
+      try {
+        // Use our new speech analysis service
+        const analysis = await analyzeSpeech(
+          processedAudio.blob,
+          topicName,
+          type,
+          speechContext,
+          timer,
+          scriptContent
+        );
+        
+        setSpeechAnalysis(analysis);
+      } catch (error) {
+        console.error("Error in speech analysis:", error);
+        if (error.message?.includes('500') || error.message?.includes('Internal Server Error')) {
+          setShowRateLimitPopup(true);
+        } else if (!error.message?.includes('Internal Server Error')) {
+          alert(`Analysis failed: ${error.message}. Please try again.`);
         }
-      };
-      
-      reader.onerror = (error) => {
-        console.error("FileReader error:", error);
-        alert("Failed to read audio file. Please try again.");
+        
+        // Set fallback analysis
+        setSpeechAnalysis({
+          contentScore: 15,
+          deliveryScore: 10,
+          feedback: "We couldn't properly analyze your speech. The audio may be too poor quality or contain no actual speech.",
+          topic: "No coherent speech detected",
+          strengths: ["Attempting to use the speech analysis tool", "Showing interest in improving your speaking skills"],
+          improvements: ["Ensure you're actually speaking during recording", "Speak clearly and directly into the microphone", "Reduce background noise when recording"],
+          poorQuality: true
+        });
+      } finally {
         setIsAnalyzing(false);
-      };
-      
-      reader.readAsDataURL(processedAudio.blob);
+      }
     } catch (error) {
       console.error("Error analyzing speech:", error);
       alert(`Speech analysis error: ${error.message}`);

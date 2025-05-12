@@ -6,6 +6,9 @@ const mongoose = require("mongoose");
 const axios = require("axios");
 require("dotenv").config();
 
+// Import the transcribe-audio handler
+const transcribeAudioHandler = require('./api/transcribe-audio');
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -475,6 +478,9 @@ app.post("/api/analyze-speech", async (req, res) => {
     }
   }
 });
+
+// Add the transcribe-audio endpoint
+app.post("/api/transcribe-audio", transcribeAudioHandler);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
