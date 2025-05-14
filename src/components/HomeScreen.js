@@ -1637,6 +1637,130 @@ function HomeScreen() {
               Start AI Coaching <span style={{ marginLeft: '8px' }}>→</span>
             </motion.button>
           </motion.div>
+          
+          {/* New Collaborative Practice Option */}
+          <motion.div 
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              padding: "2rem",
+              borderRadius: "20px",
+              background: "linear-gradient(135deg, rgba(106, 17, 203, 0.8), rgba(124, 77, 255, 0.8))",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#fff"
+            }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)"
+            }}
+          >
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              marginBottom: "1.5rem"
+            }}>
+              <span style={{
+                fontSize: "3rem",
+                marginBottom: "1rem"
+              }}>👥</span>
+              <h2 style={{
+                fontSize: "1.8rem",
+                fontWeight: "700",
+                marginBottom: "0.5rem",
+                background: "linear-gradient(45deg, #fff, #E0AAFF)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent"
+              }}>Collaborative Practice</h2>
+            </div>
+            
+            <p style={{
+              fontSize: "1.1rem",
+              marginBottom: "2rem",
+              textAlign: "center"
+            }}>
+              Practice with others in real-time video rooms and get instant feedback
+            </p>
+            
+            <ul style={{
+              width: "100%",
+              listStyle: "none",
+              padding: 0,
+              margin: "0 0 2rem 0",
+              textAlign: "left"
+            }}>
+              <li style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>🎥</span>
+                <span>Live video practice sessions</span>
+              </li>
+              <li style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>💬</span>
+                <span>Real-time feedback exchange</span>
+              </li>
+              <li style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>⏱️</span>
+                <span>Timed speech practice</span>
+              </li>
+              <li style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem",
+                fontSize: "1.05rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>🔄</span>
+                <span>Interactive peer evaluation</span>
+              </li>
+            </ul>
+            
+            <motion.button
+              style={{
+                padding: "1rem 2rem",
+                backgroundColor: "rgba(157, 78, 221, 0.7)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "30px",
+                fontSize: "1.1rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                alignSelf: "center",
+                marginTop: "auto",
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+              whileHover={{ scale: 1.05, backgroundColor: "rgba(124, 58, 237, 0.9)" }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/collaborative-rooms")}
+            >
+              Join Practice Room <span style={{ marginLeft: '8px' }}>→</span>
+            </motion.button>
+          </motion.div>
         </div>
       </div>
 
