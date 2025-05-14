@@ -5,7 +5,6 @@ import { FiArrowDown, FiArrowUp } from "react-icons/fi";
 import { jwtDecode } from "jwt-decode";
 import { useSpring, animated } from 'react-spring';
 import { TypeAnimation } from 'react-type-animation';
-import VisualBackground from "./VisualBackground";
 import { useInterval, useMouse, useWindowSize } from 'react-use';
 
 // StickFigureSpeechAnimation component for fallback when audio permissions are denied
@@ -1317,15 +1316,8 @@ function HomeScreen() {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Background visualization */}
-      <VisualBackground 
-        colorMapping={{
-          lowFreq: '#1e3c72',
-          midFreq: '#2a5298',
-          highFreq: '#00BFFF'
-        }}
-      />
+    <div style={{...styles.container, backgroundColor: "#ffffff"}}>
+      {/* Background visualization removed for solid white background */}
 
       <Header onFeedbackClick={handleFeedbackClick} />
 

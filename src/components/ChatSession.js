@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import VisualBackground from "./VisualBackground";
 import { generateChatResponse } from "../utils/geminiApi";
 import ReactMarkdown from "react-markdown";
 import RateLimitPopup from './RateLimitPopup';
@@ -251,15 +250,8 @@ How would you like me to help you improve your speech?
   };
 
   return (
-    <div style={styles.container}>
-      {/* Background */}
-      <VisualBackground 
-        colorMapping={{
-          lowFreq: '#1a237e',
-          midFreq: '#283593',
-          highFreq: '#3949ab'
-        }}
-      />
+    <div style={{...styles.container, backgroundColor: "#ffffff"}}>
+      {/* Background is now solid white */}
       
       {/* Header */}
       <header style={styles.header}>

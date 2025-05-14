@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import VisualBackground from "./VisualBackground";
 
 function AICoachScreen() {
   const [userName, setUserName] = useState("");
@@ -26,19 +25,15 @@ function AICoachScreen() {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Background */}
-      <VisualBackground 
-        colorMapping={{
-          lowFreq: '#0077B6',
-          midFreq: '#00B4D8',
-          highFreq: '#90E0EF'
-        }}
-      />
+    <div style={{...styles.container, backgroundColor: "#ffffff"}}>
+      {/* Background is now solid white */}
       
       {/* Header */}
       <header style={styles.header}>
-        <h1 style={styles.logo} onClick={() => navigate("/")}>ARTICULATE</h1>
+        <div style={styles.logoContainer}>
+          <span style={styles.logoIcon}>🤖</span>
+          <h1 style={styles.logo} onClick={() => navigate("/")}>ARTICULATE</h1>
+        </div>
         <button style={styles.backButton} onClick={() => navigate("/")}>
           Back to Home
         </button>
@@ -140,6 +135,15 @@ const styles = {
     top: 0,
     zIndex: 100,
     boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+  },
+  logoContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+  },
+  logoIcon: {
+    fontSize: "1.5rem",
+    color: "#0077B6",
   },
   logo: {
     fontSize: "1.5rem",
