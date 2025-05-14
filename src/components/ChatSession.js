@@ -5,63 +5,7 @@ import VisualBackground from "./VisualBackground";
 import { generateChatResponse } from "../utils/geminiApi";
 import ReactMarkdown from "react-markdown";
 import RateLimitPopup from './RateLimitPopup';
-
-// Theme colors
-const themeColors = {
-  primary: {
-    main: '#3949ab',
-    dark: '#1a237e',
-    light: '#5c6bc0',
-  },
-  accent: {
-    blue: '#2196f3',
-    purple: '#7a43c9',
-    green: '#4caf50',
-    red: '#f44336',
-  },
-  text: {
-    primary: '#2c3e50',
-    secondary: '#546e7a',
-    bright: '#ffffff',
-  },
-  background: {
-    main: '#f5f7fa',
-    card: '#ffffff',
-    dark: '#121212',
-    light: '#f9fafc',
-  },
-  ui: {
-    border: 'rgba(0, 0, 0, 0.08)',
-    shadow: 'rgba(0, 0, 0, 0.1)',
-  }
-};
-
-// Maximum number of tokens to keep in conversation history (approx)
-const MAX_TOKENS = 6000;
-
-// Utility to estimate token count (rough estimate)
-const estimateTokens = (text) => Math.ceil(text.length / 4);
-
-// Utility to trim conversation if it gets too long
-const trimConversationIfNeeded = (messages) => {
-  // Always keep at least 4 messages if possible
-  if (messages.length <= 4) return messages;
-  
-  let totalTokens = 0;
-  let startIndex = 0;
-  
-  // Calculate tokens from newest to oldest
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const tokens = estimateTokens(messages[i].text);
-    if (totalTokens + tokens > MAX_TOKENS && i > 0) {
-      startIndex = i;
-      break;
-    }
-    totalTokens += tokens;
-  }
-  
-  return messages.slice(startIndex);
-};
+import { FiRefreshCw } from "react-icons/fi";
 
 function ChatSession() {
   const location = useLocation();
@@ -75,31 +19,69 @@ function ChatSession() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
   
+  // Helper function to estimate token count (rough approximation)
+  const estimateTokens = (text) => Math.ceil(text.length / 4);
+  
+  // Trim conversation if it gets too long
+  const trimConversationIfNeeded = (messages, maxTokens = 6000) => {
+    // Always keep at least 2 messages if available
+    if (messages.length <= 2) return messages;
+    
+    let totalTokens = 0;
+    let startIndex = 0;
+    
+    // Count tokens from newest to oldest
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const tokens = estimateTokens(messages[i].text);
+      if (totalTokens + tokens > maxTokens) {
+        startIndex = i + 1;
+        break;
+      }
+      totalTokens += tokens;
+    }
+    
+    // Always keep at least the first message (welcome message)
+    return startIndex === 0 ? messages : [messages[0], ...messages.slice(startIndex)];
+  };
+  
   // Initialize messages with a welcome message or speech analysis data if available
   const initialMessages = () => {
-    // Try to load saved messages from localStorage first
-    const savedMessages = localStorage.getItem('chatHistory');
-    
+    // Try to load saved messages from localStorage
+    const savedMessages = localStorage.getItem('articulate_chat_history');
+    console.log("Retrieved from localStorage:", savedMessages);
     if (savedMessages) {
       try {
         const parsedMessages = JSON.parse(savedMessages);
-        // If we have analysisData and saved messages don't start with analysis data,
-        // we'll create a new conversation with the analysis
-        if (analysisData && parsedMessages.length > 0 && !parsedMessages[0].text.includes("AI speech coach")) {
-          return createNewConversation();
+        console.log("Parsed messages from localStorage:", parsedMessages);
+        
+        // If we have analysis data but saved messages don't include it,
+        // we should start a new conversation with the analysis
+        if (analysisData) {
+          const hasAnalysis = parsedMessages.some(msg => 
+            msg.text && msg.text.includes('Speech Analysis Summary')
+          );
+          
+          if (!hasAnalysis) {
+            console.log("Analysis data present but not in saved messages, creating new chat");
+            return createNewChatWithAnalysis();
+          }
         }
-        return parsedMessages;
+        
+        return trimConversationIfNeeded(parsedMessages);
       } catch (e) {
         console.error("Error parsing saved messages:", e);
-        return createNewConversation();
+        // Fall back to default messages
       }
-    } else {
-      return createNewConversation();
     }
+    
+    console.log("No saved messages found, creating new chat");
+    return createNewChatWithAnalysis();
   };
   
-  // Create a new conversation with welcome message or analysis data
-  const createNewConversation = () => {
+  // Create a new chat with analysis data if available
+  const createNewChatWithAnalysis = () => {
+    const timestamp = new Date().toISOString();
+    
     if (analysisData) {
       // Format the speech analysis data into a welcome message
       const speechInfo = `
@@ -129,12 +111,14 @@ How would you like me to help you improve your speech?
         { 
           id: 1, 
           text: "👋 Hello! I'm ARTICULATE, your AI speech coach. I see you've shared your speech analysis with me.", 
-          sender: "ai" 
+          sender: "ai",
+          timestamp
         },
         { 
           id: 2, 
           text: speechInfo, 
-          sender: "ai" 
+          sender: "ai",
+          timestamp
         }
       ];
     } else {
@@ -143,7 +127,8 @@ How would you like me to help you improve your speech?
         { 
           id: 1, 
           text: "👋 Hello! I'm ARTICULATE, your AI speech coach. How can I help you improve your speaking skills today?", 
-          sender: "ai" 
+          sender: "ai",
+          timestamp
         }
       ];
     }
@@ -157,14 +142,11 @@ How would you like me to help you improve your speech?
   
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
-
+  
   // Save messages to localStorage whenever they change
   useEffect(() => {
-    const trimmedMessages = trimConversationIfNeeded(messages);
-    localStorage.setItem('chatHistory', JSON.stringify(trimmedMessages));
-    if (trimmedMessages.length !== messages.length) {
-      setMessages(trimmedMessages);
-    }
+    console.log("Saving messages to localStorage:", messages);
+    localStorage.setItem('articulate_chat_history', JSON.stringify(messages));
   }, [messages]);
 
   // Scroll to bottom of chat when messages change
@@ -177,25 +159,38 @@ How would you like me to help you improve your speech?
     e.preventDefault();
     if (input.trim() === "") return;
     
+    const timestamp = new Date().toISOString();
+    
     // Add user message
-    const newUserMessage = { id: Date.now(), text: input, sender: "user" };
+    const newUserMessage = { 
+      id: Date.now(), 
+      text: input, 
+      sender: "user",
+      timestamp
+    };
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
     setError(null);
     
-    // Get AI response - send entire conversation history
+    // Get AI response
     try {
+      // Pass the entire conversation history to maintain context
       const aiResponseText = await generateChatResponse(updatedMessages);
       
       const aiResponse = { 
         id: Date.now() + 1, 
         text: aiResponseText, 
-        sender: "ai" 
+        sender: "ai",
+        timestamp: new Date().toISOString()
       };
       
-      setMessages([...updatedMessages, aiResponse]);
+      // Update messages and trim if needed
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages, aiResponse];
+        return trimConversationIfNeeded(newMessages);
+      });
     } catch (err) {
       console.error("Error getting response from Gemini API:", err);
       setError(`Failed to get response: ${err.message || "Unknown error"}`);
@@ -203,16 +198,29 @@ How would you like me to help you improve your speech?
       const errorResponse = { 
         id: Date.now() + 1, 
         text: "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again later.", 
-        sender: "ai" 
+        sender: "ai",
+        timestamp: new Date().toISOString()
       };
       
-      setMessages([...updatedMessages, errorResponse]);
+      setMessages(prevMessages => [...prevMessages, errorResponse]);
       if (err.message?.includes('429') || err.message?.includes('quota') || err.message?.includes('rate limit')) {
         setShowRateLimitPopup(true);
       }
     } finally {
       setIsTyping(false);
     }
+  };
+
+  // Function to start a new chat
+  const handleNewChat = () => {
+    // Clear the stored chat history
+    localStorage.removeItem('articulate_chat_history');
+    console.log("Cleared chat history from localStorage");
+    
+    const newMessages = createNewChatWithAnalysis();
+    setMessages(newMessages);
+    setInput("");
+    setError(null);
   };
 
   // Function to handle suggestion click
@@ -242,25 +250,15 @@ How would you like me to help you improve your speech?
     ];
   };
 
-  // Function to start a new chat
-  const handleNewChat = () => {
-    if (window.confirm("Are you sure you want to start a new conversation? Your current chat history will be cleared.")) {
-      const newConversation = createNewConversation();
-      setMessages(newConversation);
-      localStorage.setItem('chatHistory', JSON.stringify(newConversation));
-    }
-  };
-  
   return (
     <div style={styles.container}>
       {/* Background */}
       <VisualBackground 
         colorMapping={{
-          lowFreq: themeColors.primary.dark,
-          midFreq: themeColors.primary.main,
-          highFreq: themeColors.primary.light
+          lowFreq: '#1a237e',
+          midFreq: '#283593',
+          highFreq: '#3949ab'
         }}
-        intensity={0.5}
       />
       
       {/* Header */}
@@ -276,22 +274,18 @@ How would you like me to help you improve your speech?
           <h1 style={styles.logo} onClick={() => navigate("/")}>ARTICULATE</h1>
         </div>
         <div style={styles.headerButtons}>
-          <motion.button 
+          <motion.button
             style={styles.newChatButton}
-            whileHover={{ scale: 1.05, boxShadow: `0 4px 12px ${themeColors.accent.blue}60` }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleNewChat}
           >
-            New Chat
+            <FiRefreshCw size={16} />
+            <span>New Chat</span>
           </motion.button>
-          <motion.button 
-            style={styles.backButton}
-            whileHover={{ scale: 1.05, background: "rgba(255, 255, 255, 0.25)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/ai-coach")}
-          >
+          <button style={styles.backButton} onClick={() => navigate("/ai-coach")}>
             Back to Coach Hub
-          </motion.button>
+          </button>
         </div>
       </header>
       
@@ -339,34 +333,13 @@ How would you like me to help you improve your speech?
                 ...(message.sender === "user" ? styles.userMessage : styles.aiMessage)
               }}>
                 <div style={styles.messageContent}>
-                  {message.sender === "ai" ? (
-                    <ReactMarkdown 
-                      components={{
-                        h1: ({node, ...props}) => <h1 style={styles.mdHeading1} {...props} />,
-                        h2: ({node, ...props}) => <h2 style={styles.mdHeading2} {...props} />,
-                        h3: ({node, ...props}) => <h3 style={styles.mdHeading3} {...props} />,
-                        p: ({node, ...props}) => <p style={styles.mdParagraph} {...props} />,
-                        ul: ({node, ...props}) => <ul style={styles.mdList} {...props} />,
-                        ol: ({node, ...props}) => <ol style={styles.mdList} {...props} />,
-                        li: ({node, ...props}) => <li style={styles.mdListItem} {...props} />,
-                        a: ({node, ...props}) => <a style={styles.mdLink} {...props} />,
-                        code: ({node, inline, ...props}) => 
-                          inline ? 
-                            <code style={styles.mdInlineCode} {...props} /> : 
-                            <code style={styles.mdCodeBlock} {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote style={styles.mdBlockquote} {...props} />,
-                        strong: ({node, ...props}) => <strong style={styles.mdBold} {...props} />,
-                        em: ({node, ...props}) => <em style={styles.mdItalic} {...props} />
-                      }}
-                    >
-                      {message.text}
-                    </ReactMarkdown>
-                  ) : (
-                    <p style={styles.userText}>{message.text}</p>
-                  )}
+                  <ReactMarkdown>{message.text}</ReactMarkdown>
                 </div>
                 <div style={styles.messageTime}>
-                  {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  {message.timestamp 
+                    ? new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    : new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                  }
                 </div>
               </div>
               
@@ -414,15 +387,13 @@ How would you like me to help you improve your speech?
           <div style={styles.inputButtons}>
             <div style={styles.inputSuggestions}>
               {getSuggestions().map((suggestion, index) => (
-                <motion.div 
+                <div 
                   key={index}
                   style={styles.suggestionPill}
-                  whileHover={{ scale: 1.05, backgroundColor: '#c5cae9' }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -435,19 +406,9 @@ How would you like me to help you improve your speech?
               placeholder="Type your message..."
               style={styles.textInput}
             />
-            <motion.button 
-              type="submit" 
-              style={styles.sendButton}
-              whileHover={{ 
-                scale: 1.05, 
-                backgroundColor: themeColors.primary.dark,
-                boxShadow: `0 6px 16px ${themeColors.primary.main}60`
-              }}
-              whileTap={{ scale: 0.95 }}
-              disabled={isTyping}
-            >
+            <button type="submit" style={styles.sendButton}>
               Send
-            </motion.button>
+            </button>
           </form>
         </div>
       </div>
@@ -466,10 +427,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
-    backgroundColor: themeColors.background.main,
-    position: "relative",
-    overflow: "hidden",
+    fontFamily: "'Poppins', sans-serif",
+    backgroundColor: "#f5f7fa",
   },
   header: {
     width: "100%",
@@ -477,7 +436,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: `linear-gradient(135deg, ${themeColors.primary.main} 0%, ${themeColors.primary.dark} 100%)`,
+    background: "linear-gradient(135deg, #3949ab 0%, #1a237e 100%)",
     position: "sticky",
     top: 0,
     zIndex: 100,
@@ -501,38 +460,24 @@ const styles = {
     fontSize: "1.5rem",
     fontWeight: "800",
     margin: 0,
-    color: themeColors.text.bright,
+    color: "#ffffff",
     letterSpacing: "1px",
     cursor: "pointer",
-  },
-  headerButtons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center',
   },
   backButton: {
     padding: "0.6rem 1.2rem",
     background: "rgba(255, 255, 255, 0.15)",
     border: "1px solid rgba(255, 255, 255, 0.3)",
-    borderRadius: "8px",
-    color: themeColors.text.bright,
+    borderRadius: "24px",
+    color: "#fff",
     fontSize: "0.9rem",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s ease",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-  },
-  newChatButton: {
-    padding: "0.6rem 1.2rem",
-    backgroundColor: themeColors.accent.blue,
-    color: themeColors.text.bright,
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-    fontWeight: "600",
-    transition: "all 0.2s ease",
-    boxShadow: "0 2px 8px rgba(33, 150, 243, 0.3)",
+    "&:hover": {
+      background: "rgba(255, 255, 255, 0.25)",
+    },
   },
   chatContainer: {
     width: "100%",
@@ -540,7 +485,7 @@ const styles = {
     height: "calc(100vh - 80px)",
     display: "flex",
     flexDirection: "column",
-    background: themeColors.background.card,
+    background: "#ffffff",
     borderRadius: "16px",
     margin: "1rem",
     boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
@@ -550,11 +495,11 @@ const styles = {
   chatHeader: {
     padding: "1.5rem",
     borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
-    backgroundColor: themeColors.background.light,
+    backgroundColor: "#fafbfc",
   },
   chatTitle: {
     margin: 0,
-    color: themeColors.primary.main,
+    color: "#303f9f",
     fontSize: "1.6rem",
     fontWeight: "700",
     textAlign: "center",
@@ -568,22 +513,25 @@ const styles = {
   },
   activeTab: {
     padding: "0.6rem 1.2rem",
-    borderRadius: "8px",
-    backgroundColor: themeColors.primary.main,
-    color: themeColors.text.bright,
+    borderRadius: "20px",
+    backgroundColor: "#3949ab",
+    color: "white",
     fontWeight: "600",
     fontSize: "0.9rem",
-    boxShadow: `0 2px 8px ${themeColors.primary.main}50`,
+    boxShadow: "0 2px 8px rgba(57, 73, 171, 0.3)",
   },
   inactiveTab: {
     padding: "0.6rem 1.2rem",
-    borderRadius: "8px",
+    borderRadius: "20px",
     backgroundColor: "#f0f2f5",
-    color: themeColors.text.secondary,
+    color: "#5f6368",
     fontWeight: "500",
     fontSize: "0.9rem",
     cursor: "pointer",
     transition: "all 0.2s ease",
+    "&:hover": {
+      backgroundColor: "#e4e6eb",
+    },
   },
   errorContainer: {
     padding: "0.8rem 1.2rem",
@@ -605,15 +553,15 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "1rem",
-    backgroundColor: themeColors.background.light,
+    backgroundColor: "#f9fafc",
   },
   dateIndicator: {
     alignSelf: "center",
     padding: "0.4rem 0.8rem",
     backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderRadius: "8px",
+    borderRadius: "12px",
     fontSize: "0.8rem",
-    color: themeColors.text.secondary,
+    color: "#5f6368",
     marginBottom: "1rem",
     fontWeight: "500",
   },
@@ -634,36 +582,36 @@ const styles = {
   avatar: {
     width: "36px",
     height: "36px",
-    backgroundColor: themeColors.primary.main,
+    backgroundColor: "#3949ab",
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: themeColors.text.bright,
+    color: "white",
     fontWeight: "600",
     fontSize: "1rem",
-    boxShadow: `0 2px 8px ${themeColors.primary.main}50`,
+    boxShadow: "0 2px 8px rgba(57, 73, 171, 0.3)",
   },
   userAvatar: {
     width: "36px",
     height: "36px",
-    backgroundColor: themeColors.accent.blue,
+    backgroundColor: "#303f9f",
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: themeColors.text.bright,
+    color: "white",
     fontWeight: "500",
     fontSize: "0.7rem",
-    boxShadow: `0 2px 8px ${themeColors.accent.blue}50`,
+    boxShadow: "0 2px 8px rgba(48, 63, 159, 0.3)",
   },
   message: {
     maxWidth: "70%",
     padding: "1rem 1.2rem",
-    borderRadius: "14px",
-    fontSize: "0.95rem",
+    borderRadius: "18px",
+    fontSize: "1rem",
     lineHeight: 1.6,
-    letterSpacing: "0.01em",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
     position: "relative",
   },
   messageContent: {
@@ -680,12 +628,14 @@ const styles = {
     backgroundColor: "#e1f5fe",
     color: "#01579b",
     borderBottomRightRadius: "4px",
+    borderTopLeftRadius: "18px",
     boxShadow: "0 2px 8px rgba(3, 169, 244, 0.1)",
   },
   aiMessage: {
     backgroundColor: "#e8eaf6",
     color: "#283593",
     borderBottomLeftRadius: "4px",
+    borderTopRightRadius: "18px",
     boxShadow: "0 2px 8px rgba(40, 53, 147, 0.08)",
   },
   typingIndicator: {
@@ -697,7 +647,7 @@ const styles = {
     width: "8px",
     height: "8px",
     borderRadius: "50%",
-    backgroundColor: themeColors.primary.main,
+    backgroundColor: "#3949ab",
     opacity: 0.6,
   },
   inputContainer: {
@@ -706,7 +656,7 @@ const styles = {
     gap: "0.8rem",
     padding: "1.2rem",
     borderTop: "1px solid rgba(0, 0, 0, 0.05)",
-    background: themeColors.background.card,
+    background: "white",
   },
   inputButtons: {
     display: "flex",
@@ -719,20 +669,21 @@ const styles = {
     overflowX: "auto",
     padding: "0.3rem 0",
     marginTop: "0.3rem",
-    flexWrap: "wrap",
   },
   suggestionPill: {
     padding: "0.5rem 1rem",
     backgroundColor: "#e8eaf6",
-    color: themeColors.primary.main,
-    borderRadius: "8px",
+    color: "#3949ab",
+    borderRadius: "16px",
     fontSize: "0.8rem",
     whiteSpace: "nowrap",
     cursor: "pointer",
     transition: "all 0.2s ease",
     fontWeight: "500",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    marginBottom: "6px",
+    "&:hover": {
+      backgroundColor: "#c5cae9",
+    },
   },
   inputForm: {
     display: "flex",
@@ -741,112 +692,66 @@ const styles = {
   textInput: {
     flex: 1,
     padding: "1rem 1.2rem",
-    fontSize: "0.95rem",
-    borderRadius: "10px",
-    border: `1px solid ${themeColors.ui.border}`,
+    fontSize: "1rem",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    borderRadius: "24px",
     outline: "none",
     transition: "all 0.2s ease",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
+    fontFamily: "'Poppins', sans-serif",
+    "&:focus": {
+      borderColor: "#3949ab",
+      boxShadow: "0 2px 12px rgba(57, 73, 171, 0.15)",
+    },
+    "&:disabled": {
+      backgroundColor: "#f5f5f5",
+      color: "#9e9e9e",
+      cursor: "not-allowed",
+    },
   },
   sendButton: {
-    padding: "0.8rem 1.5rem",
-    backgroundColor: themeColors.primary.main,
+    padding: "1rem 1.5rem",
+    backgroundColor: "#4e42d4",
     color: "white",
     border: "none",
-    borderRadius: "10px",
-    fontSize: "0.95rem",
+    borderRadius: "24px",
+    fontSize: "1rem",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: `0 4px 12px ${themeColors.primary.main}40`,
+    boxShadow: "0 4px 12px rgba(78, 66, 212, 0.2)",
+    "&:hover": {
+      backgroundColor: "#3832a8",
+      transform: "translateY(-2px)",
+      boxShadow: "0 6px 16px rgba(78, 66, 212, 0.25)",
+    },
+    "&:disabled": {
+      backgroundColor: "#c5cae9",
+      cursor: "not-allowed",
+      transform: "none",
+      boxShadow: "none",
+    },
   },
-  mdHeading1: {
-    fontSize: "1.5rem",
-    fontWeight: "700",
-    marginBottom: "1rem",
+  headerButtons: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.8rem",
   },
-  mdHeading2: {
-    fontSize: "1.2rem",
+  newChatButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    padding: "0.6rem 1.2rem",
+    background: "rgba(255, 255, 255, 0.15)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    borderRadius: "24px",
+    color: "#fff",
+    fontSize: "0.9rem",
     fontWeight: "600",
-    marginBottom: "0.5rem",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
-  mdHeading3: {
-    fontSize: "1rem",
-    fontWeight: "500",
-    marginBottom: "0.25rem",
-  },
-  mdParagraph: {
-    marginBottom: "1rem",
-  },
-  mdList: {
-    marginLeft: "1.5rem",
-    marginBottom: "1rem",
-  },
-  mdListItem: {
-    marginBottom: "0.5rem",
-  },
-  mdLink: {
-    color: themeColors.accent.blue,
-    textDecoration: "underline",
-  },
-  mdInlineCode: {
-    backgroundColor: "#f0f0f0",
-    padding: "0.2rem 0.4rem",
-    borderRadius: "4px",
-  },
-  mdCodeBlock: {
-    backgroundColor: "#f0f0f0",
-    padding: "1rem",
-    borderRadius: "8px",
-    marginBottom: "1rem",
-  },
-  mdBlockquote: {
-    backgroundColor: "#f0f0f0",
-    padding: "1rem",
-    borderRadius: "8px",
-    marginBottom: "1rem",
-  },
-  mdBold: {
-    fontWeight: "600",
-  },
-  mdItalic: {
-    fontStyle: "italic",
-  },
-  userText: {
-    margin: 0,
-    fontSize: "0.95rem",
-    lineHeight: 1.6,
-  },
-  // Media query handling for mobile
-  '@media (max-width: 768px)': {
-    chatContainer: {
-      width: "100%",
-      margin: "0",
-      borderRadius: "0",
-      maxWidth: "none",
-    },
-    message: {
-      maxWidth: "85%",
-    },
-    header: {
-      padding: "0.8rem 1rem",
-    },
-    sendButton: {
-      padding: "0.8rem 1rem",
-    },
-    headerButtons: {
-      gap: "0.5rem",
-    },
-    newChatButton: {
-      padding: "0.5rem 0.8rem",
-      fontSize: "0.8rem",
-    },
-    backButton: {
-      padding: "0.5rem 0.8rem",
-      fontSize: "0.8rem",
-    },
-  }
 };
 
 export default ChatSession; 
