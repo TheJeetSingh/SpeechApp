@@ -6,19 +6,15 @@ const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
  * @param {Object} res - Express response object
  */
 const generateRtcToken = (req, res) => {
-  // Set CORS headers - be more permissive in development
+  // Set CORS headers - always allow the frontend domain
   const origin = req.headers.origin || '*';
+  const frontendDomain = 'https://speech-app-delta.vercel.app';
   
-  // Always allow localhost in development
-  if (process.env.NODE_ENV === 'development' || origin.includes('localhost')) {
-    console.log('Development mode or localhost detected - allowing all origins');
-    res.header('Access-Control-Allow-Origin', '*');
-  } else {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  
+  // Always allow the frontend domain
+  res.header('Access-Control-Allow-Origin', frontendDomain);
   res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
 
   // Log the request details
   console.log('Token request received:');

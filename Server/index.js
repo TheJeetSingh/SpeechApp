@@ -12,6 +12,9 @@ const transcribeAudioHandler = require('./api/transcribe-audio');
 // Import the Agora token handler
 const { generateRtcToken } = require('./api/agora-token');
 
+// Import CORS configuration
+const corsMiddleware = require('./cors-config');
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -23,23 +26,41 @@ const allowedOrigins = [
   'https://speech-app-server.vercel.app'
 ];
 
-// CORS middleware for all routes - simplified and more permissive
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  // Always allow the origin that sent the request
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS preflight request');
-    return res.status(200).end();
-  }
-  
-  next();
-});
+// Parse environment variable for allowed origins if available
+if (process.env.CORS_ALLOWED_ORIGINS) {
+  const envOrigins = process.env.CORS_ALLOWED_ORIGINS.split(',');
+  envOrigins.forEach(origin => {
+    if (!allowedOrigins.includes(origin)) {
+      allowedOrigins.push(origin);
+    }
+  });
+}
+
+console.log('Allowed origins:', allowedOrigins);
+
+// Configure CORS
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
 
 // Parse JSON request bodies with increased limit for audio data
 app.use(express.json({ limit: '50mb' }));

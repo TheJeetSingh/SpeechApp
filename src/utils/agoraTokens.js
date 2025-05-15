@@ -26,20 +26,20 @@ export const getAgoraAppId = () => {
 // Get a token from the server for secure Agora communication
 export const getAgoraToken = async (channelName, uid) => {
   try {
-    // ALWAYS use localhost in development mode
-    let baseUrl = 'http://localhost:5001';
-    
-    // Only use environment variable in production
+    // In production, use the deployed server URL
+    let baseUrl;
     if (process.env.NODE_ENV === 'production') {
-      baseUrl = process.env.REACT_APP_API_BASE_URL || baseUrl;
+      baseUrl = 'https://speech-app-server.vercel.app';
+      console.log('Production mode: Using deployed server URL');
     } else {
-      console.log('Development mode: Forcing localhost API URL');
+      // In development, always use localhost
+      baseUrl = 'http://localhost:5001';
+      console.log('Development mode: Using localhost server URL');
     }
     
-    console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
     console.log('Using base URL:', baseUrl);
     
-    const apiUrl = `${baseUrl.replace(/\/+$/, '')}/api/agora/token`;
+    const apiUrl = `${baseUrl}/api/agora/token`;
     
     console.log('Requesting token from:', apiUrl);
     
@@ -50,14 +50,19 @@ export const getAgoraToken = async (channelName, uid) => {
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
+        },
         body: JSON.stringify({ 
           channelName, 
           uid, 
           role: 'publisher',
           expirationTimeInSeconds: 3600 // 1 hour
         }),
-        signal: controller.signal
+        signal: controller.signal,
+        mode: 'cors',
+        credentials: 'include'
       });
       
       clearTimeout(timeoutId);
