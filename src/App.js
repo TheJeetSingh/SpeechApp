@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import HomeScreen from "./components/HomeScreen";
@@ -20,9 +20,38 @@ import AICoachScreen from "./components/AICoachScreen"; // Import the new AICoac
 import ChatSession from "./components/ChatSession"; // Import the ChatSession component
 import NotFound from "./components/NotFound"; // Import the NotFound component
 import ErrorFallback from "./components/ErrorFallback"; // Import the ErrorFallback component
+import MobileBlocker from "./components/MobileBlocker"; // Import the MobileBlocker component
 import { Analytics } from "@vercel/analytics/react";
 
 function App() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check if the device is mobile
+    const checkMobile = () => {
+      const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      const isMobileDevice = mobileRegex.test(navigator.userAgent);
+      const isSmallScreen = window.innerWidth < 768; // Consider screens smaller than 768px as mobile
+      
+      // Check if user has chosen to override mobile restriction
+      const hasOverride = localStorage.getItem('articulate_mobile_override') === 'true';
+      
+      setIsMobile((isMobileDevice || isSmallScreen) && !hasOverride);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
+  // If it's a mobile device, show the mobile blocker
+  if (isMobile) {
+    return <MobileBlocker />;
+  }
+
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
