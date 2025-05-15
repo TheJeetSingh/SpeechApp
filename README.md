@@ -2,17 +2,6 @@
 
 A modern, interactive web application for practicing and improving public speaking skills.
 
-## New Feature: Speech Tutoring Room with WebRTC
-
-SpeechApp now includes a real-time speech tutoring room powered by Agora WebRTC! This feature allows you to:
-
-1. Connect with other users in real-time video calls
-2. Practice speeches with peers or tutors
-3. Get immediate feedback through video and chat
-4. Collaborate on speech improvement in a virtual environment
-
-For setup instructions, see [AGORA_SETUP.md](AGORA_SETUP.md).
-
 ## New Feature: AI Speech Analysis
 
 SpeechApp now includes AI-powered speech analysis using AssemblyAI for transcription and Google's Gemini API for coaching. When recording a speech, you can:
