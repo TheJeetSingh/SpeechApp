@@ -1511,6 +1511,30 @@ function HomeScreen() {
                 <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>🌎</span>
                 Extemp
               </motion.button>
+
+              <motion.button 
+                style={{
+                  padding: "1rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "#fff",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "12px",
+                  fontSize: "1rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "0.5rem"
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#1e3c72" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate("/speech-tutoring")}
+              >
+                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>👥</span>
+                Speech Tutoring
+              </motion.button>
             </div>
           </motion.div>
           
