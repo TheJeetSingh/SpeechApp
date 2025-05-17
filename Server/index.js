@@ -264,6 +264,56 @@ app.get("/api/news", async (req, res) => {
   }
 });
 
+// NYT News API Route
+app.get("/api/nyt-news", async (req, res) => {
+  // Always accept requests from localhost and production domain
+  const origin = req.headers.origin;
+  const allowedOrigins = ['http://localhost:3000', 'https://speech-app-delta.vercel.app', 'https://speech-app-server.vercel.app'];
+  
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  console.log(`NYT News API requested from origin: ${origin}`);
+  
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  const API_KEY = process.env.NYT_API_KEY;
+  const section = req.query.section || "home";
+
+  if (!API_KEY) {
+    return res.status(500).json({ message: "NYT API key is missing" });
+  }
+
+  try {
+    console.log(`Fetching news from NYT API for section: ${section}`);
+    const response = await axios.get(`https://api.nytimes.com/svc/topstories/v2/${section}.json`, {
+      params: {
+        'api-key': API_KEY
+      }
+    });
+
+    if (response.data.results && response.data.results.length > 0) {
+      console.log(`Successfully fetched ${response.data.results.length} articles from NYT`);
+      res.json({ results: response.data.results });
+    } else {
+      console.log("No articles found from NYT API");
+      res.status(404).json({ message: "No articles found" });
+    }
+  } catch (err) {
+    console.error("NYT API Error:", err.response?.data || err.message);
+    res.status(500).json({ message: "Error fetching news from NYT", error: err.message });
+  }
+});
+
 // Speech Analysis API Route with Gemini
 app.post("/api/analyze-speech", async (req, res) => {
   // Set CORS headers directly on this route

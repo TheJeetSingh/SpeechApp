@@ -16,7 +16,14 @@ const CurrentScreen = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch(`${config.API_URL}${config.NEWS_ENDPOINT}`, {
+        // Use the server endpoint for NYT API with the correct port in development
+        const apiUrl = process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:5001/api/nyt-news'
+          : `${config.API_URL}${config.NYT_NEWS_ENDPOINT}`;
+          
+        console.log('Fetching articles from:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -28,7 +35,7 @@ const CurrentScreen = () => {
         // Check if response is ok and content-type is application/json
         const contentType = response.headers.get("content-type");
         if (!response.ok || !contentType?.includes("application/json")) {
-          setError("Unable to fetch current topics. Please try again later.");
+          setError("Unable to fetch current topics from NYT. Please try again later.");
           return;
         }
 
@@ -41,10 +48,12 @@ const CurrentScreen = () => {
           return;
         }
 
-        if (data?.articles?.length) {
-          const processedArticles = data.articles.map(article => ({
+        if (data?.results?.length) {
+          const processedArticles = data.results.map(article => ({
             title: article.title || '',
-            description: article.description || ''
+            description: article.abstract || '',
+            section: article.section || 'general',
+            url: article.url || ''
           }));
           setArticles(getRandomArticles(processedArticles, 3));
         } else {
@@ -77,7 +86,7 @@ const CurrentScreen = () => {
     } else if (timer === 0 && articles.length) {
       setIsTimerActive(false);
       navigate(`/prep/${encodeURIComponent(articles[0].title)}`, {
-        state: { topicName: articles[0].title },
+        state: { topicName: articles[0].title, topicDescription: articles[0].description },
       });
     }
     return () => clearInterval(interval);
@@ -141,13 +150,17 @@ const CurrentScreen = () => {
                 whileTap="tap"
                 onClick={() =>
                   navigate(`/prep/${encodeURIComponent(article.title)}`, {
-                    state: { topicName: article.title },
+                    state: { topicName: article.title, topicDescription: article.description },
                   })
                 }
                 custom={index}
                 layout
               >
-                {article.title}
+                <div style={styles.articleTitle}>{article.title}</div>
+                {article.description && (
+                  <div style={styles.articleDescription}>{article.description}</div>
+                )}
+                <div style={styles.articleSection}>Section: {article.section}</div>
               </motion.li>
             ))}
           </AnimatePresence>
@@ -176,6 +189,22 @@ const styles = {
     color: colors.text.primary,
     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
     lineHeight: 1.6,
+    cursor: "pointer",
+  },
+  articleTitle: {
+    fontWeight: "600",
+    marginBottom: "10px",
+  },
+  articleDescription: {
+    fontSize: "1rem",
+    opacity: 0.9,
+    marginBottom: "10px",
+  },
+  articleSection: {
+    fontSize: "0.9rem",
+    opacity: 0.7,
+    fontStyle: "italic",
+    textTransform: "capitalize",
   },
   error: {
     padding: "15px 20px",

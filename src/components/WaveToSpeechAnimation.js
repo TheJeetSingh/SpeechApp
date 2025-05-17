@@ -928,7 +928,7 @@ function HomeScreen() {
       title: "Extemp",
       description: "Speak on current events with depth.",
       background: "linear-gradient(135deg, #00c853, #00e676)",
-      navigateTo: "/beta",
+      navigateTo: "/extemp",
       icon: "🌎",
       type: "Extemp",
       onClick: () => {

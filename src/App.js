@@ -10,17 +10,18 @@ import SpeechScreen from "./components/SpeechScreen";
 import AbstractScreen from "./components/AbstractScreen";
 import CurrentScreen from "./components/CurrentScreen";
 import ConstructionScreen from "./components/ConstructionScreen";
-import BetaDev from "./components/BetaDev";
 import ExtempScreen from "./components/ExtempScreen";
 import ExtempPrepScreen from "./components/ExtempPrepScreen";
-import LoginScreen from "./components/LoginScreen"; // Import the new LoginScreen
+import ExtempSelectScreen from "./components/ExtempSelectScreen";
+import ExtempTopicSelectScreen from "./components/ExtempTopicSelectScreen";
+import LoginScreen from "./components/LoginScreen";
 import SignupScreen from "./components/SignupScreen";
-import SpeechStats from "./components/SpeechStats"; // Add import for SpeechStats
-import AICoachScreen from "./components/AICoachScreen"; // Import the new AICoachScreen
-import ChatSession from "./components/ChatSession"; // Import the ChatSession component
-import NotFound from "./components/NotFound"; // Import the NotFound component
-import ErrorFallback from "./components/ErrorFallback"; // Import the ErrorFallback component
-import MobileBlocker from "./components/MobileBlocker"; // Import the MobileBlocker component
+import SpeechStats from "./components/SpeechStats";
+import AICoachScreen from "./components/AICoachScreen";
+import ChatSession from "./components/ChatSession";
+import NotFound from "./components/NotFound";
+import ErrorFallback from "./components/ErrorFallback";
+import MobileBlocker from "./components/MobileBlocker";
 import { Analytics } from "@vercel/analytics/react";
 
 function App() {
@@ -64,8 +65,8 @@ function App() {
         <Analytics />
         <Routes>
           <Route path="/" element={<HomeScreen />} />
-          <Route path="/login" element={<LoginScreen />} /> {/* Add the login route */}
-          <Route path="/signup" element={<SignupScreen />} /> {/* Add the signup route */}
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/signup" element={<SignupScreen />} />
           <Route path="/topics" element={<TopicsScreen />} />
           <Route path="/quote" element={<QuoteScreen />} />
           <Route path="/concrete" element={<ConcreteScreen />} />
@@ -74,13 +75,13 @@ function App() {
           <Route path="/speech" element={<SpeechScreen />} />
           <Route path="/current" element={<CurrentScreen />} />
           <Route path="/construction" element={<ConstructionScreen />} />
-          <Route path="/beta" element={<BetaDev />} />
-          <Route path="/extemp" element={<ExtempScreen />} />
+          <Route path="/extemp" element={<ExtempSelectScreen />} />
+          <Route path="/extempTopicSelect" element={<ExtempTopicSelectScreen />} />
           <Route path="/extempPrep" element={<ExtempPrepScreen />} />
-          <Route path="/stats" element={<SpeechStats />} /> {/* Add route for SpeechStats */}
-          <Route path="/ai-coach" element={<AICoachScreen />} /> {/* Add route for AICoachScreen */}
-          <Route path="/chat-session" element={<ChatSession />} /> {/* Add route for ChatSession */}
-          <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 errors */}
+          <Route path="/stats" element={<SpeechStats />} />
+          <Route path="/ai-coach" element={<AICoachScreen />} />
+          <Route path="/chat-session" element={<ChatSession />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </ErrorBoundary>

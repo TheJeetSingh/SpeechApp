@@ -17,8 +17,10 @@ const config = {
   // API URL will be empty in development (to use proxy) and absolute URL in production
   API_URL: getApiUrl(),
   NEWS_ENDPOINT: '/api/news',
+  NYT_NEWS_ENDPOINT: '/api/nyt-news',
   CORS_TEST_ENDPOINT: '/api/cors-test',
   NEWS_API_KEY: process.env.REACT_APP_NEWS_API_KEY,
+  NYT_API_KEY: process.env.REACT_APP_NYT_API_KEY,
   DEFAULT_NEWS_PARAMS: {
     country: 'us',
     pageSize: 10,

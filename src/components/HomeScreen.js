@@ -1298,7 +1298,7 @@ function HomeScreen() {
   // Navigate to practice screen with selected type
   const handlePractice = (type, defaultTopic = null) => {
     if (type === "Extemp") {
-      navigate("/beta", { 
+      navigate("/extemp", { 
         state: { type }
       });
     } else if (type === "Impromptu") {
