@@ -135,7 +135,7 @@ const NotFound = () => {
             style={styles.homeButton}
             whileHover={{ scale: 1.05, backgroundColor: colors.accent.blue }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
           >
             <FiHome size={20} />
             <span>Return to the Podium</span>

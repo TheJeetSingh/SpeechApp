@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
+import LandingPage from "./components/LandingPage";
 import HomeScreen from "./components/HomeScreen";
 import TopicsScreen from "./components/TopicsScreen";
 import QuoteScreen from "./components/QuoteScreen";
@@ -58,13 +59,14 @@ function App() {
       FallbackComponent={ErrorFallback}
       onReset={() => {
         // Reset the app state here
-        window.location.href = '/';
+        window.location.href = '/home';
       }}
     >
       <Router>
         <Analytics />
         <Routes>
-          <Route path="/" element={<HomeScreen />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<HomeScreen />} />
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/signup" element={<SignupScreen />} />
           <Route path="/topics" element={<TopicsScreen />} />

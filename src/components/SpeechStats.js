@@ -262,7 +262,7 @@ function SpeechStats() {
     
     // Navigate after the complete animation finishes
     setTimeout(() => {
-      navigate('/');
+      navigate('/home');
     }, 2000); // Reduced from 3500ms to 2000ms for faster transition
   };
 

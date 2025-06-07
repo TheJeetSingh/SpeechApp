@@ -135,7 +135,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
             style={styles.homeButton}
             whileHover={{ scale: 1.05, backgroundColor: colors.primary.light }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
           >
             <FiHome size={20} />
             <span>Return to Mission Control</span>
