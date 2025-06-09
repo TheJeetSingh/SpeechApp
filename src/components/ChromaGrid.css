@@ -51,6 +51,7 @@
 .chroma-card-user-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .chroma-card-user-info h3 {
@@ -67,5 +68,4 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px; /* Adjust as needed */
 } 

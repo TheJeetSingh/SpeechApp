@@ -36,7 +36,7 @@ cp .env.example .env
    REACT_APP_ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
    ```
 
-3. **IMPORTANT**: Never commit your `.env` file to version control! It contains sensitive API keys.
+3. **IMPORTANT**: Never commit your `.env` file to version control! It contains sensitive API keys. unless you feel like sharing, because sharing is caring :)
 
 ## Installation
 
