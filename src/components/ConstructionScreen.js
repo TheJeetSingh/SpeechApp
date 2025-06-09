@@ -15,7 +15,7 @@ const UnderConstructionScreen = () => {
         The Developer will be back once he walks his fish.
         Disclaimer: Your credit card will be automatically charged for breaking this site
       </p>
-      <button style={styles.button} onClick={() => navigate("/")}>Back to Home</button>
+      <button style={styles.button} onClick={() => navigate("/home")}>Back to Home</button>
     </div>
   );
 };

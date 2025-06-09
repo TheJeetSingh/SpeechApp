@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+import { FiArrowDown, FiArrowUp, FiLogOut, FiLogIn } from "react-icons/fi";
 import { jwtDecode } from "jwt-decode";
 import { useSpring, animated } from 'react-spring';
 import { TypeAnimation } from 'react-type-animation';
 import { useInterval, useMouse, useWindowSize } from 'react-use';
+import Aurora from './Aurora';
+import ChromaGrid from './ChromaGrid';
 
 // StickFigureSpeechAnimation component for fallback when audio permissions are denied
 const StickFigureSpeechAnimation = () => {
@@ -65,6 +67,7 @@ const StickFigureSpeechAnimation = () => {
         opacity: 0.1 + Math.random() * 0.5,
         life: 0,
         maxLife: 100 + Math.random() * 200,
+        text: Math.random() > 0.7 ? speechTexts[Math.floor(Math.random() * speechTexts.length)] : null
       });
     }
     
@@ -821,309 +824,43 @@ function Modal({ isOpen, onClose, onConfirm }) {
   );
 }
 
-// Header Component with background toggle added to settings
-function Header({ onFeedbackClick }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [userName, setUserName] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        setUserName(decodedToken.name);
-      } catch (error) {
-        console.error("Error decoding token", error);
-      }
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setUserName("");
-    setMenuOpen(false);
-    navigate("/login");
-  };
-
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const handleNavigation = (path) => {
-    setMenuOpen(false);
-    navigate(path);
-  };
-
-  return (
-    <div style={styles.header}>
-      <h1 style={styles.headerTitle}>ARTICULATE</h1>
-      <div style={styles.settingsContainer}>
-        <motion.div 
-          style={styles.settingsIcon} 
-          onClick={toggleMenu}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          ⚙️
-        </motion.div>
-        {menuOpen && (
-          <motion.div 
-            style={styles.settingsDropdown}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            {userName ? (
-              <>
-                <motion.div style={styles.userName}>
-                  {userName}
-                </motion.div>
-                <motion.button 
-                  style={styles.dropdownButton} 
-                  onClick={handleLogout}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Log Out
-                </motion.button>
-              </>
-            ) : (
-              <>
-                <motion.button 
-                  style={styles.dropdownButton} 
-                  onClick={() => handleNavigation("/login")}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Sign In
-                </motion.button>
-                <motion.button 
-                  style={styles.dropdownButton} 
-                  onClick={() => handleNavigation("/signup")}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Sign Up
-                </motion.button>
-              </>
-            )}
-            <motion.button 
-              style={styles.dropdownButton} 
-              onClick={() => { onFeedbackClick(); setMenuOpen(false); }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Give Feedback
-            </motion.button>
-          </motion.div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Define styles first, before the HomeScreen component
 const styles = {
   container: {
     display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: "row",
     minHeight: "100vh",
     width: "100%",
     color: "#fff",
-    textAlign: "center",
-    fontFamily: "'Poppins', sans-serif",
-    position: "relative",
-    overflow: "auto",
-    WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+    fontFamily: "'Exo', 'Inter', sans-serif",
+    background: 'linear-gradient(to bottom, #040913, #010209)',
+    overflow: 'hidden',
   },
-  particles: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    zIndex: -2,
-  },
-  parallaxLayer: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed",
-    zIndex: -1,
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "clamp(0.5rem, 2vw, 2rem)",
-    background: "rgba(30, 60, 114, 0.95)",
-    backdropFilter: "blur(10px)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    width: "100%",
-    position: "fixed",
-    top: 0,
-    left: 0,
-    zIndex: 4000,
-    borderBottom: "1px solid rgba(255, 255, 255, 0.18)",
-    '@media (max-width: 768px)': {
-      padding: "0.8rem 1rem",
-      justifyContent: "flex-end"
-    }
-  },
-  headerTitle: {
-    fontSize: "clamp(1.2rem, 5vw, 2rem)",
-    fontWeight: "700",
-    color: "#fff",
-    margin: 0,
-    letterSpacing: "2px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
-    background: "linear-gradient(45deg, #fff, #87CEEB)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    animation: "glow 2s ease-in-out infinite alternate",
-    '@media (max-width: 768px)': {
-      display: 'none',
-    },
-  },
-  settingsContainer: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-    marginRight: "4rem",
-    marginLeft: "auto",
-    zIndex: 5000,
-  },
-  settingsIcon: {
-    fontSize: "24px",
-    cursor: "pointer",
-    marginLeft: "15px",
-    color: "white",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  settingsDropdown: {
-    position: "absolute",
-    top: "calc(100% + 10px)",
-    right: 0,
-    background: "rgba(255, 255, 255, 0.95)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
-    padding: "1rem",
-    width: "200px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-  },
-  userName: {
-    fontSize: "1rem",
-    fontWeight: "600",
-    color: "#333",
-    padding: "0.5rem",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-    marginBottom: "0.5rem",
-  },
-  dropdownButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "0.9rem",
-    fontWeight: "500",
-    width: "100%",
-    border: "none",
-    borderRadius: "8px",
-    background: "rgba(255, 255, 255, 0.1)",
-    color: "#333",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      background: "rgba(0, 0, 0, 0.05)",
-    },
-  },
-  welcomeScreen: {
+  mainContent: {
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
-    width: "100%",
     padding: "clamp(1rem, 5vw, 3rem)",
     textAlign: "center",
-    position: "relative",
-    marginTop: "clamp(60px, 10vh, 80px)",
-    '@media (max-width: 768px)': {
-      marginTop: "60px",
-      padding: "1rem",
-    },
+    overflowY: 'auto',
   },
   heading: {
     fontSize: "clamp(2rem, 8vw, 3.5rem)",
     fontWeight: "700",
     marginBottom: "1rem",
     letterSpacing: "2px",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
-    color: "#000000",
-  },
-  navDots: {
-    display: "flex",
-    gap: "1rem",
-    marginBottom: "2rem",
-    padding: "1rem",
-    borderRadius: "20px",
-  },
-  navDot: {
-    width: "12px",
-    height: "12px",
-    borderRadius: "50%",
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    border: "2px solid transparent",
-    "&:hover": {
-      backgroundColor: "#fff",
-      transform: "scale(1.2)",
-      border: "2px solid rgba(255, 255, 255, 0.5)",
-    }
-  },
-  downArrow: {
-    fontSize: "3rem",
-    marginTop: "2rem",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    color: "#000",
-    animation: "bounce 4s infinite ease-in-out",
-    filter: "drop-shadow(0 0 8px rgba(0, 0, 0, 0.5))",
-    "&:hover": {
-      transform: "scale(1.2)",
-    }
-  },
-  // Additional styles for the new layout
-  mainContent: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    width: "100%",
-    padding: "clamp(1rem, 5vw, 3rem)",
-    textAlign: "center",
-    position: "relative",
-    marginTop: "clamp(60px, 10vh, 80px)",
+    textShadow: '0 0 20px rgba(79, 172, 254, 0.5)',
+    background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
   },
   tagline: {
     fontSize: "clamp(1rem, 3vw, 1.5rem)",
     maxWidth: "800px",
     marginBottom: "3rem",
-    color: "#000",
+    color: "rgba(255, 255, 255, 0.7)",
     lineHeight: 1.6,
     fontWeight: "500",
   },
@@ -1149,7 +886,7 @@ const styles = {
     alignItems: "center",
     padding: "2rem",
     borderRadius: "20px",
-    background: "linear-gradient(135deg, rgba(42, 82, 152, 0.8), rgba(30, 60, 114, 0.8))",
+    background: "linear-gradient(135deg, rgba(42, 82, 152, 0.1), rgba(30, 60, 114, 0.2))",
     backdropFilter: "blur(10px)",
     boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
     border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -1257,17 +994,92 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
   },
-  rulesOverlay: undefined,
-  rulesContent: undefined,
-  rulesTitle: undefined, 
-  rulesList: undefined,
-  ruleItem: undefined,
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 7000,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: "2rem",
+    borderRadius: "12px",
+    maxWidth: "400px",
+    width: "100%",
+    textAlign: "center",
+    color: "#000",
+  },
+  modalTitle: {
+    fontSize: "2rem",
+    fontWeight: "700",
+    marginBottom: "1rem",
+  },
+  modalText: {
+    fontSize: "1.2rem",
+    marginBottom: "2rem",
+  },
+  modalButtons: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "1rem",
+  },
+  modalButton: {
+    padding: "0.75rem 1.5rem",
+    border: "none",
+    borderRadius: "8px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    fontSize: "1rem",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
+  settingsToggle: {
+    position: 'fixed',
+    bottom: '2rem',
+    left: '2rem',
+    zIndex: 5000,
+    cursor: 'pointer',
+    fontSize: '2rem',
+    color: 'rgba(255, 255, 255, 0.7)',
+    transition: 'all 0.3s ease',
+  },
+  sidebar: {
+    width: '280px',
+    background: 'rgba(10, 25, 47, 0.9)',
+    backdropFilter: 'blur(10px)',
+    padding: '2rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  sidebarButton: {
+    padding: '1rem',
+    fontSize: '1rem',
+    fontWeight: '500',
+    width: '100%',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '8px',
+    background: 'rgba(255, 255, 255, 0.1)',
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+  },
 };
 
 // HomeScreen Component
 function HomeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -1276,12 +1088,27 @@ function HomeScreen() {
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        setUserName(decodedToken.name);
+        setUserName(decodedToken.name || "");
+        setUserEmail(decodedToken.email || "");
+        setIsLoggedIn(true);
       } catch (error) {
-        console.error("Error decoding token", error);
+        console.error("Invalid token:", error);
+        handleLogout();
       }
     }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUserName("");
+    setUserEmail("");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
 
   const handleFeedbackClick = () => {
     setIsModalOpen(true);
@@ -1289,6 +1116,7 @@ function HomeScreen() {
 
   const handleConfirm = () => {
     setIsModalOpen(false);
+    window.open("https://your-feedback-form.com", "_blank");
   };
 
   const handleClose = () => {
@@ -1315,333 +1143,173 @@ function HomeScreen() {
     }
   };
 
+  const handleChromaClick = () => {
+    navigate("/settings");
+  };
+
   return (
-    <div style={{...styles.container, backgroundColor: "#ffffff"}}>
-      {/* Background visualization removed for solid white background */}
-
-      <Header onFeedbackClick={handleFeedbackClick} />
-
-      {/* Main Content */}
-      <div style={styles.mainContent}>
-        <motion.h1
-          style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          <FloatingText text={userName ? `Welcome to Articulate, ${userName}` : "Welcome to Articulate"} />
-        </motion.h1>
-        
-        <motion.p 
-          style={{
-            fontSize: "1.2rem",
-            maxWidth: "800px",
-            margin: "0 auto 3rem auto",
-            color: "#000",
-            lineHeight: 1.6
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          Improve your public speaking skills with practice and AI-powered feedback
-        </motion.p>
-
-        {/* Two Main Options */}
-        <div style={{
-    display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-    justifyContent: "center",
-          alignItems: "stretch",
-          width: "100%",
-          maxWidth: "1200px",
-          gap: "2rem",
-          margin: "0 auto"
-        }}>
-          {/* Practice Option */}
-          <motion.div 
-            style={{
-              flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    padding: "2rem",
-              borderRadius: "20px",
-              background: "linear-gradient(135deg, rgba(42, 82, 152, 0.8), rgba(30, 60, 114, 0.8))",
-              backdropFilter: "blur(10px)",
-              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              color: "#fff"
-            }}
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            whileHover={{ 
-              scale: 1.03, 
-              boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)"
-            }}
+    <>
+      <div style={styles.container}>
+        <motion.div style={styles.sidebar}>
+          <div style={styles.sidebarContent}>
+            <nav style={styles.nav}>
+              {!isLoggedIn && (
+                <motion.button style={styles.navButton} onClick={() => navigate('/login')}>
+                  <FiLogIn /> Log In
+                </motion.button>
+              )}
+            </nav>
+          </div>
+          <div 
+            style={{ zIndex: 101, cursor: 'pointer' }}
+            onClick={handleChromaClick}
           >
-            <div style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-              marginBottom: "1.5rem"
-            }}>
-              <span style={{
-                fontSize: "3rem",
-                marginBottom: "1rem"
-              }}>🎯</span>
-              <h2 style={{
-                fontSize: "1.8rem",
-    fontWeight: "700",
-                marginBottom: "0.5rem",
-    background: "linear-gradient(45deg, #fff, #87CEEB)",
-    WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent"
-              }}>Practice Speaking</h2>
-            </div>
-            
-            <p style={{
-              fontSize: "1.1rem",
-              marginBottom: "2rem",
-              textAlign: "center"
-            }}>
-              Choose a speech format and start practicing right away
-            </p>
-            
-            {/* Practice Options */}
-            <div style={{
-    display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
-              gap: "1rem",
-              width: "100%",
-              marginBottom: "1.5rem"
-            }}>
-              <motion.button 
-                style={{
-    padding: "1rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-                  fontSize: "1rem",
-      fontWeight: "600",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "0.5rem"
-                }}
-                whileHover={{ scale: 1.05, backgroundColor: "#1e3c72" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handlePractice("Impromptu")}
-              >
-                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>⚡️</span>
-                Impromptu
-              </motion.button>
-              
-              <motion.button 
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-      fontSize: "1rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "0.5rem"
-                }}
-                whileHover={{ scale: 1.05, backgroundColor: "#6a11cb" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
-              >
-                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>🎭</span>
-                Interp
-              </motion.button>
-              
-              <motion.button 
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-                  fontSize: "1rem",
-                  fontWeight: "600",
-    cursor: "pointer",
-    display: "flex",
-                  alignItems: "center",
-    justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "0.5rem"
-                }}
-                whileHover={{ scale: 1.05, backgroundColor: "#ff416c" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
-              >
-                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>✏️</span>
-                Original
-              </motion.button>
-              
-              <motion.button 
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-                  fontSize: "1rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  display: "flex",
-    alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "0.5rem"
-                }}
-                whileHover={{ scale: 1.05, backgroundColor: "#00c853" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handlePractice("Extemp")}
-              >
-                <span style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>🌎</span>
-                Extemp
-              </motion.button>
-            </div>
-          </motion.div>
+            <ChromaGrid 
+              isLoggedIn={isLoggedIn}
+              userName={userName} 
+              userEmail={userEmail}
+            />
+          </div>
+        </motion.div>
+        <main style={styles.mainContent}>
+          <motion.h1
+            style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+          >
+            {userName ? `Welcome, ${userName}` : "Welcome to Articulate"}
+          </motion.h1>
           
-          {/* AI Help Option */}
-          <motion.div 
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              padding: "2rem",
-    borderRadius: "20px",
-              background: "linear-gradient(135deg, rgba(0, 119, 182, 0.8), rgba(0, 180, 216, 0.8))",
-              backdropFilter: "blur(10px)",
-              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              color: "#fff"
-            }}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            whileHover={{ 
-              scale: 1.03, 
-              boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)"
-            }}
+          <motion.p 
+            style={styles.tagline}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <div style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-              marginBottom: "1.5rem"
-            }}>
-              <span style={{
-                fontSize: "3rem",
-                marginBottom: "1rem"
-              }}>🤖</span>
-              <h2 style={{
-                fontSize: "1.8rem",
-    fontWeight: "700",
-    marginBottom: "0.5rem",
-                background: "linear-gradient(45deg, #fff, #87CEEB)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent"
-              }}>AI Speech Coach</h2>
-            </div>
-            
-            <p style={{
-              fontSize: "1.1rem",
-              marginBottom: "2rem",
-              textAlign: "center"
-            }}>
-              Get personalized feedback and analysis to improve your speaking skills
-            </p>
-            
-            <ul style={{
-    width: "100%",
-              listStyle: "none",
-              padding: 0,
-              margin: "0 0 2rem 0",
-              textAlign: "left"
-            }}>
-              <li style={{
-    display: "flex",
-    alignItems: "center",
-                gap: "1rem",
-    marginBottom: "1rem",
-                fontSize: "1.05rem"
-              }}>
-                <span style={{ fontSize: "1.2rem" }}>🎤</span>
-                <span>Real-time speech analysis</span>
-              </li>
-              <li style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-                marginBottom: "1rem",
-                fontSize: "1.05rem"
-              }}>
-                <span style={{ fontSize: "1.2rem" }}>📊</span>
-                <span>Detailed performance metrics</span>
-              </li>
-              <li style={{
-    display: "flex",
-    alignItems: "center",
-                gap: "1rem",
-                marginBottom: "1rem",
-                fontSize: "1.05rem"
-              }}>
-                <span style={{ fontSize: "1.2rem" }}>💡</span>
-                <span>Personalized improvement tips</span>
-              </li>
-              <li style={{
-    display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                marginBottom: "1rem",
-                fontSize: "1.05rem"
-              }}>
-                <span style={{ fontSize: "1.2rem" }}>🔄</span>
-                <span>Progress tracking over time</span>
-              </li>
-            </ul>
-            
-            <motion.button
-              style={{
-                padding: "1rem 2rem",
-                backgroundColor: "rgba(0, 191, 255, 0.7)",
-    color: "#fff",
-    border: "none",
-    borderRadius: "30px",
-                fontSize: "1.1rem",
-                fontWeight: "600",
-    cursor: "pointer",
-                alignSelf: "center",
-                marginTop: "auto",
-                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
-              whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/ai-coach")}
-            >
-              Start AI Coaching <span style={{ marginLeft: '8px' }}>→</span>
-            </motion.button>
-          </motion.div>
-        </div>
-      </div>
+            Improve your public speaking skills with practice and AI-powered feedback
+          </motion.p>
 
-      <Modal isOpen={isModalOpen} onClose={handleClose} onConfirm={handleConfirm} />
-    </div>
+          {/* Two Main Options */}
+          <div style={styles.optionsContainer}>
+            {/* Practice Option */}
+            <motion.div 
+              style={styles.optionCard}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              whileHover={{ 
+                scale: 1.03, 
+                boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)",
+                borderColor: 'rgba(79, 172, 254, 0.5)'
+              }}
+            >
+              <div style={styles.optionHeader}>
+                <span style={styles.optionIcon}>🎯</span>
+                <h2 style={styles.optionTitle}>Practice Speaking</h2>
+              </div>
+              
+              <p style={styles.optionDescription}>
+                Choose a speech format and start practicing right away
+              </p>
+              
+              {/* Practice Options */}
+              <div style={styles.practiceTypes}>
+                <motion.button 
+                  style={styles.practiceTypeButton}
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handlePractice("Impromptu")}
+                >
+                  <span style={styles.buttonIcon}>⚡️</span>
+                  Impromptu
+                </motion.button>
+                
+                <motion.button 
+                  style={styles.practiceTypeButton}
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
+                >
+                  <span style={styles.buttonIcon}>🎭</span>
+                  Interp
+                </motion.button>
+                
+                <motion.button 
+                  style={styles.practiceTypeButton}
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
+                >
+                  <span style={styles.buttonIcon}>✏️</span>
+                  Original
+                </motion.button>
+                
+                <motion.button 
+                  style={styles.practiceTypeButton}
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handlePractice("Extemp")}
+                >
+                  <span style={styles.buttonIcon}>🌎</span>
+                  Extemp
+                </motion.button>
+              </div>
+            </motion.div>
+            
+            {/* AI Help Option */}
+            <motion.div 
+              style={styles.optionCard}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              whileHover={{ 
+                scale: 1.03, 
+                boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)",
+                borderColor: 'rgba(79, 172, 254, 0.5)'
+              }}
+            >
+              <div style={styles.optionHeader}>
+                <span style={styles.optionIcon}>🤖</span>
+                <h2 style={styles.optionTitle}>AI Speech Coach</h2>
+              </div>
+              
+              <p style={styles.optionDescription}>
+                Get personalized feedback and analysis to improve your speaking skills
+              </p>
+              
+              <ul style={styles.aiFeaturesList}>
+                <li style={styles.aiFeature}>
+                  <span style={styles.featureIcon}>🎤</span>
+                  <span>Real-time speech analysis</span>
+                </li>
+                <li style={styles.aiFeature}>
+                  <span style={styles.featureIcon}>📊</span>
+                  <span>Detailed performance metrics</span>
+                </li>
+                <li style={styles.aiFeature}>
+                  <span style={styles.featureIcon}>💡</span>
+                  <span>Personalized improvement tips</span>
+                </li>
+                <li style={styles.aiFeature}>
+                  <span style={styles.featureIcon}>🔄</span>
+                  <span>Progress tracking over time</span>
+                </li>
+              </ul>
+              
+              <motion.button
+                style={styles.aiHelpButton}
+                whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate("/ai-coach")}
+              >
+                Start AI Coaching <span style={{ marginLeft: '8px' }}>→</span>
+              </motion.button>
+            </motion.div>
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
 

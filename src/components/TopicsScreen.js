@@ -14,28 +14,28 @@ const TopicsScreen = () => {
       description: "Interpret and discuss meaningful quotes from various sources",
       icon: <FiMessageSquare size={24} />,
       path: "/quote",
-      gradient: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.blue})`,
+      gradient: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.cyan})`,
     },
     {
       title: "Abstract",
       description: "Explore philosophical and conceptual topics",
       icon: <FiBook size={24} />,
       path: "/abstract",
-      gradient: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.green})`,
+      gradient: `linear-gradient(135deg, ${colors.accent.cyan}, ${colors.accent.green})`,
     },
     {
       title: "Concrete",
       description: "Discuss tangible, real-world subjects",
       icon: <FiBox size={24} />,
       path: "/concrete",
-      gradient: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.yellow})`,
+      gradient: `linear-gradient(135deg, ${colors.accent.green}, ${colors.accent.pink})`,
     },
     {
       title: "Current Events",
       description: "Address contemporary issues and news",
       icon: <FiGlobe size={24} />,
       path: "/current",
-      gradient: `linear-gradient(135deg, ${colors.accent.red}, ${colors.accent.purple})`,
+      gradient: `linear-gradient(135deg, ${colors.accent.red}, ${colors.accent.blue})`,
     },
   ];
 
@@ -49,10 +49,11 @@ const TopicsScreen = () => {
       <Particles
         id="tsparticles"
         options={particlesConfig}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}
       />
       
       <motion.div
-        style={componentStyles.content}
+        style={styles.content}
         variants={animations.content}
       >
         <motion.h1
@@ -69,7 +70,7 @@ const TopicsScreen = () => {
                 key={category.title}
                 style={{
                   ...styles.categoryCard,
-                  background: category.gradient,
+                  borderImage: `${category.gradient} 1`,
                 }}
                 variants={animations.card}
                 custom={index}
@@ -78,35 +79,20 @@ const TopicsScreen = () => {
                 onClick={() => navigate(category.path)}
                 layout
               >
-                <motion.div 
-                  style={styles.iconContainer}
-                  animate={{ 
-                    rotate: [0, 10, -10, 0],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: index * 0.2
-                  }}
-                >
+                <div style={{...styles.iconContainer, background: category.gradient }}>
                   {category.icon}
-                </motion.div>
-                <motion.div style={styles.cardContent}>
-                  <motion.h2 style={styles.cardTitle}>
+                </div>
+                <div style={styles.cardContent}>
+                  <h2 style={styles.cardTitle}>
                     {category.title}
-                  </motion.h2>
-                  <motion.p style={styles.cardDescription}>
+                  </h2>
+                  <p style={styles.cardDescription}>
                     {category.description}
-                  </motion.p>
-                </motion.div>
-                <motion.div
-                  style={styles.arrowContainer}
-                  whileHover={{ x: 5 }}
-                >
+                  </p>
+                </div>
+                <div style={styles.arrowContainer}>
                   <FiArrowRight size={20} />
-                </motion.div>
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -117,78 +103,64 @@ const TopicsScreen = () => {
 };
 
 const styles = {
+  content: {
+    ...componentStyles.content,
+    zIndex: 1,
+  },
   heading: {
     ...componentStyles.heading,
     marginBottom: "2rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.blue})`,
+    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.secondary.main})`,
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
-    width: "100%",
-    maxWidth: "800px",
-    margin: "0 auto 2rem auto",
   },
   categoriesList: {
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
-    width: "95%",
-    maxWidth: "600px",
-    margin: "0 auto",
-    padding: "1rem",
+    gap: "1.5rem",
+    width: "100%",
+    maxWidth: "700px",
   },
   categoryCard: {
-    background: colors.background.glass,
+    background: "rgba(10, 25, 47, 0.7)",
     padding: "1.5rem",
-    borderRadius: "20px",
+    borderRadius: "15px",
+    border: "2px solid transparent",
     backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
     cursor: "pointer",
-    position: "relative",
-    overflow: "hidden",
     display: "flex",
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: "1rem",
+    gap: "1.5rem",
     transition: "all 0.3s ease",
-    width: "100%",
   },
   iconContainer: {
     color: colors.text.primary,
-    background: "rgba(255, 255, 255, 0.1)",
-    padding: "0.75rem",
+    padding: "1rem",
     borderRadius: "12px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
   },
   cardContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
     flex: 1,
   },
   cardTitle: {
-    fontSize: "1.25rem",
+    fontSize: "1.3rem",
     fontWeight: "600",
     color: colors.text.primary,
     margin: 0,
+    marginBottom: '0.25rem',
   },
   cardDescription: {
-    fontSize: "0.9rem",
+    fontSize: "0.95rem",
     color: colors.text.secondary,
     margin: 0,
-    lineHeight: 1.4,
+    lineHeight: 1.5,
   },
   arrowContainer: {
-    color: colors.text.primary,
-    display: "flex",
-    alignItems: "center",
+    color: colors.text.secondary,
     transition: "transform 0.3s ease",
-    flexShrink: 0,
   },
 };
 

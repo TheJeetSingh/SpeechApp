@@ -54,10 +54,11 @@ function QuoteScreen() {
       <Particles
         id="tsparticles"
         options={particlesConfig}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}
       />
       
       <motion.div
-        style={componentStyles.content}
+        style={styles.content}
         variants={animations.content}
       >
         <motion.h1
@@ -85,7 +86,7 @@ function QuoteScreen() {
         </motion.div>
 
         <motion.div style={styles.quotesContainer}>
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {quotesList.map((quote, index) => (
               <motion.div
                 key={quote}
@@ -95,39 +96,17 @@ function QuoteScreen() {
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => handleQuoteSelect(quote)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0,
-                  transition: { delay: index * 0.2 }
-                }}
-                exit={{ opacity: 0, y: -20 }}
                 layout
               >
-                <motion.div 
-                  style={styles.quoteIconContainer}
-                  animate={{ 
-                    rotate: [0, 10, -10, 0],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: index * 0.2
-                  }}
-                >
+                <div style={styles.quoteIconContainer}>
                   <FiMessageSquare size={24} />
-                </motion.div>
-                <motion.p style={styles.quoteText}>
-                  {quote}
-                </motion.p>
-                <motion.div
-                  style={styles.arrowContainer}
-                  whileHover={{ x: 5 }}
-                >
+                </div>
+                <p style={styles.quoteText}>
+                  "{quote}"
+                </p>
+                <div style={styles.arrowContainer}>
                   <FiArrowRight size={20} />
-                </motion.div>
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -138,85 +117,80 @@ function QuoteScreen() {
 }
 
 const styles = {
+  content: {
+    ...componentStyles.content,
+    zIndex: 1
+  },
   heading: {
     ...componentStyles.heading,
-    marginBottom: "2.5rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.accent.purple})`,
+    marginBottom: "2rem",
+    background: `linear-gradient(45deg, ${colors.accent.blue}, ${colors.accent.cyan})`,
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
-    width: "100%",
-    maxWidth: "800px",
-    margin: "0 auto 2.5rem auto",
   },
   timerContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "1rem",
-    background: colors.background.glass,
-    padding: "1.5rem 2.5rem",
+    gap: "0.75rem",
+    background: "rgba(10, 25, 47, 0.7)",
+    padding: "1rem 2rem",
     borderRadius: "50px",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    marginBottom: "3rem",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.2)",
+    marginBottom: "2.5rem",
     width: "fit-content",
-    margin: "0 auto 3rem auto",
+    margin: "0 auto 2.5rem auto",
   },
   clockIcon: {
-    color: colors.text.primary,
+    color: colors.accent.cyan,
   },
   timer: {
-    fontSize: "1.8rem",
+    fontSize: "1.5rem",
     fontWeight: "700",
     transition: "color 0.3s ease",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    textShadow: `0 0 10px ${colors.accent.cyan}`,
   },
   quotesContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "2rem",
-    width: "90%",
+    gap: "1.5rem",
+    width: "100%",
     maxWidth: "800px",
     margin: "0 auto",
   },
   quoteCard: {
-    background: colors.background.glass,
+    background: "rgba(10, 25, 47, 0.7)",
     padding: "2rem",
-    borderRadius: "20px",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 8px 20px 0 rgba(0, 0, 0, 0.2)",
     cursor: "pointer",
     display: "flex",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: "1.5rem",
     transition: "all 0.3s ease",
   },
   quoteIconContainer: {
     color: colors.text.primary,
-    background: "rgba(255, 255, 255, 0.1)",
+    background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.cyan})`,
     padding: "1rem",
     borderRadius: "12px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
   },
   quoteText: {
-    fontSize: "1.2rem",
-    color: colors.text.primary,
+    fontSize: "1.1rem",
+    fontStyle: 'italic',
+    color: colors.text.secondary,
     margin: 0,
     lineHeight: 1.6,
     flex: 1,
   },
   arrowContainer: {
-    color: colors.text.primary,
-    display: "flex",
-    alignItems: "center",
-    flexShrink: 0,
-    alignSelf: "center",
+    color: colors.text.secondary,
     transition: "transform 0.3s ease",
   },
 };

@@ -20,6 +20,7 @@ import SignupScreen from "./components/SignupScreen";
 import SpeechStats from "./components/SpeechStats";
 import AICoachScreen from "./components/AICoachScreen";
 import ChatSession from "./components/ChatSession";
+import SettingsPage from "./components/SettingsPage";
 import NotFound from "./components/NotFound";
 import ErrorFallback from "./components/ErrorFallback";
 import MobileBlocker from "./components/MobileBlocker";
@@ -69,6 +70,7 @@ function App() {
           <Route path="/home" element={<HomeScreen />} />
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/signup" element={<SignupScreen />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/topics" element={<TopicsScreen />} />
           <Route path="/quote" element={<QuoteScreen />} />
           <Route path="/concrete" element={<ConcreteScreen />} />

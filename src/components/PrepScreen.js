@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
-import { FiClock } from "react-icons/fi";
+import { FiClock, FiArrowRight } from "react-icons/fi";
 
 const PrepScreen = () => {
   const location = useLocation();
@@ -13,20 +13,20 @@ const PrepScreen = () => {
 
   const [timer, setTimer] = useState(120); // 2-minute prep time
   const [isTimerActive, setIsTimerActive] = useState(true);
-  const [currentBanner, setCurrentBanner] = useState("");
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // Prep time banners
   const prepBanners = [
-    "Grab a piece of paper to jot down ideas",
-    "I like to structure my speeches with Anecdote, Thesis, Roadmap, Examples 1 - 3, and Call to Action",
-    "Judges really love an interesting anecdote, especially when they're funny",
-    "Remember your delivery matters too! Maybe more than your actual words",
-    "Time matters! Make sure you have enough to say but not too much!",
-    "Keep going, use your entire prep time.",
-    "Don't be too nervous, studies show we perform worse under pressure",
-    "Remember certain hand gestures can help emphasize your points but not too many",
-    "We're nearing the end of prep time, keep brainstorming",
-    "Remember to include a call to action. Why does your speech matter?",
+    "Grab a piece of paper to jot down ideas.",
+    "Structure your speech with an anecdote, thesis, roadmap, examples, and a call to action.",
+    "A memorable anecdote, especially a humorous one, can win over the judges.",
+    "Delivery matters as much as your words. Use your voice and gestures effectively.",
+    "Keep an eye on the time. Have enough to say, but don't go over.",
+    "Use your entire prep time to brainstorm and organize your thoughts.",
+    "Stay calm and confident. Studies show we perform worse under pressure.",
+    "Use hand gestures to emphasize your points, but avoid overdoing it.",
+    "We're nearing the end of prep time. Keep brainstorming!",
+    "Include a strong call to action. Why should the audience care?",
     "Lock in. You're going to crush it."
   ];
 
@@ -35,17 +35,20 @@ const PrepScreen = () => {
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
-        // Rotate banners every 10 seconds
-        if (timer % 10 === 0) {
-          setCurrentBanner(prepBanners[(120 - timer) / 10]);
-        }
       }, 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
-      navigate("/speech", { state: { topicName, type: "Impromptu" } }); // Pass "Impromptu" tag
+      navigate("/speech", { state: { topicName, type: "Impromptu" } });
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer, navigate, topicName]);
+
+  useEffect(() => {
+    const bannerInterval = setInterval(() => {
+      setCurrentBannerIndex(prev => (prev + 1) % prepBanners.length);
+    }, 10000);
+    return () => clearInterval(bannerInterval);
+  }, [prepBanners.length]);
 
   // Manually start speech
   const handleStartSpeaking = () => {
@@ -68,10 +71,11 @@ const PrepScreen = () => {
       <Particles
         id="tsparticles"
         options={particlesConfig}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}
       />
 
       <motion.div
-        style={componentStyles.content}
+        style={styles.content}
         variants={animations.content}
       >
         <motion.h1
@@ -85,29 +89,15 @@ const PrepScreen = () => {
           style={styles.topicCard}
           variants={animations.card}
         >
-          <motion.div 
-            style={styles.topicIcon}
-            animate={{ 
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            💭
-          </motion.div>
-          <motion.h2 style={styles.topicTitle}>
+          <h2 style={styles.topicTitle}>
             Your Topic:
-          </motion.h2>
-          <motion.p style={styles.topicText}>
+          </h2>
+          <p style={styles.topicText}>
             {topicName || "No topic selected"}
-          </motion.p>
+          </p>
         </motion.div>
 
-        <motion.div style={styles.timerSection}>
+        <div style={styles.centerContainer}>
           <motion.div
             style={styles.timerContainer}
             initial={{ scale: 0.8, opacity: 0 }}
@@ -115,76 +105,84 @@ const PrepScreen = () => {
             transition={{ delay: 0.2 }}
           >
             <FiClock size={32} style={styles.clockIcon} />
-            <motion.span 
+            <span 
               style={{
                 ...styles.timer,
                 color: timer < 30 ? colors.accent.red : colors.text.primary
               }}
             >
               {formatTime(timer)}
-            </motion.span>
+            </span>
           </motion.div>
 
-          {currentBanner && (
-            <motion.div
-              style={styles.banner}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <motion.p style={styles.bannerText}>
-                {currentBanner}
+          <div style={styles.bannerContainer}>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={currentBannerIndex}
+                style={styles.bannerText}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                {prepBanners[currentBannerIndex]}
               </motion.p>
-            </motion.div>
-          )}
+            </AnimatePresence>
+          </div>
 
           <motion.button
             style={styles.startButton}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, boxShadow: `0 0 20px ${colors.accent.green}` }}
             whileTap={{ scale: 0.95 }}
             onClick={handleStartSpeaking}
           >
-            Start Speaking!
+            Start Speaking
+            <FiArrowRight />
           </motion.button>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );
 };
 
 const styles = {
+  content: {
+    ...componentStyles.content,
+    zIndex: 1,
+  },
   heading: {
     ...componentStyles.heading,
     marginBottom: "2rem",
-    background: `linear-gradient(45deg, ${colors.text.primary}, ${colors.secondary.main})`,
+    background: `linear-gradient(45deg, ${colors.accent.cyan}, ${colors.accent.blue})`,
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
   },
   topicCard: {
-    background: 'rgba(42, 82, 152, 0.95)',
+    background: "rgba(10, 25, 47, 0.7)",
     padding: "2rem",
     borderRadius: "15px",
     marginBottom: "2rem",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-  },
-  topicIcon: {
-    fontSize: "2rem",
-    marginBottom: "1rem",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 8px 20px 0 rgba(0, 0, 0, 0.2)",
+    textAlign: 'center',
   },
   topicTitle: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    marginBottom: "1rem",
-    color: colors.text.primary,
+    fontSize: "1.2rem",
+    fontWeight: "500",
+    marginBottom: "0.5rem",
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
   },
   topicText: {
-    fontSize: "1.2rem",
-    color: colors.text.secondary,
+    fontSize: "1.5rem",
+    fontWeight: '600',
+    color: colors.text.primary,
     lineHeight: "1.6",
+    margin: 0,
   },
-  timerSection: {
+  centerContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -194,45 +192,50 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "1rem",
-    background: 'rgba(42, 82, 152, 0.95)',
-    padding: "2rem",
+    background: "rgba(10, 25, 47, 0.7)",
+    padding: "1.5rem 2.5rem",
     borderRadius: "15px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 8px 20px 0 rgba(0, 0, 0, 0.2)",
   },
   clockIcon: {
-    color: colors.text.primary,
+    color: colors.accent.cyan,
   },
   timer: {
     fontSize: "3rem",
     fontWeight: "700",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+    textShadow: `0 0 15px ${colors.accent.cyan}`,
+    transition: 'color 0.3s ease',
   },
-  banner: {
-    background: 'rgba(42, 82, 152, 0.95)',
-    padding: "1.5rem",
+  bannerContainer: {
+    background: "rgba(10, 25, 47, 0.7)",
+    padding: "1.5rem 2rem",
     borderRadius: "15px",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    minHeight: '80px',
     maxWidth: "600px",
     width: "100%",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     textAlign: "center",
   },
   bannerText: {
-    fontSize: "1.2rem",
-    color: colors.text.primary,
+    fontSize: "1.1rem",
+    fontStyle: 'italic',
+    color: colors.text.secondary,
     margin: 0,
     lineHeight: 1.5,
   },
   startButton: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
-    padding: "1rem 2rem",
+    gap: "0.75rem",
+    padding: "1rem 2.5rem",
     fontSize: "1.2rem",
     fontWeight: "600",
-    color: colors.text.primary,
-    background: colors.accent.green,
+    color: "#fff",
+    background: `linear-gradient(45deg, ${colors.accent.green}, ${colors.accent.cyan})`,
     border: "none",
     borderRadius: "50px",
     cursor: "pointer",

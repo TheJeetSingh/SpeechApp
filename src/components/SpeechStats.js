@@ -96,39 +96,11 @@ const textRevealVariants = {
   }
 };
 
-// Calculate grade based on time and speech type
-function calculateGrade(timeInSeconds, speechType) {
-  if (!timeInSeconds || !speechType || !timeRequirements[speechType]) {
-    return { letter: 'N/A', score: 0, feedback: 'Could not calculate grade.', color: '#999' };
-  }
-  
-  const { ideal, min, max } = timeRequirements[speechType];
-  
-  // Calculate how close the time is to the ideal time
-  const timeDiff = Math.abs(timeInSeconds - ideal);
-  const maxDiff = Math.max(ideal - min, max - ideal);
-  
-  // Score based on how close to ideal (percentage)
-  let score = 100 - (timeDiff / maxDiff) * 100;
-  
-  // Ensure score is between 0 and 100
-  score = Math.min(100, Math.max(0, score));
-  score = Math.round(score);
-  
-  // Assign letter grade
-  if (score >= 90) return { letter: 'A', score, feedback: 'Perfect timing! Outstanding job! 🌟', color: '#4CAF50' };
-  if (score >= 80) return { letter: 'B', score, feedback: 'Great timing! Nearly perfect! ✨', color: '#8BC34A' };
-  if (score >= 70) return { letter: 'C', score, feedback: 'Good effort! Keep practicing to improve your timing. 💪', color: '#FFC107' };
-  if (score >= 60) return { letter: 'D', score, feedback: 'You\'re getting there! Focus on hitting those time targets. 🎯', color: '#FF9800' };
-  return { letter: 'F', score, feedback: 'Keep practicing! You will get better with time. 🌱', color: colors.accent.red };
-}
-
 // Main component
 function SpeechStats() {
   const location = useLocation();
   const navigate = useNavigate();
   const { timeInSeconds, speechType, topic, speechAnalysis, script } = location.state || {};
-  const grade = calculateGrade(timeInSeconds, speechType);
   const [showStats, setShowStats] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -192,33 +164,6 @@ function SpeechStats() {
     config: config.gentle,
     delay: 300
   });
-
-  // Motivational messages based on grade
-  const getMotivationalMessage = () => {
-    if (speechAnalysis) {
-      // If speech was flagged as poor quality, return a humorous message
-      if (speechAnalysis.poorQuality) {
-        const humiliatingMessages = [
-          "Was that your foot we heard? Because it sure wasn't a speech.",
-          "Did you just point random body parts at the microphone? Try using your mouth next time.",
-          "That wasn't a speech. That was... well, we're not sure what that was.",
-          "We're pretty sure you weren't even trying. Maybe put some effort in next time?",
-          "Our AI is crying. It's never heard something so incomprehensible.",
-          "Did you forget public speaking involves actual speaking?",
-          "We've heard better audio from a potato connected to two paperclips."
-        ];
-        return humiliatingMessages[Math.floor(Math.random() * humiliatingMessages.length)];
-      }
-      return speechAnalysis.feedback;
-    }
-    switch(grade.letter) {
-      case 'A': return "Exceptional work! Your timing is spot-on!";
-      case 'B': return "Impressive performance! Just a little fine-tuning needed!";
-      case 'C': return "Solid effort! With practice, you'll hit those timing targets!";
-      case 'D': return "Good try! Keep practicing your timing skills!";
-      default: return "Every speech is a learning opportunity. Don't give up!";
-    }
-  };
 
   // Download as PDF
   const downloadAsPDF = async () => {
@@ -288,8 +233,6 @@ function SpeechStats() {
       feedback: speechAnalysis?.feedback || "",
       strengths: speechAnalysis?.strengths || [],
       improvements: speechAnalysis?.improvements || [],
-      grade: grade.letter,
-      score: grade.score
     };
     
     // Navigate to the chat session with the analysis data
@@ -472,102 +415,15 @@ function SpeechStats() {
                 transition={{ delay: 1.4, duration: 0.6 }}
                 onClick={nextStep}
               >
-                <span>See Your Grade</span>
+                <span>See Your Analysis</span>
                 <FiArrowRight size={20} />
               </motion.button>
             </motion.div>
           </AnimatePresence>
         )}
 
-        {/* Step 1: Grade Screen */}
+        {/* Step 1: Time Details Screen */}
         {currentStep === 1 && (
-        <AnimatePresence>
-            <motion.div 
-              style={styles.stepContainer}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.5 }}
-            >
-              <motion.h2 
-                style={styles.stepHeading}
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-              >
-                Your Grade
-              </motion.h2>
-              
-              <motion.div 
-                style={styles.gradeCard}
-                initial={{ scale: 0, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.6, type: "spring", stiffness: 100, damping: 10 }}
-              >
-                <motion.div style={styles.gradeCircle}>
-                  <motion.div 
-                    className="circle-background"
-                    style={{
-                      ...styles.circleBackground,
-                      background: `conic-gradient(${grade.color} ${grade.score}%, transparent ${grade.score}%, transparent 100%)`
-                    }}
-                    initial={{ opacity: 0, rotate: -90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    transition={{ duration: 1.5, delay: 0.8, ease: "easeOut" }}
-                  />
-                  <svg width="150" height="150" viewBox="0 0 100 100">
-                    <motion.circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      stroke={grade.color}
-                      strokeWidth="8"
-                      fill="none"
-                      variants={circleVariants}
-                      initial="hidden"
-                      animate="visible"
-                    />
-                  </svg>
-                  <motion.div
-                    style={styles.gradeContent}
-                    initial={{ scale: 0, rotateY: 180 }}
-                    animate={{ scale: 1, rotateY: 0 }}
-                    transition={{ delay: 1, duration: 0.8, type: "spring" }}
-                  >
-                    <h2 style={{ ...styles.grade, color: grade.color }}>{grade.letter}</h2>
-                    <p style={styles.score}>{grade.score.toFixed(1)}%</p>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-
-              <motion.p 
-                style={styles.motivationalMessage}
-                variants={textRevealVariants}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 1.5 }}
-              >
-                {getMotivationalMessage()}
-              </motion.p>
-              
-              <motion.button 
-                style={styles.nextButton}
-                whileHover={{ scale: 1.05, boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)' }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 2, duration: 0.6 }}
-                onClick={nextStep}
-              >
-                <span>See Timing Details</span>
-                <FiArrowRight size={20} />
-              </motion.button>
-            </motion.div>
-          </AnimatePresence>
-        )}
-
-        {/* Step 2: Time Details Screen */}
-        {currentStep === 2 && (
           <AnimatePresence>
             <motion.div 
               ref={statsRef}
@@ -672,7 +528,7 @@ function SpeechStats() {
                 </motion.div>
               )}
               
-              {speechAnalysis ? (
+              {speechAnalysis && (
                 <>
                   <motion.div 
                     style={styles.analysisCard}
@@ -713,52 +569,9 @@ function SpeechStats() {
                           </motion.div>
                           <h3 style={styles.poorQualityTitle}>Not a Speech Detected</h3>
                           <p style={styles.poorQualityMessage}>{speechAnalysis.feedback}</p>
-                          <div style={styles.scoreSection}>
-                            <div style={styles.scoreCard}>
-                              <h4 style={styles.scoreLabel}>Content</h4>
-                              <div style={{
-                                ...styles.scoreCircle,
-                                background: `conic-gradient(${colors.accent.red} ${speechAnalysis.contentScore}%, transparent ${speechAnalysis.contentScore}%, transparent 100%)`
-                              }}>
-                                <span style={styles.scoreValue}>{speechAnalysis.contentScore}</span>
-                              </div>
-                            </div>
-                            
-                            <div style={styles.scoreCard}>
-                              <h4 style={styles.scoreLabel}>Delivery</h4>
-                              <div style={{
-                                ...styles.scoreCircle,
-                                background: `conic-gradient(${colors.accent.red} ${speechAnalysis.deliveryScore}%, transparent ${speechAnalysis.deliveryScore}%, transparent 100%)`
-                              }}>
-                                <span style={styles.scoreValue}>{speechAnalysis.deliveryScore}</span>
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       ) : (
                         <>
-                          <div style={styles.scoreSection}>
-                            <div style={styles.scoreCard}>
-                              <h4 style={styles.scoreLabel}>Content</h4>
-                              <div style={{
-                                ...styles.scoreCircle,
-                                background: `conic-gradient(${getScoreColor(speechAnalysis.contentScore)} ${speechAnalysis.contentScore}%, transparent ${speechAnalysis.contentScore}%, transparent 100%)`
-                              }}>
-                                <span style={styles.scoreValue}>{speechAnalysis.contentScore}</span>
-                              </div>
-                            </div>
-                            
-                            <div style={styles.scoreCard}>
-                              <h4 style={styles.scoreLabel}>Delivery</h4>
-                              <div style={{
-                                ...styles.scoreCircle,
-                                background: `conic-gradient(${getScoreColor(speechAnalysis.deliveryScore)} ${speechAnalysis.deliveryScore}%, transparent ${speechAnalysis.deliveryScore}%, transparent 100%)`
-                              }}>
-                                <span style={styles.scoreValue}>{speechAnalysis.deliveryScore}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
                           {speechAnalysis.topic && (
                             <div style={styles.analysisSection}>
                               <h4 style={styles.analysisSectionTitle}>
@@ -813,33 +626,6 @@ function SpeechStats() {
                     </div>
                   </motion.div>
                 </>
-              ) : (
-                <motion.div 
-                  style={styles.feedbackCard}
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.4, duration: 0.5 }}
-                >
-                  <motion.div 
-                    style={styles.iconWrapper}
-                    animate={{ 
-                      rotateY: [0, 180, 360],
-                      scale: [1, 1.1, 1] 
-                    }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
-                  >
-                    <FiAward size={28} color={grade.color} />
-                  </motion.div>
-                  <h3>Feedback</h3>
-                  <motion.p 
-                    style={styles.feedback}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.6 }}
-                  >
-                    {grade.feedback}
-                  </motion.p>
-                </motion.div>
               )}
 
               <motion.div 
@@ -901,21 +687,11 @@ function SpeechStats() {
               </motion.div>
             </motion.div>
           </AnimatePresence>
-          )}
+        )}
       </motion.div>
     </motion.div>
   );
 }
-
-// Helper function to get color based on score
-const getScoreColor = (score) => {
-  if (score >= 85) return colors.accent.green; // Excellent - bright green
-  if (score >= 70) return '#4CAF50';           // Very good - standard green
-  if (score >= 55) return colors.accent.blue;  // Good - blue
-  if (score >= 40) return colors.accent.yellow; // Average - yellow
-  if (score >= 25) return '#FF9800';           // Poor - orange
-  return colors.accent.red;                    // Very poor - red
-};
 
 // Styles
 const styles = {

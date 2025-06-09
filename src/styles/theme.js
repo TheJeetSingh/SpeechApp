@@ -3,21 +3,20 @@ import { keyframes } from '@emotion/react';
 // Color palette
 export const colors = {
   primary: {
-    main: '#1e3c72',
-    light: '#2a5298',
-    dark: '#152c54',
-    gradient: 'linear-gradient(135deg, #1e3c72, #2a5298)',
+    dark: '#010209',
+    light: '#040913',
+    gradient: 'linear-gradient(to bottom, #040913, #010209)',
   },
   secondary: {
-    main: '#87CEEB',
-    light: '#B7E4F4',
-    dark: '#5BA3C6',
+    main: '#4facfe', // Light blue
+    dark: '#00f2fe', // Cyan
   },
   accent: {
-    blue: '#00BFFF',
-    purple: '#9C27B0',
-    green: '#4CAF50',
-    red: '#FF6B6B',
+    blue: '#4facfe',
+    cyan: '#00f2fe',
+    pink: '#ff7eb3',
+    green: '#4caf50',
+    red: '#f44336',
   },
   text: {
     primary: '#FFFFFF',
@@ -232,7 +231,7 @@ export const componentStyles = {
     padding: "clamp(1rem, 5vw, 3rem)",
     position: "relative",
     overflow: "hidden",
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Exo', 'Inter', sans-serif",
   },
   content: {
     width: "100%",
@@ -243,7 +242,7 @@ export const componentStyles = {
     background: colors.background.glass,
     borderRadius: "20px",
     border: "1px solid rgba(255, 255, 255, 0.18)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+    boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.3)",
   },
   heading: {
     fontSize: "clamp(2rem, 6vw, 3.5rem)",

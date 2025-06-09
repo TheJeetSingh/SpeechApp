@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import Aurora from './Aurora';
 
 /* 
 POTENTIAL FUTURISTIC ENHANCEMENTS:
@@ -66,96 +67,56 @@ const cursorBlinkStyle = {
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const gridCanvasRef = useRef(null);
   const [loaded, setLoaded] = useState(false);
-  const [typeCount, setTypeCount] = useState(0);
-  const [typingText, setTypingText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const gridAnimationFrameRef = useRef(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [scanProgress, setScanProgress] = useState(0);
   
-  // Track mouse position
+  // Feature phrases for the animated text
+  const phrases = [
+    "Learn to speak with confidence",
+    "Analyze your speech patterns",
+    "Improve your public speaking",
+    "Get real-time feedback on delivery",
+    "Master the art of communication"
+  ];
+  
+  // Current phrase index to show
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  
+  // State to trigger blur animation replay
+  const [blurKey, setBlurKey] = useState(0);
+  
+  // Auto-rotate phrases every 4 seconds
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: e.clientX,
-        y: e.clientY
-      });
-    };
+    const interval = setInterval(() => {
+      setCurrentPhraseIndex(prev => (prev + 1) % phrases.length);
+    }, 4000);
     
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    return () => clearInterval(interval);
   }, []);
-  
-  // Scan animation
-  useEffect(() => {
-    const scanTimer = setInterval(() => {
-      setScanProgress(prev => {
-        if (prev >= 100) return 0;
-        return prev + 1;
-      });
-    }, 30);
-    
-    return () => clearInterval(scanTimer);
-  }, []);
-  
-  // Typing animation effect
-  useEffect(() => {
-    const text = 'articulate';
-    const typingSpeed = isDeleting ? 50 : 150;
-    const delayBetweenCycles = 2000;
-    
-    if (!isDeleting && typingText === text) {
-      // Complete word - wait before deleting
-      const timeout = setTimeout(() => {
-        setIsDeleting(true);
-      }, delayBetweenCycles);
-      
-      return () => clearTimeout(timeout);
-    } else if (isDeleting && typingText === '') {
-      // Finished deleting - start new cycle
-      setIsDeleting(false);
-      setTypeCount(prevCount => prevCount + 1);
-      
-      return () => {};
-    }
-    
-    const timeout = setTimeout(() => {
-      setTypingText(current => {
-        if (isDeleting) {
-          return current.slice(0, -1);
-        } else {
-          return text.slice(0, current.length + 1);
-        }
-      });
-    }, typingSpeed);
-    
-    return () => clearTimeout(timeout);
-  }, [typingText, isDeleting, typeCount]);
 
-  // Add cursor blink animation to document head
+  // Replay blur animation every 12 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBlurKey(prev => prev + 1);
+    }, 12000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Set loaded state after a short delay
+  useEffect(() => {
+    const timer = setTimeout(() => setLoaded(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Add animations to document head
   useEffect(() => {
     // Create a style element
     const styleEl = document.createElement('style');
     styleEl.textContent = `
-      @keyframes blink-caret {
-        from, to { border-color: transparent }
-        50% { border-color: #4facfe }
-      }
-      
       @keyframes pulse {
         0% { opacity: 0.4; }
         50% { opacity: 0.7; }
         100% { opacity: 0.4; }
-      }
-      
-      @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
       }
     `;
     
@@ -167,148 +128,92 @@ const LandingPage = () => {
       document.head.removeChild(styleEl);
     };
   }, []);
-
-  // Handle grid background
-  useEffect(() => {
-    if (!gridCanvasRef.current) return;
-    
-    const canvas = gridCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size to window size
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    
-    resize();
-    window.addEventListener('resize', resize);
-    
-    // Draw function for grid
-    const drawGrid = (time) => {
-      // Clear canvas with gradient background
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, '#0B0F1A');
-      gradient.addColorStop(1, '#01030C');
-      
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Grid settings
-      const gridSize = 50;
-      const perspective = 500;
-      const horizonY = canvas.height * 0.5;
-      
-      // Draw horizontal lines
-      for (let y = horizonY; y <= canvas.height; y += 20) {
-        // Calculate line spacing based on perspective
-        const perspectiveFactor = (y - horizonY) / (canvas.height - horizonY);
-        const spacing = gridSize * perspectiveFactor;
-        
-        if (spacing <= 0) continue;
-        
-        // Draw the horizontal line
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.strokeStyle = `rgba(0, 100, 255, ${0.1 * perspectiveFactor})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        
-        // Draw vertical lines with perspective
-        for (let x = 0; x < canvas.width; x += spacing) {
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y + spacing * 1.5);
-          ctx.strokeStyle = `rgba(0, 100, 255, ${0.1 * perspectiveFactor})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-      
-      // Add glow at horizon
-      const gradient2 = ctx.createLinearGradient(0, horizonY - 50, 0, horizonY + 50);
-      gradient2.addColorStop(0, 'rgba(0, 100, 255, 0)');
-      gradient2.addColorStop(0.5, 'rgba(0, 100, 255, 0.2)');
-      gradient2.addColorStop(1, 'rgba(0, 100, 255, 0)');
-      
-      ctx.fillStyle = gradient2;
-      ctx.fillRect(0, horizonY - 50, canvas.width, 100);
-      
-      setLoaded(true);
-      gridAnimationFrameRef.current = requestAnimationFrame(drawGrid);
-    };
-    
-    gridAnimationFrameRef.current = requestAnimationFrame(drawGrid);
-    
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(gridAnimationFrameRef.current);
-    };
-  }, []);
   
   const handleClick = () => {
     navigate('/home');
   };
+  
+  // Animation variants for the split text phrases
+  const phraseContainer = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.03, delayChildren: 0.04 * i }
+    }),
+    exit: {
+      opacity: 0,
+      transition: { staggerChildren: 0.02, staggerDirection: -1 }
+    }
+  };
+  
+  const phraseChild = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100
+      }
+    },
+    hidden: {
+      opacity: 0,
+      y: 20,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100
+      }
+    }
+  };
+  
+  // Animation variants for blur text effect with slower timing
+  const titleContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.15,  // Increased stagger timing between characters
+        delayChildren: 0.1,    // Added a slight delay before the first character
+        duration: 3           // Overall container animation duration
+      }
+    }
+  };
+  
+  const titleChild = {
+    hidden: { 
+      opacity: 0,
+      filter: "blur(20px)",  // Increased blur amount
+      scale: 1.3             // Increased scale for more dramatic effect
+    },
+    visible: {
+      opacity: 1,
+      filter: "blur(0px)",
+      scale: 1,
+      transition: {
+        duration: 1.8,        // Increased duration for each character
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const logoText = "articulate";
   
   return (
     <div className="landing-page"
       style={{
         width: '100vw',
         height: '100vh',
-        backgroundColor: '#01030C',
+        background: 'linear-gradient(to bottom, #040913, #010209)',
         overflow: 'hidden',
-        cursor: 'pointer',
+        cursor: 'default',
         position: 'relative',
         fontFamily: "'Exo', 'Inter', sans-serif"
       }}
       onClick={handleClick}
     >
-      {/* Grid background */}
-      <canvas
-        ref={gridCanvasRef}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          top: 0,
-          left: 0,
-          zIndex: 1
-        }}
-      />
-      
-      {/* Targeting reticle - follows mouse */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '30px',
-          height: '30px',
-          borderRadius: '50%',
-          border: '1px solid rgba(0, 191, 255, 0.5)',
-          borderTop: '1px solid rgba(0, 191, 255, 0.9)',
-          borderRight: '1px solid rgba(0, 191, 255, 0.9)',
-          transform: `translate(${mousePosition.x - 15}px, ${mousePosition.y - 15}px)`,
-          zIndex: 10,
-          pointerEvents: 'none',
-          transition: 'transform 0.05s ease',
-          animation: 'rotate 4s linear infinite'
-        }}
-      />
-      
-      {/* Small targeting dot */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '4px',
-          height: '4px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(0, 191, 255, 0.9)',
-          transform: `translate(${mousePosition.x - 2}px, ${mousePosition.y - 2}px)`,
-          zIndex: 10,
-          pointerEvents: 'none',
-          boxShadow: '0 0 4px rgba(0, 191, 255, 0.8)'
-        }}
-      />
+      {/* Aurora background */}
+      <Aurora />
       
       {/* Content area */}
       <motion.div
@@ -370,27 +275,6 @@ const LandingPage = () => {
           borderBottom: '2px solid rgba(0, 191, 255, 0.6)',
         }} />
         
-        {/* System status indicator */}
-        <div style={{
-          position: 'absolute',
-          top: '30px',
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '5px',
-          zIndex: 3,
-        }}>
-          {[...Array(5)].map((_, i) => (
-            <div key={i} style={{
-              width: '30px',
-              height: '4px',
-              background: i < scanProgress % 6 ? 'rgba(0, 191, 255, 0.8)' : 'rgba(0, 191, 255, 0.2)',
-              animation: i < scanProgress % 6 ? 'pulse 1.5s infinite' : 'none'
-            }} />
-          ))}
-        </div>
-        
         {/* Top title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -414,80 +298,94 @@ const LandingPage = () => {
           </span>
         </motion.div>
         
-        {/* Central logo/title with typing effect */}
+        {/* Central logo/title - blur text animation */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.3, duration: 0.8 }}
+          key={blurKey}
           style={{
-            fontSize: 'clamp(3rem, 15vw, 6rem)',
-            fontFamily: "'Orbitron', 'Space Mono', monospace",
-            fontWeight: 700,
-            background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            textAlign: 'center',
-            marginBottom: '1rem',
-            textShadow: '0 0 20px rgba(79, 172, 254, 0.5)',
-            letterSpacing: '2px',
-            minHeight: '1.2em',
             display: 'flex',
+            justifyContent: 'center',
             alignItems: 'center',
-            justifyContent: 'center'
+            marginBottom: '2rem'
           }}
+          variants={titleContainer}
+          initial="hidden"
+          animate="visible"
         >
-          {typingText}
-          <span
-            style={{ 
-              borderRight: '0.1em solid #4facfe',
-              animation: 'blink-caret 0.75s step-end infinite',
-              marginLeft: '2px'
-            }}
-          />
+          {logoText.split("").map((char, index) => (
+            <motion.span
+              key={index}
+              variants={titleChild}
+              style={{
+                fontSize: 'clamp(3.5rem, 15vw, 7rem)',
+                fontFamily: "'Orbitron', 'Space Mono', monospace",
+                fontWeight: 700,
+                background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                display: 'inline-block',
+                textShadow: '0 0 20px rgba(79, 172, 254, 0.5)',
+                letterSpacing: '2px'
+              }}
+            >
+              {char}
+            </motion.span>
+          ))}
         </motion.div>
         
-        {/* Subtitle */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.6, duration: 0.8 }}
-          style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: 'clamp(1rem, 3vw, 1.5rem)',
-            fontWeight: 300,
-            textAlign: 'center',
-            maxWidth: '600px',
-            letterSpacing: '1px'
-          }}
-        >
-          Real-time speech insights, powered by AI.
-        </motion.div>
-        
-        {/* Progress scan bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2, duration: 0.8 }}
-          style={{
-            width: '200px',
-            height: '4px',
-            backgroundColor: 'rgba(0, 191, 255, 0.2)',
-            borderRadius: '2px',
-            marginTop: '20px',
-            overflow: 'hidden'
-          }}
-        >
-          <div 
+        {/* Split text animation */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPhraseIndex}
             style={{
-              height: '100%',
-              width: `${scanProgress}%`,
-              backgroundColor: 'rgba(0, 191, 255, 0.8)',
-              boxShadow: '0 0 8px rgba(0, 191, 255, 0.8)',
-              transition: 'width 0.3s ease'
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'hidden',
+              padding: '0.5rem 1.5rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '10px',
+              backdropFilter: 'blur(5px)',
+              background: 'rgba(255, 255, 255, 0.05)',
+              minHeight: '4rem',
+              minWidth: '280px',
+              width: 'auto'
             }}
-          />
-        </motion.div>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              style={{
+                display: 'flex',
+                overflow: 'hidden'
+              }}
+              variants={phraseContainer}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {phrases[currentPhraseIndex].split("").map((char, index) => (
+                <motion.span
+                  key={index}
+                  variants={phraseChild}
+                  style={{
+                    fontSize: 'clamp(1.2rem, 3vw, 1.8rem)',
+                    fontWeight: 600,
+                    letterSpacing: '1px',
+                    color: '#FFFFFF',
+                    textShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
+                    display: 'inline-block',
+                    whiteSpace: 'pre'
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Click to continue */}
         <motion.div
@@ -495,7 +393,7 @@ const LandingPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 3, duration: 0.8 }}
           style={{
-            marginTop: '3rem',
+            marginTop: '4rem',
             color: 'rgba(255, 255, 255, 0.7)',
             fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
             fontWeight: 300,
@@ -506,21 +404,9 @@ const LandingPage = () => {
             border: '1px solid rgba(79, 172, 254, 0.3)',
             borderRadius: '4px',
             background: 'rgba(0, 0, 20, 0.3)',
-            backdropFilter: 'blur(5px)',
-            position: 'relative',
-            overflow: 'hidden'
+            backdropFilter: 'blur(5px)'
           }}
         >
-          {/* Animated border */}
-          <div style={{
-            position: 'absolute',
-            top: '-2px',
-            left: '0',
-            width: `${scanProgress}%`,
-            height: '2px',
-            background: 'linear-gradient(to right, transparent, #4facfe 50%, transparent)',
-            boxShadow: '0 0 8px rgba(0, 191, 255, 0.8)',
-          }} />
           Click anywhere to continue
         </motion.div>
       </motion.div>

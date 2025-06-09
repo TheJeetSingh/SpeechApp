@@ -9,6 +9,10 @@ require("dotenv").config();
 // Import the transcribe-audio handler
 const transcribeAudioHandler = require('./api/transcribe-audio');
 
+// Import route handlers
+const updateSchoolRouter = require('./api/update-school');
+const User = require('./models/User');
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -69,21 +73,12 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// User Schema
-const UserSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String,
-});
-
-const User = mongoose.model("User", UserSchema);
-
 // Secret Key for JWT
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, {
+  return jwt.sign({ id: user._id, name: user.name, email: user.email, school: user.school }, JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -94,6 +89,9 @@ const generateToken = (user) => {
 app.get("/", (req, res) => {
   res.send("Welcome to the Impromptu App Server!");
 });
+
+// Use the new router for updating school
+app.use('/api/user/school', updateSchoolRouter);
 
 // CORS Test Endpoint
 app.get("/api/cors-test", (req, res) => {
@@ -153,7 +151,14 @@ app.post("/api/signup", async (req, res) => {
     const newUser = await User.create({ name, email, password: hashedPassword });
 
     const token = generateToken(newUser);
-    res.json({ token, name: newUser.name });
+    res.json({ 
+      token, 
+      user: {
+        name: newUser.name,
+        email: newUser.email,
+        school: newUser.school
+      } 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error while signing up" });
@@ -189,27 +194,38 @@ app.post("/api/login", async (req, res) => {
     }
 
     const token = generateToken(user);
-    res.json({ token, name: user.name });
+    res.json({
+      token,
+      user: {
+        name: user.name,
+        email: user.email,
+        school: user.school
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error while logging in" });
   }
 });
 
-// Protected Route Example
-app.get("/protected", (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+// Middleware to verify token
+const auth = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).send({ error: 'Authentication required' });
   }
-
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ message: "Access granted", user: decoded });
-  } catch (err) {
-    console.error(err);
-    res.status(401).json({ message: "Invalid or expired token" });
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).send({ error: 'Please authenticate.' });
   }
+};
+
+// Protected Route Example
+app.get("/protected", auth, (req, res) => {
+  res.json({ message: "Access granted", user: req.user });
 });
 
 // News API Route

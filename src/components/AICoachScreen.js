@@ -32,9 +32,9 @@ function AICoachScreen() {
       <header style={styles.header}>
         <div style={styles.logoContainer}>
           <span style={styles.logoIcon}>🤖</span>
-          <h1 style={styles.logo} onClick={() => navigate("/")}>ARTICULATE</h1>
+          <h1 style={styles.logo} onClick={() => navigate("/home")}>ARTICULATE</h1>
         </div>
-        <button style={styles.backButton} onClick={() => navigate("/")}>
+        <button style={styles.backButton} onClick={() => navigate("/home")}>
           Back to Home
         </button>
       </header>

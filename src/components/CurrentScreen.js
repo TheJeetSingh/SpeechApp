@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Particles from "react-tsparticles";
+import { FiClock, FiLoader, FiAlertTriangle, FiArrowRight } from "react-icons/fi";
 import config from "../config";
 import { colors, animations, particlesConfig, componentStyles } from "../styles/theme";
 
@@ -16,37 +17,17 @@ const CurrentScreen = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        // Use the server endpoint for NYT API with the correct port in development
-        const apiUrl = process.env.NODE_ENV === 'development' 
-          ? 'http://localhost:5001/api/nyt-news'
-          : `${config.API_URL}${config.NYT_NEWS_ENDPOINT}`;
-          
-        console.log('Fetching articles from:', apiUrl);
+        // Use the server endpoint for NYT API
+        const apiUrl = `${config.API_URL}${config.NYT_NEWS_ENDPOINT}`;
         
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          mode: 'cors'
-        });
+        const response = await fetch(apiUrl);
 
-        // Check if response is ok and content-type is application/json
-        const contentType = response.headers.get("content-type");
-        if (!response.ok || !contentType?.includes("application/json")) {
-          setError("Unable to fetch current topics from NYT. Please try again later.");
+        if (!response.ok) {
+          setError("Unable to fetch current topics. Please try again later.");
           return;
         }
 
-        let data;
-        try {
-          data = await response.json();
-        } catch (jsonError) {
-          console.error("Failed to parse JSON:", jsonError);
-          setError("Invalid response format. Please try again later.");
-          return;
-        }
+        const data = await response.json();
 
         if (data?.results?.length) {
           const processedArticles = data.results.map(article => ({
@@ -54,7 +35,7 @@ const CurrentScreen = () => {
             description: article.abstract || '',
             section: article.section || 'general',
             url: article.url || ''
-          }));
+          })).filter(article => article.title && article.description);
           setArticles(getRandomArticles(processedArticles, 3));
         } else {
           setError("No topics available at the moment. Please try again later.");
@@ -72,11 +53,8 @@ const CurrentScreen = () => {
 
   const getRandomArticles = (articles, count) => {
     if (articles.length <= count) return articles;
-    const selectedIndexes = new Set();
-    while (selectedIndexes.size < count) {
-      selectedIndexes.add(Math.floor(Math.random() * articles.length));
-    }
-    return Array.from(selectedIndexes).map((index) => articles[index]);
+    const shuffled = [...articles].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   };
 
   useEffect(() => {
@@ -91,6 +69,10 @@ const CurrentScreen = () => {
     }
     return () => clearInterval(interval);
   }, [isTimerActive, timer, articles, navigate]);
+  
+  const formatTime = (seconds) => {
+    return seconds.toString().padStart(2, "0");
+  };
 
   return (
     <motion.div
@@ -102,129 +84,191 @@ const CurrentScreen = () => {
       <Particles
         id="tsparticles"
         options={particlesConfig}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}
       />
       <motion.div
-        style={componentStyles.content}
+        style={styles.content}
         variants={animations.content}
       >
-        {isLoading && (
-          <motion.div
-            style={styles.loading}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            Loading...
-          </motion.div>
-        )}
-        {error && (
-          <motion.div
-            style={styles.error}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-          >
-            {error}
-          </motion.div>
-        )}
-        <motion.div style={componentStyles.timer} variants={animations.content}>
-          Time Left: {timer}s
-        </motion.div>
-        <motion.h1
-          style={componentStyles.heading}
+         <motion.h1
+          style={styles.heading}
           variants={animations.heading}
         >
           Current Events
         </motion.h1>
-        <motion.ul
-          style={styles.list}
-          variants={animations.content}
+
+        <motion.div
+          style={styles.timerContainer}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <AnimatePresence>
-            {articles.map((article, index) => (
-              <motion.li
-                key={index}
-                style={styles.listItem}
-                variants={animations.card}
-                whileHover="hover"
-                whileTap="tap"
-                onClick={() =>
-                  navigate(`/prep/${encodeURIComponent(article.title)}`, {
-                    state: { topicName: article.title, topicDescription: article.description },
-                  })
-                }
-                custom={index}
-                layout
-              >
+          <FiClock size={24} style={styles.clockIcon} />
+          <motion.span 
+            style={{
+              ...styles.timer,
+              color: timer <= 5 ? colors.accent.red : colors.text.primary
+            }}
+          >
+            {formatTime(timer)}s
+          </motion.span>
+        </motion.div>
+
+        {isLoading && (
+          <motion.div style={styles.stateContainer}>
+            <FiLoader style={styles.loadingIcon} />
+            <p>Loading Topics...</p>
+          </motion.div>
+        )}
+
+        {error && (
+           <motion.div style={styles.stateContainer}>
+            <FiAlertTriangle style={styles.errorIcon} />
+            <p>{error}</p>
+          </motion.div>
+        )}
+
+        <AnimatePresence>
+          {!isLoading && !error && articles.map((article, index) => (
+            <motion.div
+              key={index}
+              style={styles.listItem}
+              variants={animations.card}
+              whileHover="hover"
+              whileTap="tap"
+              onClick={() =>
+                navigate(`/prep/${encodeURIComponent(article.title)}`, {
+                  state: { topicName: article.title, topicDescription: article.description },
+                })
+              }
+              custom={index}
+              layout
+            >
+              <div style={styles.articleContent}>
                 <div style={styles.articleTitle}>{article.title}</div>
-                {article.description && (
-                  <div style={styles.articleDescription}>{article.description}</div>
-                )}
+                <div style={styles.articleDescription}>{article.description}</div>
                 <div style={styles.articleSection}>Section: {article.section}</div>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </motion.ul>
+              </div>
+              <FiArrowRight />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );
 };
 
 const styles = {
-  list: {
-    listStyle: "none",
-    padding: 0,
+  content: {
+    ...componentStyles.content,
+    zIndex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  heading: {
+    ...componentStyles.heading,
+    marginBottom: "2rem",
+    background: `linear-gradient(45deg, ${colors.accent.red}, ${colors.accent.blue})`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textAlign: "center",
+  },
+  timerContainer: {
     display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    width: "100%",
-    maxWidth: "800px",
-    margin: "0 auto",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.75rem",
+    background: "rgba(10, 25, 47, 0.7)",
+    padding: "1rem 2rem",
+    borderRadius: "50px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.2)",
+    marginBottom: "2.5rem",
+  },
+  clockIcon: {
+    color: colors.accent.red,
+  },
+  timer: {
+    fontSize: "1.5rem",
+    fontWeight: "700",
+    transition: "color 0.3s ease",
+    textShadow: `0 0 10px ${colors.accent.red}`,
   },
   listItem: {
-    ...componentStyles.card,
-    fontSize: "1.2rem",
-    padding: "20px 32px",
-    background: `linear-gradient(135deg, ${colors.accent.purple}, ${colors.accent.purple}88)`,
-    color: colors.text.primary,
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)",
-    lineHeight: 1.6,
+    background: "rgba(10, 25, 47, 0.7)",
+    padding: "1.5rem 2rem",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 8px 20px 0 rgba(0, 0, 0, 0.2)",
     cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "1.5rem",
+    transition: "all 0.3s ease",
+    width: '100%',
+    maxWidth: '800px',
+    marginBottom: '1rem',
+  },
+  articleContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
   },
   articleTitle: {
     fontWeight: "600",
-    marginBottom: "10px",
+    fontSize: '1.1rem',
+    color: colors.text.primary,
   },
   articleDescription: {
-    fontSize: "1rem",
-    opacity: 0.9,
-    marginBottom: "10px",
+    fontSize: "0.95rem",
+    color: colors.text.secondary,
+    lineHeight: 1.5,
   },
   articleSection: {
-    fontSize: "0.9rem",
-    opacity: 0.7,
+    fontSize: "0.85rem",
+    color: 'rgba(255,255,255,0.5)',
     fontStyle: "italic",
     textTransform: "capitalize",
   },
-  error: {
-    padding: "15px 20px",
-    borderRadius: "10px",
-    background: `linear-gradient(135deg, ${colors.accent.red}44, ${colors.accent.red}22)`,
-    color: colors.accent.red,
-    fontSize: "1.1rem",
-    fontWeight: "500",
-    textAlign: "center",
-    marginBottom: "20px",
-    backdropFilter: "blur(5px)",
-    border: `1px solid ${colors.accent.red}44`,
+  stateContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '1rem',
+    padding: "2rem",
+    borderRadius: "15px",
+    background: "rgba(10, 25, 47, 0.7)",
+    color: colors.text.secondary,
+    width: '100%',
+    maxWidth: '800px',
   },
-  loading: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    color: colors.text.primary,
-    textAlign: "center",
-    marginBottom: "20px",
+  errorIcon: {
+    fontSize: '2rem',
+    color: colors.accent.red,
+  },
+  loadingIcon: {
+    fontSize: '2rem',
+    color: colors.accent.blue,
+    animation: 'spin 1.5s linear infinite',
   },
 };
+
+// Add keyframes for spinning animation
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = `
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+`;
+document.head.appendChild(styleSheet);
 
 export default CurrentScreen;
