@@ -72,14 +72,21 @@ const auth = (req) => {
 
 // Handler for the /api/user/password endpoint
 module.exports = async (req, res) => {
-  // CORS is handled by vercel.json.
-  // This function only needs to handle POST requests.
-  
-  if (req.method === 'OPTIONS') {
-    // Vercel's edge will handle this, but as a fallback:
-    return res.status(200).end();
-  }
+  // Set CORS headers directly in the function for maximum compatibility.
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+  );
 
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
