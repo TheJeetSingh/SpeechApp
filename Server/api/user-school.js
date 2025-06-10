@@ -60,7 +60,19 @@ const auth = (req) => {
 // Serverless function handler
 module.exports = async (req, res) => {
   // Set CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://speech-app-delta.vercel.app',
+    'https://speech-app-server.vercel.app',
+    'https://www.articulate.ninja'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
