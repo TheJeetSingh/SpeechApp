@@ -59,29 +59,29 @@ const auth = (req) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // Set CORS headers for all responses
   const allowedOrigins = [
     'http://localhost:3000',
     'https://speech-app-delta.vercel.app',
     'https://speech-app-server.vercel.app',
     'https://www.articulate.ninja'
   ];
-  
+
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
+  console.log('Incoming Origin:', origin);
+
+  if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin'); // For caching proxies
   }
-  
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  // Handle preflight OPTIONS request
+
+  // Always respond to OPTIONS with CORS headers
   if (req.method === 'OPTIONS') {
-    console.log('School update OPTIONS request received');
     return res.status(200).end();
   }
-  
+
   // Only handle POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
