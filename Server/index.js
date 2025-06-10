@@ -205,11 +205,6 @@ app.get("/protected", auth, (req, res) => {
 app.get("/api/news", async (req, res) => {
   console.log(`News API requested from origin: ${req.headers.origin}`);
   
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
   const API_KEY = process.env.NEWS_API_KEY;
   const category = req.query.category || "general";
 
@@ -242,25 +237,7 @@ app.get("/api/news", async (req, res) => {
 
 // NYT News API Route
 app.get("/api/nyt-news", async (req, res) => {
-  // Always accept requests from localhost and production domain
-  const origin = req.headers.origin;
-  const allowedOrigins = ['http://localhost:3000', 'https://speech-app-delta.vercel.app', 'https://speech-app-server.vercel.app'];
-  
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  console.log(`NYT News API requested from origin: ${origin}`);
-  
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  console.log(`NYT News API requested from origin: ${req.headers.origin}`);
   
   const API_KEY = process.env.NYT_API_KEY;
   const section = req.query.section || "home";
@@ -292,11 +269,6 @@ app.get("/api/nyt-news", async (req, res) => {
 
 // Speech Analysis API Route with Gemini
 app.post("/api/analyze-speech", async (req, res) => {
-  // Set CORS headers directly on this route
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
   const { audio, topic, speechType, speechContext, duration, mimeType } = req.body;
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
