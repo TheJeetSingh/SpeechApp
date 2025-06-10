@@ -72,19 +72,17 @@ const auth = (req) => {
 
 // Handler for the /api/user/password endpoint
 module.exports = async (req, res) => {
-  // Set CORS headers directly in the function for maximum compatibility.
+  // CRITICAL: Set explicit CORS headers for the specific domain
+  res.setHeader('Access-Control-Allow-Origin', 'https://www.articulate.ninja');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-  );
-
-  // Handle preflight requests
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  // Special handling for OPTIONS requests - must return 200 immediately
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    console.log('OPTIONS request for password endpoint - responding with 200');
+    return res.status(200).end();
   }
   
   if (req.method !== 'POST') {

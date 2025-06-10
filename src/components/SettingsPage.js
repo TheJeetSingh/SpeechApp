@@ -233,12 +233,19 @@ const SettingsPage = () => {
     
     try {
       const token = localStorage.getItem('token');
+      console.log('Sending password update request to:', `${API_URL}/api/user/password`);
+      console.log('Authorization token present:', !!token);
+      
       const response = await fetch(`${API_URL}/api/user/password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Origin': window.location.origin
         },
+        credentials: 'omit', // Don't send cookies
+        mode: 'cors', // Explicitly set CORS mode
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -259,7 +266,8 @@ const SettingsPage = () => {
       setSuccess('Your password has been updated successfully.');
       
     } catch (error) {
-      setError(error.message);
+      setError(error.message || 'Error updating password. Please try again later.');
+      console.error('Password update error:', error);
     }
   };
 
