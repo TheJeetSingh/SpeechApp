@@ -21,7 +21,8 @@ const PORT = process.env.PORT || 5001;
 const allowedOrigins = [
   'http://localhost:3000',
   'https://speech-app-delta.vercel.app',
-  'https://speech-app-server.vercel.app'
+  'https://speech-app-server.vercel.app',
+  'https://articulate.ninja'
 ];
 
 // CORS middleware for all routes - simplified and more permissive
