@@ -10,7 +10,6 @@ require("dotenv").config();
 const transcribeAudioHandler = require('./api/transcribe-audio');
 
 // Import route handlers
-const updateSchoolRouter = require('./api/update-school');
 const User = require('./models/User');
 
 // Initialize Express app
@@ -87,7 +86,7 @@ app.get("/", (req, res) => {
 });
 
 // Use the new router for updating school
-app.use('/api/user/school', updateSchoolRouter);
+// This is now handled by a dedicated serverless function
 
 // CORS Test Endpoint
 app.get("/api/cors-test", (req, res) => {
