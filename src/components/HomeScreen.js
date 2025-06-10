@@ -828,7 +828,7 @@ function Modal({ isOpen, onClose, onConfirm }) {
 // Custom Flowing Menu Component
 const FlowingMenuItem = ({ icon, label, isActive, onClick, delay = 0 }) => {
   return (
-    <motion.div
+        <motion.div 
       className="flowing-menu-item"
       initial={{ opacity: 0, x: -20 }}
       animate={{ 
@@ -859,7 +859,7 @@ const FlowingMenuItem = ({ icon, label, isActive, onClick, delay = 0 }) => {
           {icon}
         </div>
         <span style={styles.menuItemLabel}>{label}</span>
-        <motion.div 
+          <motion.div 
           style={styles.menuArrow}
           animate={{ 
             x: isActive ? 5 : 0,
@@ -867,8 +867,8 @@ const FlowingMenuItem = ({ icon, label, isActive, onClick, delay = 0 }) => {
           }}
         >
           <FiChevronRight size={14} color={isActive ? "#4FACFE" : "#6a8bad"} />
-        </motion.div>
-      </motion.button>
+                </motion.div>
+                </motion.button>
     </motion.div>
   );
 };
@@ -891,7 +891,7 @@ const PracticeOptionCard = ({ icon, title, description, onClick }) => {
       </div>
       <h3 style={styles.practiceTitle}>{title}</h3>
       <p style={styles.practiceDescription}>{description}</p>
-    </motion.div>
+          </motion.div>
   );
 };
 
@@ -911,7 +911,7 @@ const AIFeatureCard = ({ icon, title, description }) => {
       <div style={styles.featureContent}>
         <h3 style={styles.featureTitle}>{title}</h3>
         <p style={styles.featureDescription}>{description}</p>
-      </div>
+    </div>
     </motion.div>
   );
 };
@@ -1499,8 +1499,8 @@ function HomeScreen() {
   // Render practice content for the main area
   const renderPracticeContent = () => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       style={styles.contentCard}
     >
@@ -1509,47 +1509,47 @@ function HomeScreen() {
           <FiTarget style={styles.contentIconSvg} />
         </div>
         <h2 style={styles.contentTitle}>Practice Speaking</h2>
-      </div>
-      
+            </div>
+            
       <p style={styles.contentDescription}>
-        Choose a speech format and start practicing right away
-      </p>
-      
+              Choose a speech format and start practicing right away
+            </p>
+            
       <div style={styles.practiceGrid}>
         <PracticeOptionCard 
           icon={<FiZap size={26} color="#4FACFE" />}
           title="Impromptu"
           description="Think on your feet with random topics"
-          onClick={() => handlePractice("Impromptu")}
+                onClick={() => handlePractice("Impromptu")}
         />
         
         <PracticeOptionCard 
           icon={<FiBookOpen size={26} color="#4FACFE" />}
           title="Interp"
           description="Interpret and perform literature or poetry"
-          onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
+                onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
         />
         
         <PracticeOptionCard 
           icon={<FiEdit size={26} color="#4FACFE" />}
           title="Original"
           description="Present your own prepared speech"
-          onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
+                onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
         />
         
         <PracticeOptionCard 
           icon={<FiGlobe size={26} color="#4FACFE" />}
           title="Extemp"
           description="Present a speech with limited preparation"
-          onClick={() => handlePractice("Extemp")}
+                onClick={() => handlePractice("Extemp")}
         />
-      </div>
-    </motion.div>
+            </div>
+          </motion.div>
   );
-
+          
   // Render AI coach content for the main area
   const renderAICoachContent = () => (
-    <motion.div
+          <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -1560,12 +1560,12 @@ function HomeScreen() {
           <FiCpu style={styles.contentIconSvg} />
         </div>
         <h2 style={styles.contentTitle}>AI Speech Coach</h2>
-      </div>
-      
+            </div>
+            
       <p style={styles.contentDescription}>
-        Get personalized feedback and analysis to improve your speaking skills
-      </p>
-      
+              Get personalized feedback and analysis to improve your speaking skills
+            </p>
+            
       <div style={styles.aiFeatureContainer}>
         <div style={styles.aiFeatureCol}>
           <AIFeatureCard
@@ -1595,16 +1595,16 @@ function HomeScreen() {
           />
         </div>
       </div>
-      
-      <motion.button
+            
+            <motion.button
         style={styles.aiStartButton}
-        whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => navigate("/ai-coach")}
-      >
+              whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/ai-coach")}
+            >
         Start AI Coaching Session
-      </motion.button>
-    </motion.div>
+            </motion.button>
+          </motion.div>
   );
 
   // Render welcome content for the main area
@@ -1656,7 +1656,7 @@ function HomeScreen() {
           <div style={styles.sidebarContent}>
             <div style={styles.menuHeader}>
               <h3 style={styles.menuHeaderTitle}>Articulate</h3>
-            </div>
+        </div>
             <nav style={styles.nav}>
               <motion.div 
                 style={styles.flowingMenuContainer}
@@ -1676,7 +1676,7 @@ function HomeScreen() {
                 ))}
               </motion.div>
             </nav>
-          </div>
+      </div>
           <div 
             style={{ zIndex: 101, cursor: 'pointer', padding: '0 1.5rem 1.5rem' }}
             onClick={handleChromaClick}
@@ -1701,7 +1701,7 @@ function HomeScreen() {
             )}
           </AnimatePresence>
         </main>
-      </div>
+    </div>
     </>
   );
 }

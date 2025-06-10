@@ -108,7 +108,7 @@ function Login() {
         // Parse the error message to provide a more user-friendly error
         const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
         throw new Error(errorInfo.message);
-      }
+        }
 
       // Reset login attempts on successful login
       setLoginAttempts(0);

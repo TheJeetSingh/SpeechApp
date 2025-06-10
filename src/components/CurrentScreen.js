@@ -19,7 +19,7 @@ const CurrentScreen = () => {
       try {
         // Use the server endpoint for NYT API
         const apiUrl = `${config.API_URL}${config.NYT_NEWS_ENDPOINT}`;
-        
+          
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
@@ -90,7 +90,7 @@ const CurrentScreen = () => {
         style={styles.content}
         variants={animations.content}
       >
-         <motion.h1
+        <motion.h1
           style={styles.heading}
           variants={animations.heading}
         >
@@ -128,31 +128,31 @@ const CurrentScreen = () => {
           </motion.div>
         )}
 
-        <AnimatePresence>
+          <AnimatePresence>
           {!isLoading && !error && articles.map((article, index) => (
             <motion.div
-              key={index}
-              style={styles.listItem}
-              variants={animations.card}
-              whileHover="hover"
-              whileTap="tap"
-              onClick={() =>
-                navigate(`/prep/${encodeURIComponent(article.title)}`, {
-                  state: { topicName: article.title, topicDescription: article.description },
-                })
-              }
-              custom={index}
-              layout
-            >
+                key={index}
+                style={styles.listItem}
+                variants={animations.card}
+                whileHover="hover"
+                whileTap="tap"
+                onClick={() =>
+                  navigate(`/prep/${encodeURIComponent(article.title)}`, {
+                    state: { topicName: article.title, topicDescription: article.description },
+                  })
+                }
+                custom={index}
+                layout
+              >
               <div style={styles.articleContent}>
                 <div style={styles.articleTitle}>{article.title}</div>
-                <div style={styles.articleDescription}>{article.description}</div>
+                  <div style={styles.articleDescription}>{article.description}</div>
                 <div style={styles.articleSection}>Section: {article.section}</div>
               </div>
               <FiArrowRight />
             </motion.div>
-          ))}
-        </AnimatePresence>
+            ))}
+          </AnimatePresence>
       </motion.div>
     </motion.div>
   );

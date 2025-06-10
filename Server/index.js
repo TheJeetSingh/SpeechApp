@@ -22,26 +22,31 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://speech-app-delta.vercel.app',
   'https://speech-app-server.vercel.app',
-  'https://articulate.ninja'
+  'https://www.articulate.ninja'
 ];
 
-// CORS middleware for all routes - simplified and more permissive
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  // Always allow the origin that sent the request
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS preflight request');
-    return res.status(200).end();
-  }
-  
-  next();
-});
+// CORS middleware configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: 'GET, POST, PUT, DELETE, OPTIONS',
+  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+  maxAge: 86400 // 24 hours
+};
+
+// Use CORS middleware for all routes
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Parse JSON request bodies with increased limit for audio data
 app.use(express.json({ limit: '50mb' }));
@@ -53,16 +58,6 @@ app.use((req, res, next) => {
   console.log('Origin:', req.headers.origin);
   console.log('Headers:', JSON.stringify(req.headers));
   next();
-});
-
-// Handle OPTIONS preflight for all routes explicitly
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  res.status(200).end();
 });
 
 // MongoDB Connection
@@ -96,37 +91,20 @@ app.use('/api/user/school', updateSchoolRouter);
 
 // CORS Test Endpoint
 app.get("/api/cors-test", (req, res) => {
-  // Set CORS headers explicitly on this route
-  const origin = req.headers.origin || '*';
-  res.header('Access-Control-Allow-Origin', origin);
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  console.log(`CORS test requested from origin: ${origin}`);
+  console.log(`CORS test requested from origin: ${req.headers.origin}`);
   
   // Return detailed information to help with debugging
   res.status(200).json({ 
     message: "CORS test successful",
-    origin: origin,
+    origin: req.headers.origin,
     time: new Date().toISOString(),
-    headers: req.headers,
-    corsHeaders: {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-    }
+    headers: req.headers
   });
 });
 
 // Signup Route
 app.post("/api/signup", async (req, res) => {
-  const origin = req.headers.origin || '*';
-  // Always set CORS headers explicitly
-  res.header('Access-Control-Allow-Origin', origin);
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  console.log("Signup attempt from origin:", origin);
+  console.log("Signup attempt from origin:", req.headers.origin);
   console.log("Signup request body:", JSON.stringify(req.body));
   
   const { name, email, password } = req.body;
@@ -168,13 +146,7 @@ app.post("/api/signup", async (req, res) => {
 
 // Login Route
 app.post("/api/login", async (req, res) => {
-  const origin = req.headers.origin || '*';
-  // Always set CORS headers explicitly
-  res.header('Access-Control-Allow-Origin', origin);
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  console.log("Login attempt from origin:", origin);
+  console.log("Login attempt from origin:", req.headers.origin);
   console.log("Login request body:", JSON.stringify(req.body));
   
   const { email, password } = req.body;
@@ -231,20 +203,7 @@ app.get("/protected", auth, (req, res) => {
 
 // News API Route
 app.get("/api/news", async (req, res) => {
-  // Always accept requests from localhost and production domain
-  const origin = req.headers.origin;
-  const allowedOrigins = ['http://localhost:3000', 'https://speech-app-delta.vercel.app', 'https://speech-app-server.vercel.app'];
-  
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  console.log(`News API requested from origin: ${origin}`);
+  console.log(`News API requested from origin: ${req.headers.origin}`);
   
   // Handle preflight request
   if (req.method === 'OPTIONS') {

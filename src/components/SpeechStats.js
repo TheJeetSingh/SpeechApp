@@ -687,7 +687,7 @@ function SpeechStats() {
               </motion.div>
             </motion.div>
           </AnimatePresence>
-        )}
+          )}
       </motion.div>
     </motion.div>
   );

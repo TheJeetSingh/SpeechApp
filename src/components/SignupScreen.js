@@ -107,7 +107,7 @@ function Signup() {
         // Parse the error message to provide a more user-friendly error
         const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
         throw new Error(errorInfo.message);
-      }
+        }
 
       localStorage.setItem("token", data.token);
       navigate("/home");
