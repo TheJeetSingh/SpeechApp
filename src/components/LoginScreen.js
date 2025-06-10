@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { jwtDecode } from "jwt-decode"; // Import JWT decoder
 import config from "../config"; // Import config for API URLs
 
 // Use config.API_URL which handles development/production environments properly
@@ -109,15 +108,11 @@ function Login() {
         // Parse the error message to provide a more user-friendly error
         const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
         throw new Error(errorInfo.message);
-      }
+        }
 
       // Reset login attempts on successful login
       setLoginAttempts(0);
-      
-      // Store token in localStorage (only token, no user data)
       localStorage.setItem("token", data.token);
-      console.log('Login successful, token stored');
-      
       navigate("/home");
     } catch (error) {
       console.error("Login error:", error);

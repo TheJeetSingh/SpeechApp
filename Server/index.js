@@ -270,34 +270,6 @@ app.get("/protected", auth, (req, res) => {
   res.json({ message: "Access granted", user: req.user });
 });
 
-// Get User Data - endpoint to retrieve user data based on JWT token
-app.get("/api/user", auth, async (req, res) => {
-  try {
-    // The auth middleware already verified the token and set req.user
-    const userId = req.user.id;
-    
-    console.log(`Retrieving user data for ID: ${userId}`);
-    
-    // Find the user in MongoDB
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    // Return user data without password
-    res.json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      school: user.school || '',
-    });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    res.status(500).json({ message: "Server error while fetching user data" });
-  }
-});
-
 // News API Route
 app.get("/api/news", async (req, res) => {
   console.log(`News API requested from origin: ${req.headers.origin}`);

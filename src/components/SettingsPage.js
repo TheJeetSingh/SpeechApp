@@ -32,47 +32,26 @@ const SettingsPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      // Fetch user data directly from the server using token
-      fetchUserData(token);
+      try {
+        const decoded = jwtDecode(token);
+        console.log('Decoded token data:', decoded);
+        setUserData({
+          name: decoded.name || '',
+          email: decoded.email || '',
+          school: decoded.school || ''
+        });
+        setSchoolInput(decoded.school || '');
+        setIsLoggedIn(true);
+        setActiveTab('profile');
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        setIsLoggedIn(false);
+        setActiveTab('account');
+      }
     } else {
       setActiveTab('account');
     }
   }, []);
-
-  // Function to fetch user data from the server
-  const fetchUserData = async (token) => {
-    try {
-      console.log('Fetching user data from server...');
-      const response = await fetch(`${API_URL}/api/user`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user data: ${response.status}`);
-      }
-
-      const userData = await response.json();
-      console.log('User data retrieved from MongoDB:', userData);
-      
-      // Set state with data from MongoDB
-      setUserData({
-        name: userData.name || '',
-        email: userData.email || '',
-        school: userData.school || ''
-      });
-      setSchoolInput(userData.school || '');
-      setIsLoggedIn(true);
-      setActiveTab('profile');
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setIsLoggedIn(false);
-      setActiveTab('account');
-    }
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -106,8 +85,8 @@ const SettingsPage = () => {
         body: JSON.stringify({ school: schoolInput })
       };
 
-      // On production, only use the backup endpoint as it's the only one working
-      console.log(`Sending request to backup endpoint: ${API_URL}/api/school-update`);
+      // Use the endpoint that works in production
+      console.log(`Sending request to endpoint: ${API_URL}/api/school-update`);
       const response = await fetch(`${API_URL}/api/school-update`, requestOptions);
       console.log('Endpoint response status:', response.status);
 
@@ -130,8 +109,8 @@ const SettingsPage = () => {
       localStorage.setItem('token', data.token);
       const decoded = jwtDecode(data.token);
       setUserData({
-        name: decoded.name || '',
-        email: decoded.email || '',
+        name: decoded.name,
+        email: decoded.email,
         school: decoded.school || ''
       });
       setSuccess('School updated successfully!');
