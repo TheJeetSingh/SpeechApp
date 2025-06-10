@@ -20,28 +20,7 @@
   ],
   "routes": [
     {
-      "src": "/api/login",
-      "methods": ["POST", "OPTIONS"],
-      "dest": "Server/api/login.js"
-    },
-    {
-      "src": "/api/signup",
-      "methods": ["POST", "OPTIONS"],
-      "dest": "Server/api/signup.js"
-    },
-    {
-      "src": "/api/news",
-      "methods": ["GET", "OPTIONS"],
-      "dest": "Server/api/news.js"
-    },
-    {
-      "src": "/api/cors-test",
-      "methods": ["GET", "OPTIONS"],
-      "dest": "Server/api/cors-test.js"
-    },
-    {
       "src": "/api/(.*)",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       "dest": "Server/index.js"
     },
     {
