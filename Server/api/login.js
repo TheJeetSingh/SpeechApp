@@ -46,7 +46,7 @@ const generateToken = (user) => {
 // Serverless function handler
 module.exports = async (req, res) => {
   // Set CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', 'https://speech-app-delta.vercel.app');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
