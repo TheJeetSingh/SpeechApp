@@ -6,6 +6,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "Server/api/*.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -26,6 +30,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/user/school", "destination": "Server/api/user-school.js" },
     { "source": "/api/(.*)", "destination": "Server/index.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
