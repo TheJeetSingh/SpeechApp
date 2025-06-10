@@ -35,16 +35,64 @@ const SettingsPage = () => {
       try {
         const decoded = jwtDecode(token);
         console.log('Decoded token data:', decoded);
-        setUserData({
-          name: decoded.name || '',
-          email: decoded.email || '',
-          school: decoded.school || ''
-        });
-        setSchoolInput(decoded.school || '');
+        
+        // Check if user data is complete from token
+        if (!decoded.email || decoded.email === 'undefined') {
+          console.warn('Email missing in token, checking local storage');
+          // Try to get from localStorage
+          const storedUserData = JSON.parse(localStorage.getItem("userData") || '{}');
+          if (storedUserData.email) {
+            console.log('Using userData from localStorage:', storedUserData);
+            setUserData({
+              name: storedUserData.name || '',
+              email: storedUserData.email || '',
+              school: storedUserData.school || ''
+            });
+            setSchoolInput(storedUserData.school || '');
+          } else {
+            console.warn('User data incomplete both in token and localStorage');
+            // Fallback to what we have in token
+            setUserData({
+              name: decoded.name || '',
+              email: decoded.email || '',
+              school: decoded.school || ''
+            });
+            setSchoolInput(decoded.school || '');
+          }
+        } else {
+          // Use data from token if it's complete
+          setUserData({
+            name: decoded.name || '',
+            email: decoded.email || '',
+            school: decoded.school || ''
+          });
+          setSchoolInput(decoded.school || '');
+        }
+        
         setIsLoggedIn(true);
         setActiveTab('profile');
       } catch (error) {
         console.error('Error decoding token:', error);
+        
+        // Try to get from localStorage as fallback
+        try {
+          const storedUserData = JSON.parse(localStorage.getItem("userData") || '{}');
+          if (storedUserData.email) {
+            console.log('Token decode failed, using userData from localStorage');
+            setUserData({
+              name: storedUserData.name || '',
+              email: storedUserData.email || '',
+              school: storedUserData.school || ''
+            });
+            setSchoolInput(storedUserData.school || '');
+            setIsLoggedIn(true);
+            setActiveTab('profile');
+            return;
+          }
+        } catch (e) {
+          console.error('Error reading from localStorage:', e);
+        }
+        
         setIsLoggedIn(false);
         setActiveTab('account');
       }

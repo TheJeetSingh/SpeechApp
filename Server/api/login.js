@@ -29,6 +29,7 @@ try {
     name: String,
     email: String,
     password: String,
+    school: String
   });
   User = mongoose.model("User", UserSchema);
 }
@@ -38,7 +39,19 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, {
+  console.log('Generating token with user data in login.js:', {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    school: user.school || ''
+  });
+  
+  return jwt.sign({ 
+    id: user._id, 
+    name: user.name, 
+    email: user.email, 
+    school: user.school || '' 
+  }, JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -96,7 +109,8 @@ module.exports = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        school: user.school || ''
       }
     });
   } catch (error) {

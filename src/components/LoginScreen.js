@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { jwtDecode } from "jwt-decode"; // Import jwt-decode
 import config from "../config"; // Import config for API URLs
 
 // Use config.API_URL which handles development/production environments properly
@@ -108,11 +109,33 @@ function Login() {
         // Parse the error message to provide a more user-friendly error
         const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
         throw new Error(errorInfo.message);
-        }
+      }
 
       // Reset login attempts on successful login
       setLoginAttempts(0);
+      
+      // Store the token
       localStorage.setItem("token", data.token);
+      
+      // Store user data directly from the response
+      if (data.user) {
+        console.log("Storing user data from API response:", data.user);
+        localStorage.setItem("userData", JSON.stringify({
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          school: data.user.school || ''
+        }));
+      }
+      
+      // Also decode the token for verification
+      try {
+        const decoded = jwtDecode(data.token);
+        console.log("Login successful. Token contains:", decoded);
+      } catch (decodeError) {
+        console.error("Failed to decode token:", decodeError);
+      }
+      
       navigate("/home");
     } catch (error) {
       console.error("Login error:", error);

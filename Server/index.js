@@ -217,7 +217,8 @@ app.post("/api/login", async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    // Use select() to explicitly include all fields we need
+    const user = await User.findOne({ email }).select('+name +email +password +school');
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -233,8 +234,23 @@ app.post("/api/login", async (req, res) => {
       email: user.email,
       school: user.school || ''
     });
+    
+    // Double-check that MongoDB data is complete
+    if (!user.name || !user.email) {
+      console.error("Warning: User data is incomplete in MongoDB:", user);
+    }
 
     const token = generateToken(user);
+    
+    // Parse the token we just created to verify it contains all fields
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log("Decoded token to verify contents:", {
+      id: decoded.id,
+      name: decoded.name,
+      email: decoded.email,
+      school: decoded.school
+    });
+
     res.json({
       token,
       user: {
@@ -245,7 +261,7 @@ app.post("/api/login", async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server error while logging in" });
   }
 });
