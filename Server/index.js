@@ -15,6 +15,7 @@ const User = require('./models/User');
 // Import the serverless function handlers for local development
 const userSchoolHandler = require('./api/user-school');
 const schoolUpdateHandler = require('./api/school-update');
+const userPasswordHandler = require('./api/user-password');
 
 // Initialize Express app
 const app = express();
@@ -126,6 +127,11 @@ app.all("/api/user/school", (req, res) => {
 app.all("/api/school-update", (req, res) => {
   console.log("Local route for /api/school-update called");
   return schoolUpdateHandler(req, res);
+});
+
+app.all("/api/user/password", (req, res) => {
+  console.log("Local route for /api/user/password called");
+  return userPasswordHandler(req, res);
 });
 
 // Use the new router for updating school
