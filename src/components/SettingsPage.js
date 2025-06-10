@@ -64,34 +64,75 @@ const SettingsPage = () => {
       return;
     }
     setError('');
+    setSuccess('');
 
     try {
+      console.log('Attempting to update school...');
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/user/school`, {
+      
+      // Create a more detailed options object with explicit CORS settings
+      const requestOptions = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ school: schoolInput }),
-      });
+        mode: 'cors', // Explicitly set CORS mode
+        credentials: 'omit', // Don't send cookies for cross-origin requests
+        body: JSON.stringify({ school: schoolInput })
+      };
 
+      // Try multiple endpoints in sequence if needed
+      let response;
+      let errorFromFirstTry = null;
+      
+      // First try the original endpoint
+      try {
+        console.log(`Sending request to original endpoint: ${API_URL}/api/user/school`);
+        response = await fetch(`${API_URL}/api/user/school`, requestOptions);
+        console.log('Original endpoint response status:', response.status);
+      } catch (err) {
+        // If that fails, save the error and try our backup endpoint
+        errorFromFirstTry = err;
+        console.log('Original endpoint failed, trying backup endpoint');
+      }
+      
+      // If first endpoint failed or returned an error, try our backup endpoint
+      if (!response || !response.ok) {
+        console.log(`Sending request to backup endpoint: ${API_URL}/api/school-update`);
+        response = await fetch(`${API_URL}/api/school-update`, requestOptions);
+        console.log('Backup endpoint response status:', response.status);
+      }
+
+      // Check for network errors or failed responses
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update school.');
+        let errorMessage = `Server returned ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Could not parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      localStorage.setItem('token', data.token); // Update token
+      console.log('Update successful:', data.message);
+      
+      // Update token and user data
+      localStorage.setItem('token', data.token);
       const decoded = jwtDecode(data.token);
       setUserData({
-          name: decoded.name,
-          email: decoded.email,
-          school: decoded.school
+        name: decoded.name,
+        email: decoded.email,
+        school: decoded.school
       });
+      setSuccess('School updated successfully!');
       setIsEditingSchool(false);
     } catch (error) {
-      setError(error.message);
+      console.error('School update error:', error);
+      setError(error.message || 'Failed to update school. Please try again later.');
     }
   };
   
@@ -241,6 +282,7 @@ const SettingsPage = () => {
               )}
             </div>
             {error && <p style={styles.errorMessage}>{error}</p>}
+            {success && <p style={styles.successMessage}>{success}</p>}
           </motion.div>
         );
       case 'account':
@@ -611,22 +653,15 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.8)',
   },
   errorMessage: {
-    color: '#ff6b6b',
-    fontSize: '0.95rem',
-    marginTop: '1rem',
-    padding: '0.75rem',
-    background: 'rgba(255, 107, 107, 0.1)',
-    borderRadius: '8px',
-    border: '1px solid rgba(255, 107, 107, 0.3)',
+    color: '#e74c3c',
+    marginTop: 10,
+    fontSize: '14px'
   },
   successMessage: {
-    color: '#51cf66',
-    fontSize: '0.95rem',
-    marginTop: '1rem',
-    padding: '0.75rem',
-    background: 'rgba(81, 207, 102, 0.1)',
-    borderRadius: '8px',
-    border: '1px solid rgba(81, 207, 102, 0.3)',
+    color: '#2ecc71',
+    marginTop: 10,
+    fontSize: '14px',
+    fontWeight: 'bold'
   },
   fieldError: {
     color: '#ff6b6b',

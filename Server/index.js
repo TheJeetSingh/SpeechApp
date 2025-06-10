@@ -12,6 +12,10 @@ const transcribeAudioHandler = require('./api/transcribe-audio');
 // Import route handlers
 const User = require('./models/User');
 
+// Import the serverless function handlers for local development
+const userSchoolHandler = require('./api/user-school');
+const schoolUpdateHandler = require('./api/school-update');
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -19,6 +23,11 @@ const PORT = process.env.PORT || 5001;
 // Specific origins to allow
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3001',  // Adding potential alternative local port
+  'http://localhost:5001',  // Adding the server's own origin for local development
+  'http://127.0.0.1:3000',  // Adding localhost IP equivalent
+  'http://127.0.0.1:3001',  // Adding localhost IP equivalent with alternative port
+  'http://127.0.0.1:5001',  // Adding localhost IP equivalent for server port
   'https://speech-app-delta.vercel.app',
   'https://speech-app-server.vercel.app',
   'https://www.articulate.ninja'
@@ -27,12 +36,23 @@ const allowedOrigins = [
 // CORS middleware configuration
 const corsOptions = {
   origin: function (origin, callback) {
+    // For development - show detailed origin debug info
+    console.log(`CORS Debug - Request origin: "${origin}"`);
+    console.log(`CORS Debug - Allowed origins: ${JSON.stringify(allowedOrigins)}`);
+    
     // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('CORS Debug - No origin, allowing request');
+      return callback(null, true);
+    }
+    
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      console.log(`CORS Debug - Origin "${origin}" not in allowed list, rejecting`);
       return callback(new Error(msg), false);
     }
+    
+    console.log(`CORS Debug - Origin "${origin}" is allowed`);
     return callback(null, true);
   },
   credentials: true,
@@ -83,6 +103,17 @@ const generateToken = (user) => {
 // Root Route (To Check If Backend is Running)
 app.get("/", (req, res) => {
   res.send("Welcome to the Impromptu App Server!");
+});
+
+// Add routes for serverless functions to work in local development
+app.all("/api/user/school", (req, res) => {
+  console.log("Local route for /api/user/school called");
+  return userSchoolHandler(req, res);
+});
+
+app.all("/api/school-update", (req, res) => {
+  console.log("Local route for /api/school-update called");
+  return schoolUpdateHandler(req, res);
 });
 
 // Use the new router for updating school
@@ -147,6 +178,12 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   console.log("Login attempt from origin:", req.headers.origin);
   console.log("Login request body:", JSON.stringify(req.body));
+  
+  // Special CORS handling for login endpoint
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
   const { email, password } = req.body;
 

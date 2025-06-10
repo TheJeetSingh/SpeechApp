@@ -1,3 +1,4 @@
+// Dedicated endpoint for updating user's school with CORS handling
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 require("dotenv").config();
@@ -11,7 +12,7 @@ const connectToDatabase = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("MongoDB connected in serverless function");
+    console.log("MongoDB connected in school-update function");
   } catch (error) {
     console.error("MongoDB connection error:", error);
     throw new Error("Database connection failed");
@@ -57,65 +58,66 @@ const auth = (req) => {
   }
 };
 
-// Handler for the /api/user/school endpoint
+// Serverless function handler
 module.exports = async (req, res) => {
-  // Set CORS headers
+  // Most permissive CORS headers possible
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
   
-  // Handle preflight requests
+  // Handle preflight request
   if (req.method === 'OPTIONS') {
-    console.log('OPTIONS request for /api/user/school');
+    console.log('SCHOOL_UPDATE: Handling OPTIONS preflight request');
     return res.status(200).end();
   }
   
-  // Only accept POST requests
+  console.log('SCHOOL_UPDATE: Request received', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body
+  });
+  
+  // Only accept POST requests for actual updates
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ 
+      message: 'Method not allowed',
+      allowedMethods: ['POST', 'OPTIONS'] 
+    });
   }
   
-  console.log('/api/user/school: Processing request');
-  console.log('Headers:', JSON.stringify(req.headers));
-  
   try {
-    // Connect to the database
+    // Connect to database
     await connectToDatabase();
     
-    // Authenticate the user
-    let user;
-    try {
-      user = auth(req);
-      console.log('User authenticated:', user);
-    } catch (error) {
-      console.error('Authentication error:', error.message);
-      return res.status(401).json({ message: error.message });
-    }
+    // Verify user authentication
+    const user = auth(req);
+    console.log('SCHOOL_UPDATE: User authenticated', { userId: user.id });
     
     // Extract school from request body
     const { school } = req.body;
     if (!school) {
-      return res.status(400).json({ message: 'School name is required' });
+      return res.status(400).json({ message: "School name is required" });
     }
     
-    // Find and update the user
+    // Find and update user
     const userDoc = await User.findById(user.id);
     if (!userDoc) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
     
-    // Update school
+    // Update school and save
     userDoc.school = school;
     await userDoc.save();
-    console.log('School updated successfully:', school);
+    console.log('SCHOOL_UPDATE: School updated successfully for user', { userId: user.id, school });
     
-    // Generate a new token with updated school
+    // Generate a new token with updated info
     const token = generateToken(userDoc);
     
-    // Return success response
+    // Return success
     return res.status(200).json({
-      message: 'School updated successfully',
+      message: "School updated successfully",
       token,
       user: {
         id: userDoc._id,
@@ -125,7 +127,15 @@ module.exports = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in /api/user/school:', error);
-    return res.status(500).json({ message: 'Server error while updating school' });
+    console.error('SCHOOL_UPDATE: Error occurred', { error: error.message, stack: error.stack });
+    
+    if (error.message === 'Authentication required' || error.message === 'Please authenticate.') {
+      return res.status(401).json({ message: error.message });
+    }
+    
+    return res.status(500).json({
+      message: "Server error occurred while updating school",
+      error: error.message
+    });
   }
 }; 
