@@ -60,17 +60,23 @@ const auth = (req) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // CRITICAL: Set explicit CORS headers for the specific domain
-  res.setHeader('Access-Control-Allow-Origin', 'https://www.articulate.ninja');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // Set CORS headers for all responses - using exact same format as login.js
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
   
-  // Special handling for OPTIONS requests - must return 200 immediately
+  // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
-    console.log('OPTIONS request for school-update endpoint - responding with 200');
+    console.log('School-update OPTIONS request received');
     return res.status(200).end();
+  }
+  
+  // Only handle POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      message: 'Method not allowed',
+      allowedMethods: ['POST', 'OPTIONS'] 
+    });
   }
   
   console.log('SCHOOL_UPDATE: Request received', {
@@ -79,14 +85,6 @@ module.exports = async (req, res) => {
     headers: req.headers,
     body: req.body
   });
-  
-  // Only accept POST requests for actual updates
-  if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      message: 'Method not allowed',
-      allowedMethods: ['POST', 'OPTIONS'] 
-    });
-  }
   
   try {
     // Connect to database
