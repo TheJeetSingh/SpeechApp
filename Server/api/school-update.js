@@ -60,15 +60,9 @@ const auth = (req) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // Most permissive CORS headers possible
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', '*');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  // CORS is handled by vercel.json.
   
-  // Handle preflight request
   if (req.method === 'OPTIONS') {
-    console.log('SCHOOL_UPDATE: Handling OPTIONS preflight request');
     return res.status(200).end();
   }
   
