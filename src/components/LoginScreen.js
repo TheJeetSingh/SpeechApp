@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { jwtDecode } from "jwt-decode"; // Import JWT decoder
 import config from "../config"; // Import config for API URLs
 
 // Use config.API_URL which handles development/production environments properly
@@ -108,11 +109,42 @@ function Login() {
         // Parse the error message to provide a more user-friendly error
         const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
         throw new Error(errorInfo.message);
-        }
+      }
 
       // Reset login attempts on successful login
       setLoginAttempts(0);
+      
+      // Store token in localStorage
       localStorage.setItem("token", data.token);
+      
+      // Decode and log token data to verify all fields are present
+      try {
+        const decoded = jwtDecode(data.token);
+        console.log('Successfully logged in with user data:', {
+          id: decoded.id || 'missing',
+          name: decoded.name || 'missing',
+          email: decoded.email || 'missing',
+          school: decoded.school || 'missing'
+        });
+        
+        // If user data is missing from token but present in response, use that
+        if (!decoded.email && data.user && data.user.email) {
+          console.log('Email missing from token but found in response. Using response data.');
+          // Create a more complete token with all user data
+          const completeUserData = {
+            id: decoded.id || data.user.id,
+            name: decoded.name || data.user.name,
+            email: data.user.email,
+            school: decoded.school || data.user.school || ''
+          };
+          
+          // Store the complete user data separately for immediate access
+          localStorage.setItem('userData', JSON.stringify(completeUserData));
+        }
+      } catch (decodeError) {
+        console.error('Error decoding JWT token:', decodeError);
+      }
+      
       navigate("/home");
     } catch (error) {
       console.error("Login error:", error);

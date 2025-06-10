@@ -35,12 +35,36 @@ const SettingsPage = () => {
       try {
         const decoded = jwtDecode(token);
         console.log('Decoded token data:', decoded);
-        setUserData({
+        
+        // Check if we have any missing fields
+        const hasMissingFields = !decoded.email || !decoded.name;
+        
+        // Try to get userData from localStorage as fallback
+        let userData = {
           name: decoded.name || '',
           email: decoded.email || '',
           school: decoded.school || ''
-        });
-        setSchoolInput(decoded.school || '');
+        };
+        
+        // If email or other critical data is missing, check localStorage for complete userData
+        if (hasMissingFields) {
+          try {
+            const storedUserData = JSON.parse(localStorage.getItem('userData') || '{}');
+            console.log('Using stored userData from localStorage:', storedUserData);
+            
+            // Use stored data as fallback for any missing fields
+            userData = {
+              name: decoded.name || storedUserData.name || '',
+              email: decoded.email || storedUserData.email || '',
+              school: decoded.school || storedUserData.school || ''
+            };
+          } catch (e) {
+            console.error('Error parsing stored userData:', e);
+          }
+        }
+        
+        setUserData(userData);
+        setSchoolInput(userData.school);
         setIsLoggedIn(true);
         setActiveTab('profile');
       } catch (error) {
@@ -85,27 +109,10 @@ const SettingsPage = () => {
         body: JSON.stringify({ school: schoolInput })
       };
 
-      // Try multiple endpoints in sequence if needed
-      let response;
-      let errorFromFirstTry = null;
-      
-      // First try the original endpoint
-      try {
-        console.log(`Sending request to original endpoint: ${API_URL}/api/user/school`);
-        response = await fetch(`${API_URL}/api/user/school`, requestOptions);
-        console.log('Original endpoint response status:', response.status);
-      } catch (err) {
-        // If that fails, save the error and try our backup endpoint
-        errorFromFirstTry = err;
-        console.log('Original endpoint failed, trying backup endpoint');
-      }
-      
-      // If first endpoint failed or returned an error, try our backup endpoint
-      if (!response || !response.ok) {
-        console.log(`Sending request to backup endpoint: ${API_URL}/api/school-update`);
-        response = await fetch(`${API_URL}/api/school-update`, requestOptions);
-        console.log('Backup endpoint response status:', response.status);
-      }
+      // On production, only use the backup endpoint as it's the only one working
+      console.log(`Sending request to backup endpoint: ${API_URL}/api/school-update`);
+      const response = await fetch(`${API_URL}/api/school-update`, requestOptions);
+      console.log('Endpoint response status:', response.status);
 
       // Check for network errors or failed responses
       if (!response.ok) {
@@ -126,9 +133,9 @@ const SettingsPage = () => {
       localStorage.setItem('token', data.token);
       const decoded = jwtDecode(data.token);
       setUserData({
-        name: decoded.name,
-        email: decoded.email,
-        school: decoded.school
+        name: decoded.name || '',
+        email: decoded.email || '',
+        school: decoded.school || ''
       });
       setSuccess('School updated successfully!');
       setIsEditingSchool(false);
