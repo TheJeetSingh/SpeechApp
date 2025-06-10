@@ -107,9 +107,12 @@ function Signup() {
         // Parse the error message to provide a more user-friendly error
         const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
         throw new Error(errorInfo.message);
-        }
+      }
 
+      // Store token in localStorage (only token, no user data)
       localStorage.setItem("token", data.token);
+      console.log('Signup successful, token stored');
+      
       navigate("/home");
     } catch (error) {
       console.error("Signup error:", error);

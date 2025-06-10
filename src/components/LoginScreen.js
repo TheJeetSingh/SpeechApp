@@ -114,36 +114,9 @@ function Login() {
       // Reset login attempts on successful login
       setLoginAttempts(0);
       
-      // Store token in localStorage
+      // Store token in localStorage (only token, no user data)
       localStorage.setItem("token", data.token);
-      
-      // Decode and log token data to verify all fields are present
-      try {
-        const decoded = jwtDecode(data.token);
-        console.log('Successfully logged in with user data:', {
-          id: decoded.id || 'missing',
-          name: decoded.name || 'missing',
-          email: decoded.email || 'missing',
-          school: decoded.school || 'missing'
-        });
-        
-        // If user data is missing from token but present in response, use that
-        if (!decoded.email && data.user && data.user.email) {
-          console.log('Email missing from token but found in response. Using response data.');
-          // Create a more complete token with all user data
-          const completeUserData = {
-            id: decoded.id || data.user.id,
-            name: decoded.name || data.user.name,
-            email: data.user.email,
-            school: decoded.school || data.user.school || ''
-          };
-          
-          // Store the complete user data separately for immediate access
-          localStorage.setItem('userData', JSON.stringify(completeUserData));
-        }
-      } catch (decodeError) {
-        console.error('Error decoding JWT token:', decodeError);
-      }
+      console.log('Login successful, token stored');
       
       navigate("/home");
     } catch (error) {

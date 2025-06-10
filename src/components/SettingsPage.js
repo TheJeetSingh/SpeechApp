@@ -32,50 +32,47 @@ const SettingsPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        console.log('Decoded token data:', decoded);
-        
-        // Check if we have any missing fields
-        const hasMissingFields = !decoded.email || !decoded.name;
-        
-        // Try to get userData from localStorage as fallback
-        let userData = {
-          name: decoded.name || '',
-          email: decoded.email || '',
-          school: decoded.school || ''
-        };
-        
-        // If email or other critical data is missing, check localStorage for complete userData
-        if (hasMissingFields) {
-          try {
-            const storedUserData = JSON.parse(localStorage.getItem('userData') || '{}');
-            console.log('Using stored userData from localStorage:', storedUserData);
-            
-            // Use stored data as fallback for any missing fields
-            userData = {
-              name: decoded.name || storedUserData.name || '',
-              email: decoded.email || storedUserData.email || '',
-              school: decoded.school || storedUserData.school || ''
-            };
-          } catch (e) {
-            console.error('Error parsing stored userData:', e);
-          }
-        }
-        
-        setUserData(userData);
-        setSchoolInput(userData.school);
-        setIsLoggedIn(true);
-        setActiveTab('profile');
-      } catch (error) {
-        console.error('Error decoding token:', error);
-        setIsLoggedIn(false);
-        setActiveTab('account');
-      }
+      // Fetch user data directly from the server using token
+      fetchUserData(token);
     } else {
       setActiveTab('account');
     }
   }, []);
+
+  // Function to fetch user data from the server
+  const fetchUserData = async (token) => {
+    try {
+      console.log('Fetching user data from server...');
+      const response = await fetch(`${API_URL}/api/user`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user data: ${response.status}`);
+      }
+
+      const userData = await response.json();
+      console.log('User data retrieved from MongoDB:', userData);
+      
+      // Set state with data from MongoDB
+      setUserData({
+        name: userData.name || '',
+        email: userData.email || '',
+        school: userData.school || ''
+      });
+      setSchoolInput(userData.school || '');
+      setIsLoggedIn(true);
+      setActiveTab('profile');
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setIsLoggedIn(false);
+      setActiveTab('account');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
