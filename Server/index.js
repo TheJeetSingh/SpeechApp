@@ -93,7 +93,19 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, name: user.name, email: user.email, school: user.school }, JWT_SECRET, {
+  console.log('Generating token with user data:', {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    school: user.school
+  });
+  
+  return jwt.sign({ 
+    id: user._id, 
+    name: user.name, 
+    email: user.email, 
+    school: user.school || '' 
+  }, JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -157,15 +169,28 @@ app.post("/api/signup", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword });
+    const newUser = await User.create({ 
+      name, 
+      email, 
+      password: hashedPassword,
+      school: '' 
+    });
+
+    console.log("User created successfully:", {
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      school: newUser.school || ''
+    });
 
     const token = generateToken(newUser);
     res.json({ 
       token, 
       user: {
+        id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        school: newUser.school
+        school: newUser.school || ''
       } 
     });
   } catch (err) {
@@ -202,13 +227,21 @@ app.post("/api/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    console.log("Login successful for user:", {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      school: user.school || ''
+    });
+
     const token = generateToken(user);
     res.json({
       token,
       user: {
+        id: user._id,
         name: user.name,
         email: user.email,
-        school: user.school
+        school: user.school || ''
       }
     });
   } catch (err) {

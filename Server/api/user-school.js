@@ -37,7 +37,19 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, name: user.name, email: user.email, school: user.school }, JWT_SECRET, {
+  console.log('Generating token in user-school with data:', {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    school: user.school || ''
+  });
+  
+  return jwt.sign({ 
+    id: user._id, 
+    name: user.name, 
+    email: user.email, 
+    school: user.school || '' 
+  }, JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -121,7 +133,7 @@ module.exports = async (req, res) => {
         id: userDoc._id,
         name: userDoc.name,
         email: userDoc.email,
-        school: userDoc.school
+        school: userDoc.school || ''
       }
     });
   } catch (error) {

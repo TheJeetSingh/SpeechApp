@@ -34,6 +34,7 @@ const SettingsPage = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        console.log('Decoded token data:', decoded);
         setUserData({
           name: decoded.name || '',
           email: decoded.email || '',
@@ -43,6 +44,7 @@ const SettingsPage = () => {
         setIsLoggedIn(true);
         setActiveTab('profile');
       } catch (error) {
+        console.error('Error decoding token:', error);
         setIsLoggedIn(false);
         setActiveTab('account');
       }
