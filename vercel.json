@@ -29,43 +29,15 @@
       ]
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "Server/index.js"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/robots.txt"
-    },
-    {
-      "src": "/logo192.png",
-      "dest": "/logo192.png"
-    },
-    {
-      "src": "/logo512.png",
-      "dest": "/logo512.png"
-    },
-    {
-      "src": "/(.*\\.(js|json|css|map))",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html",
-      "status": 200
-    }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "Server/index.js" },
+    { "source": "/static/(.*)", "destination": "/static/$1" },
+    { "source": "/favicon.ico", "destination": "/favicon.ico" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/logo192.png", "destination": "/logo192.png" },
+    { "source": "/logo512.png", "destination": "/logo512.png" },
+    { "source": "/(.*\\.(js|json|css|map))", "destination": "/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 
