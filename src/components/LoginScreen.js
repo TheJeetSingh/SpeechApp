@@ -22,11 +22,70 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loginAttempts, setLoginAttempts] = useState(0);
   const navigate = useNavigate();
+
+  const parseErrorMessage = (error, responseStatus) => {
+    // Check for specific error messages
+    const errorMsg = error.toLowerCase();
+    
+    if (errorMsg.includes("invalid email or password") || 
+        responseStatus === 401) {
+      // Increment login attempts to track multiple failures
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      
+      if (newAttempts >= 3) {
+        return {
+          title: "Login Failed",
+          message: "Multiple login attempts failed. Did you forget your password or need to create an account?"
+        };
+      }
+      
+      return {
+        title: "Authentication Failed",
+        message: "The email or password you entered is incorrect. Please try again."
+      };
+    }
+    
+    if (responseStatus === 429) {
+      return {
+        title: "Too Many Attempts",
+        message: "Too many login attempts. Please try again later."
+      };
+    }
+    
+    if (errorMsg.includes("email") && errorMsg.includes("not found")) {
+      return {
+        title: "Account Not Found",
+        message: "No account exists with this email. Would you like to sign up?"
+      };
+    }
+    
+    // Network or server errors
+    if (responseStatus >= 500 || errorMsg.includes("network") || errorMsg.includes("connection")) {
+      return {
+        title: "Connection Error",
+        message: "There was a problem connecting to our servers. Please check your internet connection and try again."
+      };
+    }
+    
+    // Default error message
+    return {
+      title: "Login Failed",
+      message: error
+    };
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Basic validation
+    if (!email || !password) {
+      setError("Please enter both email and password");
+      return;
+    }
 
     try {
       // Log diagnostics
@@ -43,17 +102,16 @@ function Login() {
         mode: 'cors', // Explicitly set CORS mode
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        // Try to get the error message from the response
-        try {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `Server error: ${response.status} ${response.statusText}`);
-        } catch (jsonError) {
-          throw new Error(`Server error: ${response.status} ${response.statusText}`);
-        }
+        // Parse the error message to provide a more user-friendly error
+        const errorInfo = parseErrorMessage(data.message || "Unknown error", response.status);
+        throw new Error(errorInfo.message);
       }
 
-      const data = await response.json();
+      // Reset login attempts on successful login
+      setLoginAttempts(0);
       localStorage.setItem("token", data.token);
       navigate("/home");
     } catch (error) {
@@ -200,20 +258,26 @@ const styles = {
   },
   errorPopup: {
     position: 'absolute',
-    top: '30px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: 'rgba(255, 77, 79, 0.85)',
-    backdropFilter: 'blur(5px)',
+    top: '-70px',
+    left: '0',
+    right: '0',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    background: 'rgba(255, 77, 79, 0.9)',
+    backdropFilter: 'blur(8px)',
     color: '#fff',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '10px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
+    padding: '0.85rem 1.5rem',
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.3)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     zIndex: 1000,
+    width: '90%',
+    maxWidth: '400px',
+    fontWeight: '500',
+    transform: 'none',
   },
   closeButton: {
     background: 'none',
@@ -222,6 +286,8 @@ const styles = {
     fontSize: '1.2rem',
     marginLeft: '15px',
     cursor: 'pointer',
+    opacity: '0.8',
+    transition: 'opacity 0.2s ease',
   }
 };
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FiArrowDown, FiArrowUp, FiLogOut, FiLogIn } from "react-icons/fi";
+import { FiArrowDown, FiArrowUp, FiLogOut, FiLogIn, FiTarget, FiCpu, FiZap, FiBookOpen, FiEdit, FiGlobe, FiUser, FiSettings, FiChevronRight } from "react-icons/fi";
+import { BsMicFill, BsBarChartFill, BsLightbulbFill, BsArrowRepeat } from "react-icons/bs";
 import { jwtDecode } from "jwt-decode";
 import { useSpring, animated } from 'react-spring';
 import { TypeAnimation } from 'react-type-animation';
@@ -824,6 +825,97 @@ function Modal({ isOpen, onClose, onConfirm }) {
   );
 }
 
+// Custom Flowing Menu Component
+const FlowingMenuItem = ({ icon, label, isActive, onClick, delay = 0 }) => {
+  return (
+    <motion.div
+      className="flowing-menu-item"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ 
+        opacity: 1, 
+        x: 0,
+        transition: { 
+          delay: delay,
+          duration: 0.3
+        }
+      }}
+      exit={{ opacity: 0, x: -20 }}
+    >
+      <motion.button
+        style={{
+          ...styles.flowingMenuItem,
+          backgroundColor: isActive ? 'rgba(79, 172, 254, 0.15)' : 'transparent',
+          borderLeft: isActive ? '3px solid #4FACFE' : '3px solid transparent'
+        }}
+        onClick={onClick}
+        whileHover={{ 
+          backgroundColor: "rgba(79, 172, 254, 0.1)",
+          x: 5,
+          transition: { type: "spring", stiffness: 300, damping: 20 }
+        }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="icon-container" style={styles.iconContainer}>
+          {icon}
+        </div>
+        <span style={styles.menuItemLabel}>{label}</span>
+        <motion.div 
+          style={styles.menuArrow}
+          animate={{ 
+            x: isActive ? 5 : 0,
+            opacity: isActive ? 1 : 0.3,
+          }}
+        >
+          <FiChevronRight size={14} color={isActive ? "#4FACFE" : "#6a8bad"} />
+        </motion.div>
+      </motion.button>
+    </motion.div>
+  );
+};
+
+// Content Card component for practice options
+const PracticeOptionCard = ({ icon, title, description, onClick }) => {
+  return (
+    <motion.div 
+      style={styles.practiceCard}
+      whileHover={{ 
+        scale: 1.03, 
+        boxShadow: "0 8px 30px rgba(0, 0, 0, 0.15)",
+        y: -5
+      }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+    >
+      <div style={styles.practiceIconWrapper}>
+        {icon}
+      </div>
+      <h3 style={styles.practiceTitle}>{title}</h3>
+      <p style={styles.practiceDescription}>{description}</p>
+    </motion.div>
+  );
+};
+
+// AI Feature component
+const AIFeatureCard = ({ icon, title, description }) => {
+  return (
+    <motion.div 
+      style={styles.aiFeature}
+      whileHover={{ 
+        y: -3,
+        boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)"
+      }}
+    >
+      <div style={styles.aiFeatureIcon}>
+        {icon}
+      </div>
+      <div style={styles.featureContent}>
+        <h3 style={styles.featureTitle}>{title}</h3>
+        <p style={styles.featureDescription}>{description}</p>
+      </div>
+    </motion.div>
+  );
+};
+
 // Define styles first, before the HomeScreen component
 const styles = {
   container: {
@@ -850,7 +942,7 @@ const styles = {
     fontSize: "clamp(2rem, 8vw, 3.5rem)",
     fontWeight: "700",
     marginBottom: "1rem",
-    letterSpacing: "2px",
+    letterSpacing: "1px",
     textShadow: '0 0 20px rgba(79, 172, 254, 0.5)',
     background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
     WebkitBackgroundClip: 'text',
@@ -1054,23 +1146,247 @@ const styles = {
     width: '280px',
     background: 'rgba(10, 25, 47, 0.9)',
     backdropFilter: 'blur(10px)',
-    padding: '2rem',
+    padding: '1rem 0',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
     borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+    overflowY: 'auto',
+    boxShadow: '5px 0 15px rgba(0, 0, 0, 0.2)',
   },
-  sidebarButton: {
-    padding: '1rem',
-    fontSize: '1rem',
-    fontWeight: '500',
+  sidebarContent: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    marginBottom: '2rem',
+  },
+  nav: {
+    display: 'flex',
+    flexDirection: 'column',
     width: '100%',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+  },
+  flowingMenuContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    padding: '0 0.75rem',
+  },
+  flowingMenuItem: {
+    width: '100%',
+    padding: '0.75rem 1rem',
     borderRadius: '8px',
-    background: 'rgba(255, 255, 255, 0.1)',
+    textAlign: 'left',
+    background: 'transparent',
+    border: 'none',
     color: '#fff',
+    fontWeight: '500',
+    fontSize: '0.95rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    transition: 'all 0.2s ease',
+    position: 'relative',
+  },
+  menuItemLabel: {
+    flex: 1,
+  },
+  menuArrow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '8px',
+    background: 'rgba(255, 255, 255, 0.05)',
+  },
+  contentCard: {
+    background: 'rgba(10, 25, 47, 0.5)',
+    borderRadius: '16px',
+    padding: '2.5rem',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    width: '100%',
+    maxWidth: '900px',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+  },
+  contentHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '1.5rem',
+  },
+  contentIconContainer: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '12px',
+    background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.1))',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: '1.25rem',
+    border: '1px solid rgba(79, 172, 254, 0.3)',
+  },
+  contentIconSvg: {
+    width: '24px',
+    height: '24px',
+    color: '#4FACFE',
+  },
+  contentTitle: {
+    fontSize: '1.8rem',
+    fontWeight: '700',
+    background: 'linear-gradient(to right, #4facfe, #00f2fe)',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
+    margin: 0,
+  },
+  contentDescription: {
+    fontSize: '1.1rem',
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: '2.5rem',
+    textAlign: 'left',
+  },
+  practiceGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1.5rem',
+  },
+  practiceCard: {
+    padding: '1.75rem 1.5rem',
+    backgroundColor: 'rgba(20, 35, 60, 0.5)',
+    color: '#fff',
+    border: '1px solid rgba(79, 172, 254, 0.2)',
+    borderRadius: '12px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+  },
+  practiceIconWrapper: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.1))',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '1.25rem',
+    border: '1px solid rgba(79, 172, 254, 0.3)',
+  },
+  practiceIconSvg: {
+    width: '26px',
+    height: '26px',
+    color: '#4FACFE',
+  },
+  practiceTitle: {
+    fontSize: '1.15rem',
+    fontWeight: '600',
+    marginBottom: '0.75rem',
+    color: '#ffffff',
+  },
+  practiceDescription: {
+    fontSize: '0.9rem',
+    color: 'rgba(255, 255, 255, 0.7)',
+    margin: 0,
+    lineHeight: '1.4',
+  },
+  aiFeatureContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '2rem',
+    marginBottom: '2.5rem',
+  },
+  aiFeatureCol: {
+    flex: '1 1 300px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+  },
+  aiFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1.25rem',
+    padding: '1.25rem',
+    backgroundColor: 'rgba(20, 35, 60, 0.5)',
+    borderRadius: '12px',
+    border: '1px solid rgba(79, 172, 254, 0.15)',
+    transition: 'all 0.3s ease',
+  },
+  aiFeatureIcon: {
+    width: '48px',
+    height: '48px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '12px',
+    background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.05))',
+    padding: '10px',
+    border: '1px solid rgba(79, 172, 254, 0.2)',
+  },
+  featureContent: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    margin: '0 0 0.5rem 0',
+    color: '#ffffff',
+  },
+  featureDescription: {
+    fontSize: '0.9rem',
+    color: 'rgba(255, 255, 255, 0.7)',
+    margin: 0,
+    textAlign: 'left',
+    lineHeight: '1.5',
+  },
+  aiStartButton: {
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+    color: '#010209',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 5px 15px rgba(79, 172, 254, 0.3)',
+    display: 'block',
+    margin: '0 auto',
+    letterSpacing: '0.5px',
+  },
+  welcomeMessage: {
+    background: 'rgba(10, 25, 47, 0.5)',
+    borderRadius: '16px',
+    padding: '2.5rem',
+    marginTop: '2rem',
+    maxWidth: '800px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+  },
+  welcomeText: {
+    fontSize: '1.2rem',
+    lineHeight: '1.6',
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
+  menuHeader: {
+    padding: '1rem 1.5rem 1.5rem 1.5rem',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    marginBottom: '1rem',
+  },
+  menuHeaderTitle: {
+    margin: 0,
+    fontSize: '1.2rem',
+    fontWeight: '600',
+    background: 'linear-gradient(to right, #4facfe, #00f2fe)',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
+    letterSpacing: '0.5px',
   },
 };
 
@@ -1080,6 +1396,8 @@ function HomeScreen() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeContent, setActiveContent] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(true);
   const navigate = useNavigate();
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -1123,6 +1441,15 @@ function HomeScreen() {
     setIsModalOpen(false);
   };
 
+  // Set active content to display in main area
+  const setActiveSidebarItem = (item) => {
+    if (activeContent === item) {
+      setActiveContent(null);
+    } else {
+      setActiveContent(item);
+    }
+  };
+
   // Navigate to practice screen with selected type
   const handlePractice = (type, defaultTopic = null) => {
     if (type === "Extemp") {
@@ -1144,24 +1471,214 @@ function HomeScreen() {
   };
 
   const handleChromaClick = () => {
-    navigate("/settings");
+    if (isLoggedIn) {
+      navigate("/settings");
+    } else {
+      navigate("/login");
+    }
   };
+
+  // Flowing Menu items
+  const menuItems = [
+    { 
+      id: 'practice', 
+      icon: <FiTarget size={20} color={activeContent === 'practice' ? "#4FACFE" : "#6a8bad"} />, 
+      label: 'Practice Speaking', 
+      isActive: activeContent === 'practice',
+      onClick: () => setActiveSidebarItem('practice')
+    },
+    { 
+      id: 'ai-coach', 
+      icon: <FiCpu size={20} color={activeContent === 'ai-coach' ? "#4FACFE" : "#6a8bad"} />, 
+      label: 'AI Speech Coach', 
+      isActive: activeContent === 'ai-coach',
+      onClick: () => setActiveSidebarItem('ai-coach')
+    }
+  ];
+
+  // Render practice content for the main area
+  const renderPracticeContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={styles.contentCard}
+    >
+      <div style={styles.contentHeader}>
+        <div style={styles.contentIconContainer}>
+          <FiTarget style={styles.contentIconSvg} />
+        </div>
+        <h2 style={styles.contentTitle}>Practice Speaking</h2>
+      </div>
+      
+      <p style={styles.contentDescription}>
+        Choose a speech format and start practicing right away
+      </p>
+      
+      <div style={styles.practiceGrid}>
+        <PracticeOptionCard 
+          icon={<FiZap size={26} color="#4FACFE" />}
+          title="Impromptu"
+          description="Think on your feet with random topics"
+          onClick={() => handlePractice("Impromptu")}
+        />
+        
+        <PracticeOptionCard 
+          icon={<FiBookOpen size={26} color="#4FACFE" />}
+          title="Interp"
+          description="Interpret and perform literature or poetry"
+          onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
+        />
+        
+        <PracticeOptionCard 
+          icon={<FiEdit size={26} color="#4FACFE" />}
+          title="Original"
+          description="Present your own prepared speech"
+          onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
+        />
+        
+        <PracticeOptionCard 
+          icon={<FiGlobe size={26} color="#4FACFE" />}
+          title="Extemp"
+          description="Present a speech with limited preparation"
+          onClick={() => handlePractice("Extemp")}
+        />
+      </div>
+    </motion.div>
+  );
+
+  // Render AI coach content for the main area
+  const renderAICoachContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={styles.contentCard}
+    >
+      <div style={styles.contentHeader}>
+        <div style={styles.contentIconContainer}>
+          <FiCpu style={styles.contentIconSvg} />
+        </div>
+        <h2 style={styles.contentTitle}>AI Speech Coach</h2>
+      </div>
+      
+      <p style={styles.contentDescription}>
+        Get personalized feedback and analysis to improve your speaking skills
+      </p>
+      
+      <div style={styles.aiFeatureContainer}>
+        <div style={styles.aiFeatureCol}>
+          <AIFeatureCard
+            icon={<BsMicFill size={24} color="#4FACFE" />}
+            title="Real-time Analysis"
+            description="Get live feedback as you speak on pacing, tone, and clarity"
+          />
+          
+          <AIFeatureCard
+            icon={<BsBarChartFill size={24} color="#4FACFE" />}
+            title="Performance Metrics" 
+            description="Track key metrics like pace, filler words, and engagement"
+          />
+        </div>
+        
+        <div style={styles.aiFeatureCol}>
+          <AIFeatureCard
+            icon={<BsLightbulbFill size={24} color="#4FACFE" />}
+            title="Personalized Tips"
+            description="Receive custom advice tailored to your speaking style"
+          />
+          
+          <AIFeatureCard
+            icon={<BsArrowRepeat size={24} color="#4FACFE" />}
+            title="Progress Tracking"
+            description="Monitor your improvement over time with detailed reports"
+          />
+        </div>
+      </div>
+      
+      <motion.button
+        style={styles.aiStartButton}
+        whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => navigate("/ai-coach")}
+      >
+        Start AI Coaching Session
+      </motion.button>
+    </motion.div>
+  );
+
+  // Render welcome content for the main area
+  const renderWelcomeContent = () => (
+    <>
+      <motion.h1
+        style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {userName ? `Welcome, ${userName}` : "Welcome to Articulate"}
+      </motion.h1>
+      
+      <motion.p 
+        style={styles.tagline}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+      >
+        Improve your public speaking skills with practice and AI-powered feedback
+      </motion.p>
+
+      <motion.div
+        style={styles.welcomeMessage}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.6 }}
+      >
+        <p style={styles.welcomeText}>
+          Select an option from the sidebar to get started with your speech practice 
+          or AI coaching session. Articulate helps you become a more confident and 
+          effective public speaker through guided practice and intelligent feedback.
+        </p>
+      </motion.div>
+    </>
+  );
 
   return (
     <>
       <div style={styles.container}>
-        <motion.div style={styles.sidebar}>
+        {/* Flowing Menu Sidebar */}
+        <motion.div 
+          style={styles.sidebar}
+          initial={{ x: -280 }}
+          animate={{ x: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        >
           <div style={styles.sidebarContent}>
+            <div style={styles.menuHeader}>
+              <h3 style={styles.menuHeaderTitle}>Articulate</h3>
+            </div>
             <nav style={styles.nav}>
-              {!isLoggedIn && (
-                <motion.button style={styles.navButton} onClick={() => navigate('/login')}>
-                  <FiLogIn /> Log In
-                </motion.button>
-              )}
+              <motion.div 
+                style={styles.flowingMenuContainer}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                {menuItems.map((item, index) => (
+                  <FlowingMenuItem
+                    key={item.id}
+                    icon={item.icon}
+                    label={item.label}
+                    isActive={item.isActive}
+                    onClick={item.onClick}
+                    delay={0.1 * (index + 1)}
+                  />
+                ))}
+              </motion.div>
             </nav>
           </div>
           <div 
-            style={{ zIndex: 101, cursor: 'pointer' }}
+            style={{ zIndex: 101, cursor: 'pointer', padding: '0 1.5rem 1.5rem' }}
             onClick={handleChromaClick}
           >
             <ChromaGrid 
@@ -1171,142 +1688,18 @@ function HomeScreen() {
             />
           </div>
         </motion.div>
+        
+        {/* Main Content Area */}
         <main style={styles.mainContent}>
-          <motion.h1
-            style={isMobile ? {...styles.heading, ...styles.mobileHeading} : styles.heading}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            {userName ? `Welcome, ${userName}` : "Welcome to Articulate"}
-          </motion.h1>
-          
-          <motion.p 
-            style={styles.tagline}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            Improve your public speaking skills with practice and AI-powered feedback
-          </motion.p>
-
-          {/* Two Main Options */}
-          <div style={styles.optionsContainer}>
-            {/* Practice Option */}
-            <motion.div 
-              style={styles.optionCard}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              whileHover={{ 
-                scale: 1.03, 
-                boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)",
-                borderColor: 'rgba(79, 172, 254, 0.5)'
-              }}
-            >
-              <div style={styles.optionHeader}>
-                <span style={styles.optionIcon}>🎯</span>
-                <h2 style={styles.optionTitle}>Practice Speaking</h2>
-              </div>
-              
-              <p style={styles.optionDescription}>
-                Choose a speech format and start practicing right away
-              </p>
-              
-              {/* Practice Options */}
-              <div style={styles.practiceTypes}>
-                <motion.button 
-                  style={styles.practiceTypeButton}
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePractice("Impromptu")}
-                >
-                  <span style={styles.buttonIcon}>⚡️</span>
-                  Impromptu
-                </motion.button>
-                
-                <motion.button 
-                  style={styles.practiceTypeButton}
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePractice("Interp", "Choose a piece of literature, poem, or dramatic work to interpret")}
-                >
-                  <span style={styles.buttonIcon}>🎭</span>
-                  Interp
-                </motion.button>
-                
-                <motion.button 
-                  style={styles.practiceTypeButton}
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePractice("Original", "Present your original speech on a topic of your choice")}
-                >
-                  <span style={styles.buttonIcon}>✏️</span>
-                  Original
-                </motion.button>
-                
-                <motion.button 
-                  style={styles.practiceTypeButton}
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(79, 172, 254, 0.3)" }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePractice("Extemp")}
-                >
-                  <span style={styles.buttonIcon}>🌎</span>
-                  Extemp
-                </motion.button>
-              </div>
-            </motion.div>
-            
-            {/* AI Help Option */}
-            <motion.div 
-              style={styles.optionCard}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              whileHover={{ 
-                scale: 1.03, 
-                boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)",
-                borderColor: 'rgba(79, 172, 254, 0.5)'
-              }}
-            >
-              <div style={styles.optionHeader}>
-                <span style={styles.optionIcon}>🤖</span>
-                <h2 style={styles.optionTitle}>AI Speech Coach</h2>
-              </div>
-              
-              <p style={styles.optionDescription}>
-                Get personalized feedback and analysis to improve your speaking skills
-              </p>
-              
-              <ul style={styles.aiFeaturesList}>
-                <li style={styles.aiFeature}>
-                  <span style={styles.featureIcon}>🎤</span>
-                  <span>Real-time speech analysis</span>
-                </li>
-                <li style={styles.aiFeature}>
-                  <span style={styles.featureIcon}>📊</span>
-                  <span>Detailed performance metrics</span>
-                </li>
-                <li style={styles.aiFeature}>
-                  <span style={styles.featureIcon}>💡</span>
-                  <span>Personalized improvement tips</span>
-                </li>
-                <li style={styles.aiFeature}>
-                  <span style={styles.featureIcon}>🔄</span>
-                  <span>Progress tracking over time</span>
-                </li>
-              </ul>
-              
-              <motion.button
-                style={styles.aiHelpButton}
-                whileHover={{ scale: 1.05, backgroundColor: "#0077B6" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate("/ai-coach")}
-              >
-                Start AI Coaching <span style={{ marginLeft: '8px' }}>→</span>
-              </motion.button>
-            </motion.div>
-          </div>
+          <AnimatePresence mode="wait">
+            {activeContent === 'practice' ? (
+              renderPracticeContent()
+            ) : activeContent === 'ai-coach' ? (
+              renderAICoachContent()
+            ) : (
+              renderWelcomeContent()
+            )}
+          </AnimatePresence>
         </main>
       </div>
     </>
