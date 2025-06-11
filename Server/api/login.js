@@ -58,15 +58,23 @@ const generateToken = (user) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // Set CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  // Handle preflight OPTIONS request
+  // Robust CORS setup
+  const allowedOrigins = ['http://localhost:3000', 'https://www.articulate.ninja'];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+  );
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Login OPTIONS request received');
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
   
   // Only handle POST requests
