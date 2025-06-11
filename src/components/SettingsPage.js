@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUser, FiArrowLeft, FiLogOut, FiEdit, FiSave, FiSettings, FiLock, FiKey } from 'react-icons/fi';
+import { FiUser, FiArrowLeft, FiLogOut, FiEdit, FiSave, FiSettings } from 'react-icons/fi';
 import { jwtDecode } from "jwt-decode";
 import config from '../config';
 
@@ -16,18 +16,6 @@ const SettingsPage = () => {
   const [schoolInput, setSchoolInput] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
-  // Password change form state
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [passwordErrors, setPasswordErrors] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
   
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -169,108 +157,6 @@ const SettingsPage = () => {
     }
   };
   
-  // Handle password input changes
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData({
-      ...passwordData,
-      [name]: value
-    });
-    
-    // Clear any previous errors for this field
-    setPasswordErrors({
-      ...passwordErrors,
-      [name]: ''
-    });
-    
-    // Clear success message when user starts typing
-    if (success) setSuccess('');
-  };
-  
-  // Validate password form
-  const validatePasswordForm = () => {
-    let isValid = true;
-    const errors = {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    };
-    
-    if (!passwordData.currentPassword) {
-      errors.currentPassword = 'Current password is required';
-      isValid = false;
-    }
-    
-    if (!passwordData.newPassword) {
-      errors.newPassword = 'New password is required';
-      isValid = false;
-    } else if (passwordData.newPassword.length < 8) {
-      errors.newPassword = 'Password must be at least 8 characters';
-      isValid = false;
-    }
-    
-    if (!passwordData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your new password';
-      isValid = false;
-    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-      isValid = false;
-    }
-    
-    setPasswordErrors(errors);
-    return isValid;
-  };
-  
-  // Handle password update submission
-  const handleUpdatePassword = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    
-    if (!validatePasswordForm()) {
-      return;
-    }
-    
-    try {
-      const token = localStorage.getItem('token');
-      console.log('Sending password update request to:', `${API_URL}/api/user/password`);
-      console.log('Authorization token present:', !!token);
-      
-      const response = await fetch(`${API_URL}/api/user/password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'Origin': window.location.origin
-        },
-        credentials: 'omit', // Don't send cookies
-        mode: 'cors', // Explicitly set CORS mode
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update password.');
-      }
-      
-      // Reset form and show success message
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      setSuccess('Your password has been updated successfully.');
-      
-    } catch (error) {
-      setError(error.message || 'Error updating password. Please try again later.');
-      console.error('Password update error:', error);
-    }
-  };
-
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -342,75 +228,7 @@ const SettingsPage = () => {
                 : "Access your account or create a new one to save your progress."}
             </p>
             
-            {isLoggedIn ? (
-              // Password change form for logged in users
-              <div style={styles.formContainer}>
-                <h3 style={styles.formTitle}>
-                  <FiLock style={{marginRight: '10px'}} />
-                  Change Password
-                </h3>
-                
-                <form onSubmit={handleUpdatePassword} style={styles.form}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Current Password</label>
-                    <input 
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      style={styles.inputField}
-                      placeholder="Enter your current password"
-                    />
-                    {passwordErrors.currentPassword && (
-                      <p style={styles.fieldError}>{passwordErrors.currentPassword}</p>
-                    )}
-                  </div>
-                  
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>New Password</label>
-                    <input 
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      style={styles.inputField}
-                      placeholder="Enter your new password"
-                    />
-                    {passwordErrors.newPassword && (
-                      <p style={styles.fieldError}>{passwordErrors.newPassword}</p>
-                    )}
-                  </div>
-                  
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Confirm New Password</label>
-                    <input 
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      style={styles.inputField}
-                      placeholder="Confirm your new password"
-                    />
-                    {passwordErrors.confirmPassword && (
-                      <p style={styles.fieldError}>{passwordErrors.confirmPassword}</p>
-                    )}
-                  </div>
-                  
-                  {error && <p style={styles.errorMessage}>{error}</p>}
-                  {success && <p style={styles.successMessage}>{success}</p>}
-                  
-                  <motion.button 
-                    type="submit"
-                    style={styles.submitButton}
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(79, 172, 254, 0.9)' }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <FiKey style={styles.buttonIcon} /> Update Password
-                  </motion.button>
-                </form>
-              </div>
-            ) : (
-              // Login/signup options for non-logged in users
+            {!isLoggedIn && (
               <>
                 <div style={styles.settingItem}>
                   <div style={styles.settingText}>
@@ -662,37 +480,6 @@ const styles = {
     borderRadius: '8px',
     cursor: 'pointer',
   },
-  // Password form styles
-  formContainer: {
-    background: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: '12px',
-    padding: '2rem',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    marginBottom: '2rem',
-  },
-  formTitle: {
-    fontSize: '1.4rem',
-    fontWeight: '600',
-    marginBottom: '1.5rem',
-    color: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  label: {
-    fontSize: '0.95rem',
-    fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
   errorMessage: {
     color: '#e74c3c',
     marginTop: 10,
@@ -703,26 +490,6 @@ const styles = {
     marginTop: 10,
     fontSize: '14px',
     fontWeight: 'bold'
-  },
-  fieldError: {
-    color: '#ff6b6b',
-    fontSize: '0.85rem',
-    margin: '0.25rem 0 0 0',
-  },
-  submitButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0.85rem 1.5rem',
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: '#fff',
-    background: 'rgba(79, 172, 254, 0.8)',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    marginTop: '1rem',
-    transition: 'all 0.3s ease',
   },
 };
 

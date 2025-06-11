@@ -71,13 +71,25 @@ const auth = (req) => {
 
 // Handler for the /api/user/school endpoint
 module.exports = async (req, res) => {
-  // CORS is now handled by the main Express app in Server/index.js
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    console.log('OPTIONS request for /api/user/school');
+    return res.status(200).end();
+  }
+  
+  // Only accept POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
   
-  console.log('School update request received');
+  console.log('/api/user/school: Processing request');
+  console.log('Headers:', JSON.stringify(req.headers));
   
   try {
     // Connect to the database

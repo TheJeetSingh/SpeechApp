@@ -60,14 +60,16 @@ const auth = (req) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // CORS is now handled by the main Express app in Server/index.js
-
-  // Only accept POST requests for actual updates
-  if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      message: 'Method not allowed',
-      allowedMethods: ['POST', 'OPTIONS'] 
-    });
+  // Most permissive CORS headers possible
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    console.log('SCHOOL_UPDATE: Handling OPTIONS preflight request');
+    return res.status(200).end();
   }
   
   console.log('SCHOOL_UPDATE: Request received', {
@@ -76,6 +78,14 @@ module.exports = async (req, res) => {
     headers: req.headers,
     body: req.body
   });
+  
+  // Only accept POST requests for actual updates
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      message: 'Method not allowed',
+      allowedMethods: ['POST', 'OPTIONS'] 
+    });
+  }
   
   try {
     // Connect to database

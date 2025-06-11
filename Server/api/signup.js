@@ -58,8 +58,17 @@ const generateToken = (user) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // CORS is now handled by the main Express app in Server/index.js
-
+  // Set CORS headers for all responses
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    console.log('Signup OPTIONS request received');
+    return res.status(200).end();
+  }
+  
   // Only handle POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });

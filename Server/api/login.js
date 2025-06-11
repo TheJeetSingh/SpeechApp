@@ -58,22 +58,17 @@ const generateToken = (user) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // Belt-and-suspenders CORS handling
-  const allowedOrigins = ['http://localhost:3000', 'https://www.articulate.ninja'];
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-
-  // Immediately respond to preflight OPTIONS requests
+  // Set CORS headers for all responses
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    console.log('Login OPTIONS request received');
+    return res.status(200).end();
   }
-
+  
   // Only handle POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });

@@ -6,6 +6,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "Server/api/*.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -14,8 +18,21 @@
       }
     }
   ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin" }
+      ]
+    }
+  ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/Server/index.js" },
+    { "source": "/api/school-update", "destination": "Server/api/school-update.js" },
+    { "source": "/api/user/school", "destination": "Server/api/user-school.js" },
+    { "source": "/api/(.*)", "destination": "Server/index.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 
