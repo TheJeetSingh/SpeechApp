@@ -18,49 +18,75 @@ const SettingsPage = () => {
   const [success, setSuccess] = useState('');
   
   useEffect(() => {
-    const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          // Fetch the latest user data from the server
-          const response = await fetch(`${API_URL}/api/user/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            }
-          });
-
-          if (!response.ok) {
-            // This could be because the token is expired or invalid
-            throw new Error('Failed to fetch user data');
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        console.log('Decoded token data:', decoded);
+        
+        // Check if user data is complete from token
+        if (!decoded.email || decoded.email === 'undefined') {
+          console.warn('Email missing in token, checking local storage');
+          // Try to get from localStorage
+          const storedUserData = JSON.parse(localStorage.getItem("userData") || '{}');
+          if (storedUserData.email) {
+            console.log('Using userData from localStorage:', storedUserData);
+            setUserData({
+              name: storedUserData.name || '',
+              email: storedUserData.email || '',
+              school: storedUserData.school || ''
+            });
+            setSchoolInput(storedUserData.school || '');
+          } else {
+            console.warn('User data incomplete both in token and localStorage');
+            // Fallback to what we have in token
+            setUserData({
+              name: decoded.name || '',
+              email: decoded.email || '',
+              school: decoded.school || ''
+            });
+            setSchoolInput(decoded.school || '');
           }
-
-          const userDataFromServer = await response.json();
-          console.log('Fetched fresh user data from server:', userDataFromServer);
-          
+        } else {
+          // Use data from token if it's complete
           setUserData({
-            name: userDataFromServer.name || '',
-            email: userDataFromServer.email || '',
-            school: userDataFromServer.school || ''
+            name: decoded.name || '',
+            email: decoded.email || '',
+            school: decoded.school || ''
           });
-          setSchoolInput(userDataFromServer.school || '');
-          setIsLoggedIn(true);
-          setActiveTab('profile');
-
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          // If fetching fails, the token might be invalid, so log the user out
-          localStorage.removeItem('token');
-          localStorage.removeItem('userData');
-          setIsLoggedIn(false);
-          setActiveTab('account');
+          setSchoolInput(decoded.school || '');
         }
-      } else {
+        
+        setIsLoggedIn(true);
+        setActiveTab('profile');
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        
+        // Try to get from localStorage as fallback
+        try {
+          const storedUserData = JSON.parse(localStorage.getItem("userData") || '{}');
+          if (storedUserData.email) {
+            console.log('Token decode failed, using userData from localStorage');
+            setUserData({
+              name: storedUserData.name || '',
+              email: storedUserData.email || '',
+              school: storedUserData.school || ''
+            });
+            setSchoolInput(storedUserData.school || '');
+            setIsLoggedIn(true);
+            setActiveTab('profile');
+            return;
+          }
+        } catch (e) {
+          console.error('Error reading from localStorage:', e);
+        }
+        
         setIsLoggedIn(false);
         setActiveTab('account');
       }
-    };
-
-    fetchUserData();
+    } else {
+      setActiveTab('account');
+    }
   }, []);
 
   const handleLogout = () => {
@@ -117,25 +143,12 @@ const SettingsPage = () => {
       
       // Update token and user data
       localStorage.setItem('token', data.token);
-
-      // Use the user data directly from the response to update the state
-      if (data.user) {
-        console.log('Updating state with user data from response:', data.user);
-        setUserData({
-          name: data.user.name,
-          email: data.user.email,
-          school: data.user.school || ''
-        });
-      } else {
-        // Fallback to decoding the token if user object is not in response
-        const decoded = jwtDecode(data.token);
-        setUserData({
-          name: decoded.name,
-          email: decoded.email,
-          school: decoded.school || ''
-        });
-      }
-
+      const decoded = jwtDecode(data.token);
+      setUserData({
+        name: decoded.name,
+        email: decoded.email,
+        school: decoded.school || ''
+      });
       setSuccess('School updated successfully!');
       setIsEditingSchool(false);
     } catch (error) {

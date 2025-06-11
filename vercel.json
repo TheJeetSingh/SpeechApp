@@ -6,6 +6,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "Server/api/*.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -25,14 +29,10 @@
       ]
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "Server/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/api/school-update", "destination": "Server/api/school-update.js" },
+    { "source": "/api/user/school", "destination": "Server/api/user-school.js" },
+    { "source": "/api/(.*)", "destination": "Server/index.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 

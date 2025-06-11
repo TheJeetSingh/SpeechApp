@@ -286,26 +286,6 @@ app.get("/protected", auth, (req, res) => {
   res.json({ message: "Access granted", user: req.user });
 });
 
-// Get current user data
-app.get("/api/user/me", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password'); // exclude password
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    // Return the latest user data from the database
-    res.json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      school: user.school || ''
-    });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    res.status(500).json({ message: "Server error while fetching user data" });
-  }
-});
-
 // News API Route
 app.get("/api/news", async (req, res) => {
   console.log(`News API requested from origin: ${req.headers.origin}`);
