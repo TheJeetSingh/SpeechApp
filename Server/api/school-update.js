@@ -60,21 +60,7 @@ const auth = (req) => {
 
 // Serverless function handler
 module.exports = async (req, res) => {
-  // Belt-and-suspenders CORS handling
-  const allowedOrigins = ['http://localhost:3000', 'https://www.articulate.ninja'];
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-
-  // Immediately respond to preflight OPTIONS requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+  // CORS is now handled by the main Express app in Server/index.js
 
   // Only accept POST requests for actual updates
   if (req.method !== 'POST') {
