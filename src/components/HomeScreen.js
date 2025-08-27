@@ -927,6 +927,7 @@ const styles = {
     fontFamily: "'Exo', 'Inter', sans-serif",
     background: 'linear-gradient(to bottom, #040913, #010209)',
     overflow: 'hidden',
+    position: 'relative',
   },
   mainContent: {
     flex: 1,
@@ -934,27 +935,40 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    padding: "clamp(1rem, 5vw, 3rem)",
+    padding: "clamp(1rem, 2vw, 1.5rem)",
     textAlign: "center",
     overflowY: 'auto',
+    overflowX: 'hidden',
+    wordWrap: 'break-word',
+    hyphens: 'auto',
+    maxWidth: '100%',
+    minWidth: 0,
   },
   heading: {
-    fontSize: "clamp(2rem, 8vw, 3.5rem)",
+    fontSize: "clamp(1.8rem, 6vw, 3rem)",
     fontWeight: "700",
-    marginBottom: "1rem",
-    letterSpacing: "1px",
+    marginBottom: "clamp(0.75rem, 2vw, 1.5rem)",
+    letterSpacing: "0.5px",
     textShadow: '0 0 20px rgba(79, 172, 254, 0.5)',
     background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
     WebkitBackgroundClip: 'text',
     color: 'transparent',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    hyphens: 'auto',
+    maxWidth: '100%',
+    textAlign: 'center',
   },
   tagline: {
-    fontSize: "clamp(1rem, 3vw, 1.5rem)",
-    maxWidth: "800px",
-    marginBottom: "3rem",
+    fontSize: "clamp(0.95rem, 2.5vw, 1.3rem)",
+    maxWidth: "min(800px, 90vw)",
+    marginBottom: "clamp(2rem, 5vw, 3rem)",
     color: "rgba(255, 255, 255, 0.7)",
     lineHeight: 1.6,
     fontWeight: "500",
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    hyphens: 'auto',
   },
   optionsContainer: {
     display: "flex",
@@ -962,12 +976,12 @@ const styles = {
     justifyContent: "center",
     alignItems: "stretch",
     width: "100%",
-    maxWidth: "1200px",
-    gap: "2rem",
+    maxWidth: "min(1000px, 95vw)",
+    gap: "clamp(1rem, 3vw, 1.5rem)",
     margin: "0 auto",
     '@media (max-width: 768px)': {
       flexDirection: "column",
-      gap: "1.5rem",
+      gap: "clamp(0.75rem, 3vw, 1rem)",
     },
   },
   optionCard: {
@@ -976,14 +990,17 @@ const styles = {
     flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "center",
-    padding: "2rem",
-    borderRadius: "20px",
+    padding: "clamp(1.25rem, 3vw, 1.75rem)",
+    borderRadius: "16px",
     background: "linear-gradient(135deg, rgba(42, 82, 152, 0.1), rgba(30, 60, 114, 0.2))",
     backdropFilter: "blur(10px)",
-    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.1)",
     color: "#fff",
     transition: "all 0.3s ease",
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    minWidth: 0,
   },
   optionHeader: {
     display: "flex",
@@ -998,17 +1015,24 @@ const styles = {
     filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))",
   },
   optionTitle: {
-    fontSize: "1.8rem",
+    fontSize: "clamp(1.4rem, 4vw, 1.6rem)",
     fontWeight: "700",
-    marginBottom: "0.5rem",
+    marginBottom: "clamp(0.4rem, 1vw, 0.6rem)",
     background: "linear-gradient(45deg, #fff, #87CEEB)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    textAlign: 'center',
+    lineHeight: 1.2,
   },
   optionDescription: {
-    fontSize: "1.1rem",
-    marginBottom: "2rem",
-    lineHeight: 1.6,
+    fontSize: "clamp(0.95rem, 2.5vw, 1rem)",
+    marginBottom: "clamp(1.25rem, 4vw, 1.75rem)",
+    lineHeight: 1.5,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    textAlign: 'center',
   },
   practiceTypes: {
     display: "grid",
@@ -1143,16 +1167,20 @@ const styles = {
     transition: 'all 0.3s ease',
   },
   sidebar: {
-    width: '280px',
-    background: 'rgba(10, 25, 47, 0.9)',
-    backdropFilter: 'blur(10px)',
-    padding: '1rem 0',
+    width: 'clamp(160px, 12vw, 180px)',
+    minWidth: '140px',
+    maxWidth: '180px',
+    background: 'rgba(10, 25, 47, 0.98)',
+    backdropFilter: 'blur(15px)',
+    padding: 'clamp(0.5rem, 1vw, 0.75rem) 0',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRight: '1px solid rgba(255, 255, 255, 0.15)',
     overflowY: 'auto',
-    boxShadow: '5px 0 15px rgba(0, 0, 0, 0.2)',
+    overflowX: 'hidden',
+    boxShadow: '1px 0 8px rgba(0, 0, 0, 0.4)',
+    wordWrap: 'break-word',
   },
   sidebarContent: {
     flex: 1,
@@ -1168,25 +1196,27 @@ const styles = {
   flowingMenuContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.5rem',
-    padding: '0 0.75rem',
+    gap: 'clamp(0.25rem, 1vw, 0.4rem)',
+    padding: '0 clamp(0.5rem, 1vw, 0.75rem)',
   },
   flowingMenuItem: {
     width: '100%',
-    padding: '0.75rem 1rem',
-    borderRadius: '8px',
+    padding: 'clamp(0.5rem, 1.5vw, 0.65rem) clamp(0.6rem, 1.5vw, 0.8rem)',
+    borderRadius: '6px',
     textAlign: 'left',
     background: 'transparent',
     border: 'none',
     color: '#fff',
     fontWeight: '500',
-    fontSize: '0.95rem',
+    fontSize: 'clamp(0.8rem, 2vw, 0.85rem)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
+    gap: 'clamp(0.4rem, 1vw, 0.6rem)',
     transition: 'all 0.2s ease',
     position: 'relative',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   menuItemLabel: {
     flex: 1,
@@ -1197,65 +1227,80 @@ const styles = {
     justifyContent: 'center',
   },
   iconContainer: {
-    width: '32px',
-    height: '32px',
+    width: 'clamp(24px, 6vw, 28px)',
+    height: 'clamp(24px, 6vw, 28px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '8px',
-    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '6px',
+    background: 'rgba(255, 255, 255, 0.08)',
+    flexShrink: 0,
   },
   contentCard: {
     background: 'rgba(10, 25, 47, 0.5)',
     borderRadius: '16px',
-    padding: '2.5rem',
+    padding: 'clamp(1.5rem, 4vw, 2.5rem)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     width: '100%',
-    maxWidth: '900px',
+    maxWidth: 'min(900px, 95vw)',
     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   contentHeader: {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '1.5rem',
+    marginBottom: 'clamp(1rem, 3vw, 1.5rem)',
+    flexWrap: 'wrap',
+    gap: 'clamp(0.75rem, 2vw, 1.25rem)',
   },
   contentIconContainer: {
-    width: '48px',
-    height: '48px',
+    width: 'clamp(40px, 8vw, 48px)',
+    height: 'clamp(40px, 8vw, 48px)',
     borderRadius: '12px',
     background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.1))',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: '1.25rem',
+    marginRight: 'clamp(0.75rem, 2vw, 1.25rem)',
     border: '1px solid rgba(79, 172, 254, 0.3)',
+    flexShrink: 0,
   },
   contentIconSvg: {
-    width: '24px',
-    height: '24px',
+    width: 'clamp(20px, 5vw, 24px)',
+    height: 'clamp(20px, 5vw, 24px)',
     color: '#4FACFE',
   },
   contentTitle: {
-    fontSize: '1.8rem',
+    fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
     fontWeight: '700',
     background: 'linear-gradient(to right, #4facfe, #00f2fe)',
     WebkitBackgroundClip: 'text',
     color: 'transparent',
     margin: 0,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    flex: 1,
+    minWidth: 0,
   },
   contentDescription: {
-    fontSize: '1.1rem',
+    fontSize: 'clamp(1rem, 3vw, 1.1rem)',
     color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: '2.5rem',
+    marginBottom: 'clamp(1.5rem, 5vw, 2.5rem)',
     textAlign: 'left',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    lineHeight: 1.6,
   },
   practiceGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1.5rem',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(180px, 25vw, 220px), 1fr))',
+    gap: 'clamp(1rem, 3vw, 1.5rem)',
+    width: '100%',
+    maxWidth: 'min(1000px, 95vw)',
   },
   practiceCard: {
-    padding: '1.75rem 1.5rem',
+    padding: 'clamp(1.25rem, 3vw, 1.75rem) clamp(1rem, 2.5vw, 1.5rem)',
     backgroundColor: 'rgba(20, 35, 60, 0.5)',
     color: '#fff',
     border: '1px solid rgba(79, 172, 254, 0.2)',
@@ -1267,91 +1312,115 @@ const styles = {
     alignItems: 'center',
     textAlign: 'center',
     boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    minHeight: '180px',
   },
   practiceIconWrapper: {
-    width: '56px',
-    height: '56px',
+    width: 'clamp(48px, 12vw, 56px)',
+    height: 'clamp(48px, 12vw, 56px)',
     borderRadius: '50%',
     background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.1))',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: '1.25rem',
+    marginBottom: 'clamp(0.75rem, 2vw, 1.25rem)',
     border: '1px solid rgba(79, 172, 254, 0.3)',
+    flexShrink: 0,
   },
   practiceIconSvg: {
-    width: '26px',
-    height: '26px',
+    width: 'clamp(22px, 6vw, 26px)',
+    height: 'clamp(22px, 6vw, 26px)',
     color: '#4FACFE',
   },
   practiceTitle: {
-    fontSize: '1.15rem',
+    fontSize: 'clamp(1rem, 3vw, 1.15rem)',
     fontWeight: '600',
-    marginBottom: '0.75rem',
+    marginBottom: 'clamp(0.5rem, 1.5vw, 0.75rem)',
     color: '#ffffff',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    lineHeight: 1.3,
   },
   practiceDescription: {
-    fontSize: '0.9rem',
+    fontSize: 'clamp(0.85rem, 2.5vw, 0.9rem)',
     color: 'rgba(255, 255, 255, 0.7)',
     margin: 0,
-    lineHeight: '1.4',
+    lineHeight: 1.4,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
   },
   aiFeatureContainer: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '2rem',
-    marginBottom: '2.5rem',
+    gap: 'clamp(1.5rem, 4vw, 2rem)',
+    marginBottom: 'clamp(1.5rem, 5vw, 2.5rem)',
+    width: '100%',
+    justifyContent: 'center',
   },
   aiFeatureCol: {
-    flex: '1 1 300px',
+    flex: '1 1 clamp(280px, 30vw, 320px)',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.5rem',
+    gap: 'clamp(1rem, 3vw, 1.5rem)',
+    minWidth: 'clamp(220px, 25vw, 280px)',
   },
   aiFeature: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '1.25rem',
-    padding: '1.25rem',
+    gap: 'clamp(1rem, 2.5vw, 1.25rem)',
+    padding: 'clamp(1rem, 2.5vw, 1.25rem)',
     backgroundColor: 'rgba(20, 35, 60, 0.5)',
     borderRadius: '12px',
     border: '1px solid rgba(79, 172, 254, 0.15)',
     transition: 'all 0.3s ease',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   aiFeatureIcon: {
-    width: '48px',
-    height: '48px',
+    width: 'clamp(44px, 10vw, 48px)',
+    height: 'clamp(44px, 10vw, 48px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '12px',
     background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.05))',
-    padding: '10px',
+    padding: 'clamp(8px, 2vw, 10px)',
     border: '1px solid rgba(79, 172, 254, 0.2)',
+    flexShrink: 0,
   },
   featureContent: {
     flex: 1,
+    minWidth: 0,
   },
   featureTitle: {
-    fontSize: '1.1rem',
+    fontSize: 'clamp(1rem, 2.5vw, 1.1rem)',
     fontWeight: '600',
-    margin: '0 0 0.5rem 0',
+    margin: '0 0 clamp(0.25rem, 1vw, 0.5rem) 0',
     color: '#ffffff',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    lineHeight: 1.3,
   },
   featureDescription: {
-    fontSize: '0.9rem',
+    fontSize: 'clamp(0.85rem, 2vw, 0.9rem)',
     color: 'rgba(255, 255, 255, 0.7)',
     margin: 0,
     textAlign: 'left',
     lineHeight: '1.5',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   aiStartButton: {
-    padding: '1rem 2rem',
+    padding: 'clamp(0.9rem, 2.5vw, 1.1rem) clamp(1.5rem, 5vw, 2rem)',
     background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
     color: '#010209',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '1rem',
+    fontSize: 'clamp(0.95rem, 2.5vw, 1rem)',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
@@ -1359,34 +1428,134 @@ const styles = {
     display: 'block',
     margin: '0 auto',
     letterSpacing: '0.5px',
+    minHeight: '44px',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   welcomeMessage: {
     background: 'rgba(10, 25, 47, 0.5)',
     borderRadius: '16px',
-    padding: '2.5rem',
-    marginTop: '2rem',
-    maxWidth: '800px',
+    padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+    marginTop: 'clamp(1rem, 3vw, 2rem)',
+    maxWidth: 'min(800px, 95vw)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   welcomeText: {
-    fontSize: '1.2rem',
+    fontSize: 'clamp(1rem, 3vw, 1.2rem)',
     lineHeight: '1.6',
     color: 'rgba(255, 255, 255, 0.85)',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   menuHeader: {
-    padding: '1rem 1.5rem 1.5rem 1.5rem',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-    marginBottom: '1rem',
+    padding: 'clamp(0.6rem, 1.5vw, 0.8rem) clamp(0.8rem, 2vw, 1rem)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    marginBottom: 'clamp(0.5rem, 1.5vw, 0.75rem)',
   },
   menuHeaderTitle: {
     margin: 0,
-    fontSize: '1.2rem',
+    fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
     fontWeight: '600',
     background: 'linear-gradient(to right, #4facfe, #00f2fe)',
     WebkitBackgroundClip: 'text',
     color: 'transparent',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.3px',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    textAlign: 'center',
+  },
+  // Mobile-specific styles
+  mobileHeading: {
+    fontSize: "clamp(1.5rem, 10vw, 2.2rem)",
+    lineHeight: 1.2,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+  },
+  mobileSidebar: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: 'clamp(200px, 60vw, 240px)',
+    height: '100vh',
+    zIndex: 1000,
+    transform: 'translateX(-100%)',
+    transition: 'transform 0.3s ease',
+    borderRadius: '0 8px 8px 0',
+  },
+  mobileSidebarOpen: {
+    transform: 'translateX(0)',
+  },
+  mobileOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    zIndex: 999,
+    opacity: 0,
+    visibility: 'hidden',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(2px)',
+  },
+  mobileOverlayVisible: {
+    opacity: 1,
+    visibility: 'visible',
+  },
+  mobileMenuButton: {
+    position: 'fixed',
+    top: 'clamp(0.75rem, 3vw, 1rem)',
+    left: 'clamp(0.75rem, 3vw, 1rem)',
+    zIndex: 1001,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    border: '1px solid rgba(255, 255, 255, 0.25)',
+    borderRadius: '8px',
+    padding: 'clamp(0.5rem, 1.5vw, 0.75rem)',
+    color: '#fff',
+    cursor: 'pointer',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+    minWidth: '44px',
+    minHeight: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mobileMainContent: {
+    marginLeft: 0,
+    padding: "clamp(1rem, 4vw, 2rem)",
+    width: '100%',
+    overflowX: 'hidden',
+  },
+  mobileOptionsContainer: {
+    flexDirection: "column",
+    gap: "clamp(0.75rem, 3vw, 1rem)",
+    alignItems: "stretch",
+    width: '100%',
+  },
+  mobileCard: {
+    padding: "clamp(1rem, 3vw, 1.5rem)",
+    textAlign: "center",
+    width: '100%',
+  },
+  mobilePracticeGrid: {
+    gridTemplateColumns: "1fr",
+    gap: "clamp(0.75rem, 3vw, 1rem)",
+    width: '100%',
+  },
+  mobileAiFeatureContainer: {
+    flexDirection: "column",
+    gap: "clamp(0.75rem, 3vw, 1rem)",
+    width: '100%',
+  },
+  mobileWelcomeText: {
+    fontSize: "clamp(0.85rem, 3vw, 0.9rem)",
+    lineHeight: 1.5,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
 };
 
@@ -1399,7 +1568,8 @@ function HomeScreen() {
   const [activeContent, setActiveContent] = useState(null);
   const [menuOpen, setMenuOpen] = useState(true);
   const navigate = useNavigate();
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -1515,7 +1685,7 @@ function HomeScreen() {
               Choose a speech format and start practicing right away
             </p>
             
-      <div style={styles.practiceGrid}>
+      <div style={isMobile ? {...styles.practiceGrid, ...styles.mobilePracticeGrid} : styles.practiceGrid}>
         <PracticeOptionCard 
           icon={<FiZap size={26} color="#4FACFE" />}
           title="Impromptu"
@@ -1566,7 +1736,7 @@ function HomeScreen() {
               Get personalized feedback and analysis to improve your speaking skills
             </p>
             
-      <div style={styles.aiFeatureContainer}>
+      <div style={isMobile ? {...styles.aiFeatureContainer, ...styles.mobileAiFeatureContainer} : styles.aiFeatureContainer}>
         <div style={styles.aiFeatureCol}>
           <AIFeatureCard
             icon={<BsMicFill size={24} color="#4FACFE" />}
@@ -1634,10 +1804,8 @@ function HomeScreen() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.6 }}
       >
-        <p style={styles.welcomeText}>
-          Select an option from the sidebar to get started with your speech practice 
-          or AI coaching session. Articulate helps you become a more confident and 
-          effective public speaker through guided practice and intelligent feedback.
+        <p style={isMobile ? {...styles.welcomeText, ...styles.mobileWelcomeText} : styles.welcomeText}>
+          {isMobile ? "Select an option from the menu to get started with your speech practice or AI coaching session." : "Select an option from the sidebar to get started with your speech practice or AI coaching session. Articulate helps you become a more confident and effective public speaker through guided practice and intelligent feedback."}
         </p>
       </motion.div>
     </>
@@ -1646,16 +1814,67 @@ function HomeScreen() {
   return (
     <>
       <div style={styles.container}>
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <motion.button
+            style={styles.mobileMenuButton}
+            onClick={() => setMenuOpen(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Open menu"
+          >
+            <FiArrowUp size={20} />
+          </motion.button>
+        )}
+
+        {/* Mobile Overlay */}
+        {isMobile && menuOpen && (
+          <motion.div
+            style={styles.mobileOverlay}
+            onClick={() => setMenuOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+        )}
+
         {/* Flowing Menu Sidebar */}
         <motion.div 
-          style={styles.sidebar}
-          initial={{ x: -280 }}
-          animate={{ x: 0 }}
+          style={{
+            ...styles.sidebar,
+            ...(isMobile ? {
+              ...styles.mobileSidebar,
+              ...(menuOpen ? styles.mobileSidebarOpen : {})
+            } : {})
+          }}
+          initial={isMobile ? { x: -250 } : { x: -280 }}
+          animate={isMobile ? { x: menuOpen ? 0 : -250 } : { x: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
         >
           <div style={styles.sidebarContent}>
             <div style={styles.menuHeader}>
               <h3 style={styles.menuHeaderTitle}>Articulate</h3>
+              {isMobile && (
+                <motion.button
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#fff',
+                    fontSize: '1.2rem',
+                    cursor: 'pointer',
+                    padding: '0.25rem',
+                  }}
+                  onClick={() => setMenuOpen(false)}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Close menu"
+                >
+                  ×
+                </motion.button>
+              )}
         </div>
             <nav style={styles.nav}>
               <motion.div 
@@ -1670,7 +1889,10 @@ function HomeScreen() {
                     icon={item.icon}
                     label={item.label}
                     isActive={item.isActive}
-                    onClick={item.onClick}
+                    onClick={() => {
+                      item.onClick();
+                      if (isMobile) setMenuOpen(false);
+                    }}
                     delay={0.1 * (index + 1)}
                   />
                 ))}
@@ -1678,8 +1900,15 @@ function HomeScreen() {
             </nav>
       </div>
           <div 
-            style={{ zIndex: 101, cursor: 'pointer', padding: '0 1.5rem 1.5rem' }}
-            onClick={handleChromaClick}
+            style={{
+              zIndex: 101,
+              cursor: 'pointer',
+              padding: isMobile ? '0 1rem 1rem' : '0 1.5rem 1.5rem'
+            }}
+            onClick={() => {
+              handleChromaClick();
+              if (isMobile) setMenuOpen(false);
+            }}
           >
             <ChromaGrid 
               isLoggedIn={isLoggedIn}
@@ -1690,7 +1919,10 @@ function HomeScreen() {
         </motion.div>
         
         {/* Main Content Area */}
-        <main style={styles.mainContent}>
+        <main style={{
+          ...styles.mainContent,
+          ...(isMobile ? styles.mobileMainContent : {})
+        }}>
           <AnimatePresence mode="wait">
             {activeContent === 'practice' ? (
               renderPracticeContent()
