@@ -1,15 +1,19 @@
-/* Mobile Optimization CSS */
+/* Enhanced Mobile Optimization CSS */
 
-/* General mobile optimizations */
+/* Base mobile optimization - applies to all mobile devices */
 @media screen and (max-width: 768px) {
+  /* Prevent horizontal scrolling and improve base layout */
   body {
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
   }
   
-  /* Fix white background issue on mobile - but preserve HomeScreen's background */
+  /* Ensure proper viewport coverage */
   html, body, #root {
     min-height: 100vh;
     height: 100%;
+    width: 100%;
   }
   
   /* Error pages and other pages with blue background */
@@ -18,103 +22,420 @@
     background: linear-gradient(135deg, #1e3c72, #2a5298);
   }
   
-  /* Improve readability on small screens */
-  p, li, button, input, textarea {
+  /* Enhanced typography for mobile readability */
+  p, li, span, div {
     font-size: 16px !important; /* Prevent auto-zoom on iOS */
+    line-height: 1.5 !important;
   }
   
-  /* Make buttons easier to tap */
+  h1 {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.8rem !important;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.6rem !important;
+  }
+  
+  /* Enhanced touch targets - WCAG AA compliance (44px minimum) */
   button, 
   .button, 
   [role="button"],
   a.button,
   input[type="button"],
-  input[type="submit"] {
-    min-height: 44px;
-    min-width: 44px;
-    padding: 10px 15px;
+  input[type="submit"],
+  [role="tab"],
+  [role="menuitem"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 12px 16px !important;
+    touch-action: manipulation;
+    cursor: pointer;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Touch-friendly links */
+  a {
+    min-height: 44px !important;
+    display: inline-block !important;
+    padding: 8px !important;
     touch-action: manipulation;
   }
   
-  /* Improve form elements on mobile */
+  /* Enhanced form elements */
   input, select, textarea {
     font-size: 16px !important;
-    padding: 10px !important;
-  }
-  
-  /* Fix container widths for mobile */
-  .container, 
-  div[style*="max-width"] {
+    padding: 12px !important;
+    border-radius: 8px !important;
+    border: 2px solid #e0e0e0 !important;
     width: 100% !important;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
     box-sizing: border-box !important;
+    min-height: 44px !important;
   }
   
-  /* Fix modal/dialog positioning */
-  div[role="dialog"],
-  .modal {
-    position: fixed !important;
+  input:focus, select:focus, textarea:focus {
+    border-color: #1e3c72 !important;
+    outline: 2px solid rgba(30, 60, 114, 0.2) !important;
+    outline-offset: 2px !important;
+  }
+  
+  /* Container improvements for mobile */
+  .container, 
+  div[style*="max-width"],
+  .main-content {
     width: 100% !important;
     max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Enhanced modal/dialog for mobile */
+  div[role="dialog"],
+  .modal,
+  .popup {
+    position: fixed !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
     height: auto !important;
-    max-height: 90vh !important;
+    max-height: 85vh !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     margin: 0 !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
     overflow-y: auto !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
   }
   
-  /* Improve card layouts */
-  div[style*="display: flex"] {
+  /* Improved card layouts and grid systems */
+  div[style*="display: flex"],
+  .flex-container,
+  .card-grid {
+    flex-direction: column !important;
     flex-wrap: wrap !important;
+    gap: 16px !important;
   }
   
-  /* Better spacing for stacked elements */
-  div[style*="display: flex"] > * {
-    margin-bottom: 15px !important;
+  .card,
+  .option-card,
+  .topic-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
   }
   
-  /* Make sure content doesn't overflow */
-  img, video, canvas {
+  /* Responsive media */
+  img, video, canvas, svg {
     max-width: 100% !important;
     height: auto !important;
+    border-radius: 8px !important;
+  }
+  
+  /* Enhanced navigation */
+  nav, .navigation {
+    padding: 16px !important;
+  }
+  
+  .nav-item, .menu-item {
+    margin-bottom: 8px !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+  }
+  
+  /* Improved spacing throughout */
+  .section,
+  .page-section {
+    padding: 20px 16px !important;
+    margin: 0 !important;
+  }
+  
+  /* Enhanced lists for mobile */
+  ul, ol {
+    padding-left: 20px !important;
+  }
+  
+  li {
+    margin-bottom: 8px !important;
+    padding: 8px !important;
+  }
+  
+  /* Mobile-specific animation optimizations */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* Scrolling improvements */
+  .scrollable {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-scrolling: touch !important;
   }
 }
 
-/* iPhone SE and small screens */
+/* Tablet-specific optimizations (768px - 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    max-width: 720px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  
+  .card-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  h1 {
+    font-size: 2.5rem !important;
+  }
+  
+  h2 {
+    font-size: 2rem !important;
+  }
+}
+
+/* Small mobile devices (320px - 480px) */
+@media screen and (max-width: 480px) {
+  /* More aggressive space optimization for small screens */
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+    margin-bottom: 0.8rem !important;
+  }
+  
+  h2 {
+    font-size: 1.35rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+  
+  h3 {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+  
+  p, li, span, div {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+  
+  button, 
+  .button, 
+  [role="button"] {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+  }
+  
+  .section,
+  .page-section {
+    padding: 16px 12px !important;
+  }
+  
+  .card,
+  .option-card {
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  /* Optimize modal for very small screens */
+  div[role="dialog"],
+  .modal {
+    width: calc(100% - 24px) !important;
+    max-height: 90vh !important;
+    padding: 16px !important;
+  }
+}
+
+/* iPhone SE and extra small screens (max 375px) */
 @media screen and (max-width: 375px) {
   body {
     font-size: 14px;
   }
   
+  .container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
   h1 {
-    font-size: 1.8rem !important;
+    font-size: 1.6rem !important;
   }
   
   h2 {
-    font-size: 1.5rem !important;
+    font-size: 1.25rem !important;
   }
   
-  /* Reduce padding on very small screens */
-  div[style*="padding"] {
-    padding: 10px !important;
+  .section,
+  .page-section {
+    padding: 12px 8px !important;
+  }
+  
+  .card,
+  .option-card {
+    padding: 8px !important;
+    margin-bottom: 8px !important;
   }
 }
 
-/* Ensure glass backgrounds work on mobile */
-@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
-  .glass-bg {
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+/* Enhanced glass effects for mobile with backdrop-filter support */
+@supports (-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px)) {
+  .glass-bg,
+  .glass-effect {
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
     background-color: rgba(30, 60, 114, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
 }
 
-/* Fallback for browsers that don't support backdrop-filter */
-@supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
-  .glass-bg {
+/* Fallback for browsers without backdrop-filter support */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+  .glass-bg,
+  .glass-effect {
     background-color: rgba(30, 60, 114, 0.9) !important;
+  }
+}
+
+/* Mobile-specific utility classes */
+@media screen and (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .mobile-flex {
+    display: flex !important;
+  }
+  
+  .mobile-grid {
+    display: grid !important;
+  }
+  
+  /* Mobile text utilities */
+  .mobile-text-sm {
+    font-size: 14px !important;
+  }
+  
+  .mobile-text-base {
+    font-size: 16px !important;
+  }
+  
+  .mobile-text-lg {
+    font-size: 18px !important;
+  }
+  
+  /* Mobile spacing utilities */
+  .mobile-p-2 {
+    padding: 8px !important;
+  }
+  
+  .mobile-p-4 {
+    padding: 16px !important;
+  }
+  
+  .mobile-m-2 {
+    margin: 8px !important;
+  }
+  
+  .mobile-m-4 {
+    margin: 16px !important;
+  }
+  
+  .mobile-mb-2 {
+    margin-bottom: 8px !important;
+  }
+  
+  .mobile-mb-4 {
+    margin-bottom: 16px !important;
+  }
+}
+
+/* Desktop-only utility classes */
+@media screen and (min-width: 769px) {
+  .desktop-hidden {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Performance optimizations for mobile */
+@media screen and (max-width: 768px) {
+  /* Reduce animation complexity on mobile */
+  *, *::before, *::after {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Optimize scrolling performance */
+  .scrollable,
+  .overflow-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    will-change: scroll-position;
+  }
+  
+  /* Improve touch response */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: rgba(30, 60, 114, 0.3);
+    tap-highlight-color: rgba(30, 60, 114, 0.3);
+  }
+}
+
+/* Focus improvements for accessibility */
+@media screen and (max-width: 768px) {
+  button:focus,
+  a:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  [tabindex]:focus {
+    outline: 3px solid rgba(30, 60, 114, 0.8) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.3) !important;
+  }
+  
+  /* Skip link for mobile accessibility */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #1e3c72;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    z-index: 9999;
+    font-size: 14px;
+  }
+  
+  .skip-link:focus {
+    top: 6px;
   }
 } 

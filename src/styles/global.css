@@ -1,5 +1,150 @@
-/* Add loading spinner animation */
+/* Global CSS with Mobile-First Approach */
+
+/* Base Reset and Mobile-First Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Better scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent text size adjustment */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* Mobile-friendly font stack */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  /* Better line height for readability */
+  line-height: 1.6;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+}
+
+/* Make images and media responsive by default */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Improve button accessibility and mobile interaction */
+button, [role="button"] {
+  /* Remove default button styling */
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  /* Improve touch interaction */
+  touch-action: manipulation;
+  /* Improve focus visibility */
+  outline-offset: 2px;
+}
+
+/* Better focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #1e3c72;
+  outline-offset: 2px;
+}
+
+/* Improve form elements on mobile */
+input, select, textarea {
+  /* Prevent zoom on iOS when font-size < 16px */
+  font-size: 16px;
+  /* Better touch interaction */
+  touch-action: manipulation;
+}
+
+/* Remove tap highlight on mobile while preserving accessibility */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active, a:active, [role="button"]:active {
+  -webkit-tap-highlight-color: rgba(30, 60, 114, 0.3);
+}
+
+/* Loading spinner animation */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve text selection */
+::selection {
+  background-color: rgba(30, 60, 114, 0.3);
+  color: inherit;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #1e3c72;
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  z-index: 9999;
+  font-size: 14px;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  button, a, input, select, textarea {
+    border: 2px solid;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode support preparation */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode styles when needed */
 } 
