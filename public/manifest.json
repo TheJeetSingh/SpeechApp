@@ -1,6 +1,7 @@
 {
   "short_name": "Articulate",
-  "name": "Articulate - Speech Practice App",
+  "name": "Articulate - AI-Powered Speech Practice App",
+  "description": "Improve your public speaking skills with practice and AI-powered feedback",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,8 +21,14 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#1e3c72",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "lang": "en",
+  "scope": "/",
+  "categories": ["education", "productivity", "communication"],
+  "dir": "ltr",
+  "display_override": ["window-controls-overlay", "standalone", "browser"]
 }

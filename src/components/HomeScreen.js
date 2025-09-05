@@ -1813,6 +1813,11 @@ function HomeScreen() {
 
   return (
     <>
+      {/* Skip Link for Accessibility */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      
       <div style={styles.container}>
         {/* Mobile Menu Button */}
         {isMobile && (
@@ -1919,10 +1924,13 @@ function HomeScreen() {
         </motion.div>
         
         {/* Main Content Area */}
-        <main style={{
-          ...styles.mainContent,
-          ...(isMobile ? styles.mobileMainContent : {})
-        }}>
+        <main 
+          id="main-content"
+          style={{
+            ...styles.mainContent,
+            ...(isMobile ? styles.mobileMainContent : {})
+          }}
+        >
           <AnimatePresence mode="wait">
             {activeContent === 'practice' ? (
               renderPracticeContent()
