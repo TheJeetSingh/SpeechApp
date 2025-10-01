@@ -105,7 +105,7 @@ module.exports = async (req, res) => {
 
     // Call Gemini API with the multimodal content (text + audio)
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-001:generateContent?key=${GEMINI_API_KEY}`,
       {
         contents: [
           {

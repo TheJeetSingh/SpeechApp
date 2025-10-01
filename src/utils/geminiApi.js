@@ -12,7 +12,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Get the generative model for chat
 const getGeminiProModel = () => {
-  return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  return genAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
 };
 
 // Helper function to check if error is rate limit related
