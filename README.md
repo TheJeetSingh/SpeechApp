@@ -36,7 +36,17 @@ cp .env.example .env
    REACT_APP_ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
    ```
 
-3. **IMPORTANT**: Never commit your `.env` file to version control! It contains sensitive API keys. unless you feel like sharing, because sharing is caring :)
+3. **IMPORTANT**: Never commit your `.env` file to version control. It contains sensitive API keys and service credentials that must remain private.
+
+4. Set the secure server-side environment variables before starting the backend service:
+   ```
+   JWT_SECRET=generate_a_long_random_value
+   MONGODB_URI=your_mongodb_connection_string
+   NEWS_API_KEY=your_news_api_key
+   ASSEMBLYAI_API_KEY=your_assemblyai_api_key
+   CORS_ALLOWED_ORIGINS=http://localhost:3000,https://your-production-domain
+   ```
+   Adjust the `CORS_ALLOWED_ORIGINS` list to the exact origins that should be able to call the API.
 
 ## Installation
 
