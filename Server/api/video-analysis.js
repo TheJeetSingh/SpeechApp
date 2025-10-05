@@ -77,28 +77,43 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const sanitizedVideo = typeof video === 'string'
-      ? video.replace(/\s+/g, '')
-      : '';
+    const rawVideo = typeof video === 'string' ? video.trim() : '';
+    let derivedMimeType = mimeType;
+    let base64Payload = rawVideo;
 
-    if (
-      !sanitizedVideo ||
-      !/^[A-Za-z0-9+/]+={0,2}$/.test(sanitizedVideo)
-    ) {
+    const dataUrlMatch = rawVideo.match(/^data:(.+?);base64,(.*)$/i);
+    if (dataUrlMatch) {
+      derivedMimeType = derivedMimeType || dataUrlMatch[1];
+      base64Payload = dataUrlMatch[2];
+    }
+
+    const collapsedPayload = base64Payload.replace(/\s+/g, '');
+    if (!collapsedPayload) {
       return res.status(400).json({
         message: 'Invalid video data format',
         error: 'INVALID_VIDEO_FORMAT'
       });
     }
 
-    try {
-      Buffer.from(sanitizedVideo, 'base64');
-    } catch (decodeError) {
+    const standardBase64 = collapsedPayload.replace(/-/g, '+').replace(/_/g, '/');
+    if (/[^A-Za-z0-9+/=]/.test(standardBase64)) {
       return res.status(400).json({
         message: 'Invalid video data format',
         error: 'INVALID_VIDEO_FORMAT'
       });
     }
+
+    const decoded = Buffer.from(standardBase64, 'base64');
+    const reEncoded = decoded.toString('base64').replace(/=+$/, '');
+    const normalizedInput = standardBase64.replace(/=+$/, '');
+    if (reEncoded !== normalizedInput) {
+      return res.status(400).json({
+        message: 'Invalid video data format',
+        error: 'INVALID_VIDEO_FORMAT'
+      });
+    }
+
+    const effectiveMimeType = derivedMimeType || mimeType || 'video/mp4';
 
     const minutes = Math.floor((duration || 0) / 60);
     const seconds = (duration || 0) % 60;
@@ -130,9 +145,9 @@ Keep your assessment grounded in what you observe visually and avoid commenting 
             parts: [
               { text: promptText },
               {
-                inline_data: {
-                  mime_type: mimeType || 'video/mp4',
-                  data: sanitizedVideo
+                inlineData: {
+                  mimeType: effectiveMimeType,
+                  data: standardBase64
                 }
               }
             ]

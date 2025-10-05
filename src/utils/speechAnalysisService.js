@@ -102,11 +102,12 @@ export const analyzeSpeech = async (audioBlob, topic, speechType, speechContext,
 };
 
 const analyzeVideoWithGemini = async (videoBlob, { topic, speechType, duration }) => {
-  if (!isBlobLike(videoBlob)) {
-    throw new Error('Invalid video blob provided for analysis');
-  }
+  const preferredType = (videoBlob && typeof videoBlob === 'object')
+    ? (videoBlob.type || videoBlob.mimeType)
+    : undefined;
+  const normalizedBlob = await normalizeToBlob(videoBlob, preferredType || 'video/mp4');
 
-  const base64Video = await blobToBase64(videoBlob);
+  const base64Video = await blobToBase64(normalizedBlob);
 
   const response = await fetch(`${API_BASE}/analyze-video`, {
     method: 'POST',
@@ -115,7 +116,7 @@ const analyzeVideoWithGemini = async (videoBlob, { topic, speechType, duration }
     },
     body: JSON.stringify({
       video: base64Video,
-      mimeType: videoBlob.type || 'video/mp4',
+      mimeType: normalizedBlob.type || 'video/mp4',
       topic,
       speechType,
       duration
@@ -269,6 +270,11 @@ const clampScore = (value, defaultValue = 50) => {
 };
 
 const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+  if (typeof Blob === 'undefined' || !(blob instanceof Blob)) {
+    reject(new Error('Video data must be provided as a Blob.'));
+    return;
+  }
+
   const reader = new FileReader();
   reader.onloadend = () => {
     const base64String = reader.result.split(',')[1];
@@ -278,18 +284,66 @@ const blobToBase64 = (blob) => new Promise((resolve, reject) => {
   reader.readAsDataURL(blob);
 });
 
-const isBlobLike = (value) => {
-  if (!value || typeof value !== 'object') {
-    return false;
+const normalizeToBlob = async (value, fallbackType = 'video/mp4') => {
+  if (typeof Blob === 'undefined') {
+    throw new Error('Current environment does not support Blob conversions');
   }
 
-  if (typeof Blob !== 'undefined' && value instanceof Blob) {
-    return true;
+  if (value instanceof Blob) {
+    return value;
   }
 
-  return typeof value.size === 'number'
-    && typeof value.type === 'string'
-    && typeof value.arrayBuffer === 'function';
+  const targetType = (value && (value.type || value.mimeType)) || fallbackType;
+
+  if (value instanceof ArrayBuffer) {
+    return new Blob([value], { type: targetType });
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    const view = value;
+    const buffer = view.byteOffset === 0 && view.byteLength === view.buffer.byteLength
+      ? view.buffer
+      : view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+    return new Blob([buffer], { type: targetType });
+  }
+
+  if (value && typeof value === 'object') {
+    if (typeof value.arrayBuffer === 'function') {
+      const buffer = await value.arrayBuffer();
+      return new Blob([buffer], { type: targetType });
+    }
+
+    if (typeof value.base64 === 'string') {
+      const bytes = decodeBase64ToUint8Array(value.base64);
+      return new Blob([bytes], { type: targetType });
+    }
+  }
+
+  throw new Error('Invalid video blob provided for analysis');
+};
+
+const decodeBase64ToUint8Array = (input) => {
+  const cleaned = (input || '').replace(/\s+/g, '');
+  if (!cleaned) {
+    throw new Error('Empty base64 payload cannot be converted to bytes');
+  }
+
+  if (typeof atob === 'function') {
+    const binary = atob(cleaned);
+    const length = binary.length;
+    const bytes = new Uint8Array(length);
+    for (let i = 0; i < length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  if (typeof Buffer !== 'undefined') {
+    const buffer = Buffer.from(cleaned, 'base64');
+    return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  }
+
+  throw new Error('No base64 decoding implementation available');
 };
 
 const safeReadText = async (response) => {
