@@ -160,13 +160,31 @@ module.exports = async (req, res) => {
       ];
 
   const requestOrigin = req.headers.origin;
+  const setCorsOrigin = (origin, allowCredentials = true) => {
+    if (!origin) {
+      return;
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', origin);
+
+    if (allowCredentials) {
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else {
+      res.setHeader('Access-Control-Allow-Credentials', 'false');
+    }
+  };
+
   if (requestOrigin) {
     if (allowedOrigins.includes(requestOrigin)) {
-      res.setHeader('Access-Control-Allow-Origin', requestOrigin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      setCorsOrigin(requestOrigin);
+      res.setHeader('Vary', 'Origin');
     } else {
       return res.status(403).json({ error: 'Origin not allowed' });
     }
+  } else {
+    const fallbackOrigin = allowedOrigins[0] || '*';
+    const allowCredentials = fallbackOrigin !== '*';
+    setCorsOrigin(fallbackOrigin, allowCredentials);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');

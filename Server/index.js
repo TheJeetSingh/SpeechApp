@@ -139,10 +139,11 @@ app.post("/api/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
   const sanitizedName = typeof name === 'string' ? name.trim() : '';
-  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+  const normalizedEmail = trimmedEmail.toLowerCase();
 
   // Manual input validation
-  if (!sanitizedName || !normalizedEmail || !password) {
+  if (!sanitizedName || !trimmedEmail || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -153,7 +154,11 @@ app.post("/api/signup", async (req, res) => {
   }
 
   try {
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUserQuery = User.findOne({ email: trimmedEmail });
+    if (trimmedEmail) {
+      existingUserQuery.collation({ locale: 'en', strength: 2 });
+    }
+    const existingUser = await existingUserQuery;
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -186,15 +191,19 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
 
-  if (!normalizedEmail || !password) {
+  if (!trimmedEmail || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
     // Use select() to explicitly include all fields we need
-    const user = await User.findOne({ email: normalizedEmail }).select('+name +email +password +school');
+    const userQuery = User.findOne({ email: trimmedEmail }).select('+name +email +password +school');
+    if (trimmedEmail) {
+      userQuery.collation({ locale: 'en', strength: 2 });
+    }
+    const user = await userQuery;
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
