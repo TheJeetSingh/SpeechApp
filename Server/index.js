@@ -21,38 +21,33 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Specific origins to allow
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',  // Adding potential alternative local port
-  'http://localhost:5001',  // Adding the server's own origin for local development
-  'http://127.0.0.1:3000',  // Adding localhost IP equivalent
-  'http://127.0.0.1:3001',  // Adding localhost IP equivalent with alternative port
-  'http://127.0.0.1:5001',  // Adding localhost IP equivalent for server port
-  'https://speech-app-delta.vercel.app',
-  'https://speech-app-server.vercel.app',
-  'https://www.articulate.ninja'
-];
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(Boolean)
+  : [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:5001',
+      'https://speech-app-delta.vercel.app',
+      'https://speech-app-server.vercel.app',
+      'https://www.articulate.ninja'
+    ];
 
 // CORS middleware configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // For development - show detailed origin debug info
-    console.log(`CORS Debug - Request origin: "${origin}"`);
-    console.log(`CORS Debug - Allowed origins: ${JSON.stringify(allowedOrigins)}`);
-    
     // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
-      console.log('CORS Debug - No origin, allowing request');
       return callback(null, true);
     }
-    
+
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      console.log(`CORS Debug - Origin "${origin}" not in allowed list, rejecting`);
       return callback(new Error(msg), false);
     }
-    
-    console.log(`CORS Debug - Origin "${origin}" is allowed`);
+
     return callback(null, true);
   },
   credentials: true,
@@ -71,11 +66,9 @@ app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Add debugging middleware to trace request headers
+// Minimal request logging without leaking sensitive data
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  console.log('Origin:', req.headers.origin);
-  console.log('Headers:', JSON.stringify(req.headers));
   next();
 });
 
@@ -89,21 +82,18 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Secret Key for JWT
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required for secure token generation.');
+}
 
 // Generate JWT Token
 const generateToken = (user) => {
-  console.log('Generating token with user data:', {
+  return jwt.sign({
     id: user._id,
     name: user.name,
     email: user.email,
-    school: user.school
-  });
-  
-  return jwt.sign({ 
-    id: user._id, 
-    name: user.name, 
-    email: user.email, 
     school: user.school || '' 
   }, JWT_SECRET, {
     expiresIn: "1h",
@@ -146,13 +136,14 @@ app.get("/api/cors-test", (req, res) => {
 
 // Signup Route
 app.post("/api/signup", async (req, res) => {
-  console.log("Signup attempt from origin:", req.headers.origin);
-  console.log("Signup request body:", JSON.stringify(req.body));
-  
   const { name, email, password } = req.body;
 
+  const sanitizedName = typeof name === 'string' ? name.trim() : '';
+  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+  const normalizedEmail = trimmedEmail.toLowerCase();
+
   // Manual input validation
-  if (!name || !email || !password) {
+  if (!sanitizedName || !trimmedEmail || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -163,24 +154,21 @@ app.post("/api/signup", async (req, res) => {
   }
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUserQuery = User.findOne({ email: trimmedEmail });
+    if (trimmedEmail) {
+      existingUserQuery.collation({ locale: 'en', strength: 2 });
+    }
+    const existingUser = await existingUserQuery;
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ 
-      name, 
-      email, 
+    const newUser = await User.create({
+      name: sanitizedName,
+      email: normalizedEmail,
       password: hashedPassword,
-      school: '' 
-    });
-
-    console.log("User created successfully:", {
-      id: newUser._id,
-      name: newUser.name,
-      email: newUser.email,
-      school: newUser.school || ''
+      school: ''
     });
 
     const token = generateToken(newUser);
@@ -201,24 +189,21 @@ app.post("/api/signup", async (req, res) => {
 
 // Login Route
 app.post("/api/login", async (req, res) => {
-  console.log("Login attempt from origin:", req.headers.origin);
-  console.log("Login request body:", JSON.stringify(req.body));
-  
-  // Special CORS handling for login endpoint
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
   const { email, password } = req.body;
 
-  if (!email || !password) {
+  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+
+  if (!trimmedEmail || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
     // Use select() to explicitly include all fields we need
-    const user = await User.findOne({ email }).select('+name +email +password +school');
+    const userQuery = User.findOne({ email: trimmedEmail }).select('+name +email +password +school');
+    if (trimmedEmail) {
+      userQuery.collation({ locale: 'en', strength: 2 });
+    }
+    const user = await userQuery;
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -228,28 +213,12 @@ app.post("/api/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    console.log("Login successful for user:", {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      school: user.school || ''
-    });
-    
     // Double-check that MongoDB data is complete
     if (!user.name || !user.email) {
       console.error("Warning: User data is incomplete in MongoDB:", user);
     }
 
     const token = generateToken(user);
-    
-    // Parse the token we just created to verify it contains all fields
-    const decoded = jwt.verify(token, JWT_SECRET);
-    console.log("Decoded token to verify contents:", {
-      id: decoded.id,
-      name: decoded.name,
-      email: decoded.email,
-      school: decoded.school
-    });
 
     res.json({
       token,
