@@ -191,6 +191,7 @@ function SpeechScreen() {
   const [speechAnalysis, setSpeechAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
+  const [videoBlob, setVideoBlob] = useState(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -390,7 +391,12 @@ function SpeechScreen() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      setSpeechAnalysis(null);
+      setVideoBlob(null);
+      setAudioBlob(null);
+      setRecordingURL(null);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true
       });
@@ -413,7 +419,8 @@ function SpeechScreen() {
         const blob = new Blob(chunks, { type: getMimeType() });
         const url = URL.createObjectURL(blob);
         setRecordingURL(url);
-        
+        setVideoBlob(blob);
+
         // Stop the audio recorder when video recording stops
         if (audioRecorder && audioRecorder.state === "recording") {
           audioRecorder.stop();
@@ -508,7 +515,8 @@ function SpeechScreen() {
           type,
           speechContext,
           timer,
-          scriptContent
+          scriptContent,
+          videoBlob
         );
         
         setSpeechAnalysis(analysis);

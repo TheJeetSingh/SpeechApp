@@ -44,6 +44,7 @@ cp .env.example .env
    MONGODB_URI=your_mongodb_connection_string
    NEWS_API_KEY=your_news_api_key
    ASSEMBLYAI_API_KEY=your_assemblyai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
    CORS_ALLOWED_ORIGINS=http://localhost:3000,https://your-production-domain
    ```
    Adjust the `CORS_ALLOWED_ORIGINS` list to the exact origins that should be able to call the API.

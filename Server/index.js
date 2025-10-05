@@ -6,8 +6,10 @@ const mongoose = require("mongoose");
 const axios = require("axios");
 require("dotenv").config();
 
-// Import the transcribe-audio handler
+// Import serverless handlers
 const transcribeAudioHandler = require('./api/transcribe-audio');
+const videoAnalysisHandler = require('./api/video-analysis');
+const anthropicFeedbackHandler = require('./api/anthropic-feedback');
 
 // Import route handlers
 const User = require('./models/User');
@@ -531,8 +533,10 @@ app.post("/api/analyze-speech", async (req, res) => {
   }
 });
 
-// Add the transcribe-audio endpoint
+// Add AI pipeline endpoints
 app.post("/api/transcribe-audio", transcribeAudioHandler);
+app.post("/api/analyze-video", videoAnalysisHandler);
+app.post("/api/anthropic-feedback", anthropicFeedbackHandler);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

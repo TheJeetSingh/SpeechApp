@@ -1,6 +1,8 @@
 import { processAudioWithAssemblyAI } from './assemblyAiApi';
 import { generateChatResponse } from './geminiApi';
 
+const API_BASE = '/api';
+
 /**
  * Analyze speech using AssemblyAI for transcription and Gemini for coaching
  * @param {Blob} audioBlob - The audio blob to analyze
@@ -11,7 +13,7 @@ import { generateChatResponse } from './geminiApi';
  * @param {string} script - Optional script content for comparison
  * @returns {Promise<object>} - The speech analysis results
  */
-export const analyzeSpeech = async (audioBlob, topic, speechType, speechContext, duration, script = null) => {
+export const analyzeSpeech = async (audioBlob, topic, speechType, speechContext, duration, script = null, videoBlob = null) => {
   try {
     console.log("Starting speech analysis with AssemblyAI and Gemini");
     
@@ -38,93 +40,246 @@ export const analyzeSpeech = async (audioBlob, topic, speechType, speechContext,
         topic: "No speech detected",
         strengths: ["Attempting to use the speech analysis tool", "Showing interest in improving your speaking skills"],
         improvements: ["Ensure you're actually speaking during recording", "Speak clearly and directly into the microphone", "Reduce background noise when recording"],
-        poorQuality: true
+        poorQuality: true,
+        transcript: transcript || "",
+        videoAdvice: null
       };
     }
     
     console.log("Transcript received:", transcript.substring(0, 100) + "...");
-    
-    // Step 2: Analyze the transcript with Gemini
-    console.log("Analyzing transcript with Gemini...");
-    
-    // Build a comprehensive prompt for Gemini
-    let prompt = `
-      You are ARTICULATE, an expert AI speech coach. Analyze the following speech transcript and provide detailed, insightful feedback:
-      
-      Speech Type: ${speechType || "Practice"}
-      Topic: "${topic || "General speech"}"
-      Duration: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")} minutes
-      
-      Transcript: "${transcript}"
-      
-      ${speechContext || ""}
-      
-      ${script ? `Original Script: "${script}"
-      Please compare the transcript with the original script and evaluate adherence.` : ""}
-      
-      Please analyze:
-      1. Clarity and articulation - How clearly did the speaker articulate their points? Were there any pronunciation or enunciation issues?
-      2. Pacing and rhythm - Was the speech too fast, too slow, or well-paced? Did the speaker vary their pace effectively?
-      3. Filler words - Identify any overused filler words (um, uh, like, you know, etc.) and suggest how to reduce them.
-      4. Structure and coherence - Did the speech have a clear beginning, middle, and end? Was there a logical flow?
-      5. Delivery style - Comment on voice modulation, emphasis, and emotional connection.
-      6. Persuasiveness - How effectively did the speaker make their case? What rhetorical techniques were used or could be added?
-      
-      Return your response as a JSON object with the following format:
-      {
-        "contentScore": [number between 0-100],
-        "deliveryScore": [number between 0-100],
-        "feedback": [overall feedback summary],
-        "topic": [analysis of the topic coverage],
-        "strengths": [array of strengths],
-        "improvements": [array of areas for improvement]
-      }
-      
-      Base the contentScore on the quality, structure, and persuasiveness of the speech content.
-      Base the deliveryScore on clarity, pacing, and vocal variety.
-      Provide at least 3 specific strengths and 3 areas for improvement.
-    `;
-    
-    // Get analysis from Gemini
-    const analysisText = await generateChatResponse([{ sender: "user", text: prompt }]);
-    console.log("Received analysis from Gemini");
-    
-    // Extract JSON from the response
-    const jsonMatch = analysisText.match(/```json\n([\s\S]*?)\n```/) || 
-                     analysisText.match(/{[\s\S]*?}/);
-    
-    let analysisJson;
-    
-    if (jsonMatch) {
+
+    // Step 2: Analyze the recorded video with Gemini for visual feedback
+    let videoAdvice = null;
+    if (videoBlob) {
       try {
-        // If we found a JSON block, parse it
-        const jsonStr = jsonMatch[0].startsWith('{') ? jsonMatch[0] : jsonMatch[1];
-        analysisJson = JSON.parse(jsonStr);
+        videoAdvice = await analyzeVideoWithGemini(videoBlob, {
+          topic,
+          speechType,
+          duration
+        });
+        console.log("Received video advice from Gemini");
       } catch (error) {
-        console.error("Error parsing JSON from Gemini response:", error);
-        // Extract data using regex as fallback
-        analysisJson = extractAnalysisData(analysisText);
+        console.error("Video analysis unavailable:", error);
+        videoAdvice = buildVideoAdviceFallback(error);
       }
-    } else {
-      // If no JSON block found, extract data using regex
-      analysisJson = extractAnalysisData(analysisText);
     }
-    
-    // Ensure all required fields are present
-    const analysis = {
-      contentScore: analysisJson.contentScore || 50,
-      deliveryScore: analysisJson.deliveryScore || 50,
-      feedback: analysisJson.feedback || "Speech analysis completed.",
-      topic: analysisJson.topic || "Topic analysis not available.",
-      strengths: analysisJson.strengths || ["Speech was analyzed successfully"],
-      improvements: analysisJson.improvements || ["Consider practicing more"],
-      transcript: transcript // Include the transcript
+
+    // Step 3: Combine transcript + visual advice using Anthropic (cheap model)
+    let analysis;
+    try {
+      analysis = await synthesizeFeedbackWithAnthropic({
+        transcript,
+        videoAdvice,
+        topic,
+        speechType,
+        speechContext,
+        duration,
+        script
+      });
+      console.log("Received combined feedback from Anthropic");
+    } catch (anthropicError) {
+      console.error("Anthropic synthesis failed, falling back to Gemini:", anthropicError);
+      analysis = await synthesizeFeedbackWithGeminiFallback({
+        transcript,
+        videoAdvice,
+        topic,
+        speechType,
+        speechContext,
+        duration,
+        script
+      });
+    }
+
+    return {
+      ...analysis,
+      transcript,
+      videoAdvice
     };
-    
-    return analysis;
   } catch (error) {
     console.error("Error in speech analysis:", error);
     throw error;
+  }
+};
+
+const analyzeVideoWithGemini = async (videoBlob, { topic, speechType, duration }) => {
+  const base64Video = await blobToBase64(videoBlob);
+
+  const response = await fetch(`${API_BASE}/analyze-video`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      video: base64Video,
+      mimeType: videoBlob.type || 'video/mp4',
+      topic,
+      speechType,
+      duration
+    })
+  });
+
+  if (!response.ok) {
+    const error = new Error(`Gemini video analysis failed with status ${response.status}`);
+    error.status = response.status;
+    error.details = await safeReadText(response);
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.advice;
+};
+
+const buildVideoAdviceFallback = (error) => {
+  const message = error?.status === 429
+    ? 'Video analysis service hit a rate limit. Please try again shortly.'
+    : 'Video analysis is temporarily unavailable. Re-run the analysis when service is restored.';
+
+  return {
+    summary: message,
+    visualStrengths: [],
+    visualImprovements: ['Retry the analysis later when video coaching is available.'],
+    confidence: 0,
+    unavailable: true,
+    error: error?.details || error?.message || 'Unknown error'
+  };
+};
+
+const synthesizeFeedbackWithAnthropic = async (payload) => {
+  const response = await fetch(`${API_BASE}/anthropic-feedback`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const error = new Error(`Anthropic feedback failed with status ${response.status}`);
+    error.status = response.status;
+    error.details = await safeReadText(response);
+    throw error;
+  }
+
+  const data = await response.json();
+  return normalizeAnalysisResult(data);
+};
+
+const synthesizeFeedbackWithGeminiFallback = async ({
+  transcript,
+  videoAdvice,
+  topic,
+  speechType,
+  speechContext,
+  duration,
+  script
+}) => {
+  const formattedDuration = `${Math.floor((duration || 0) / 60)}:${((duration || 0) % 60).toString().padStart(2, '0')}`;
+
+  const prompt = `You are ARTICULATE, an expert AI speech coach. The AssemblyAI transcript and visual insights are provided below.
+
+Speech type: ${speechType || 'Unknown'}
+Topic: ${topic || 'Unknown'}
+Duration: ${formattedDuration}
+${speechContext || ''}
+${script ? `Prepared script: "${script}"` : ''}
+
+Transcript (do not alter, but you may quote phrases):
+"""${transcript}"""
+
+Visual advice (may be unavailable):
+${JSON.stringify(videoAdvice ?? { summary: 'No video advice available.' }, null, 2)}
+
+Provide a JSON object with the following keys:
+{
+  "topic": "one sentence summary of what the speaker covered",
+  "contentScore": number between 0 and 100,
+  "deliveryScore": number between 0 and 100,
+  "feedback": "2-3 sentence summary that blends audio and visual observations",
+  "strengths": ["at least three bullet strengths"],
+  "improvements": ["at least three targeted improvements"],
+  "ranking": "placement from 1-7 with rationale",
+  "actionPlan": ["three concise next steps"]
+}`;
+
+  const responseText = await generateChatResponse([{ sender: 'user', text: prompt }]);
+  const parsed = parseJsonFromText(responseText);
+
+  if (parsed) {
+    return normalizeAnalysisResult(parsed);
+  }
+
+  // Fall back to heuristic extraction if structured JSON is missing
+  const extracted = extractAnalysisData(responseText);
+  return normalizeAnalysisResult(extracted);
+};
+
+const parseJsonFromText = (text) => {
+  const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/{[\s\S]*?}/);
+  if (!jsonMatch) {
+    return null;
+  }
+
+  const jsonStr = jsonMatch[0].startsWith('{') ? jsonMatch[0] : jsonMatch[1];
+
+  try {
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error('Failed to parse JSON block:', error);
+    return null;
+  }
+};
+
+const normalizeAnalysisResult = (analysisJson = {}) => {
+  const strengths = Array.isArray(analysisJson.strengths) && analysisJson.strengths.length > 0
+    ? analysisJson.strengths
+    : ['Speech was analyzed successfully'];
+
+  const improvements = Array.isArray(analysisJson.improvements) && analysisJson.improvements.length > 0
+    ? analysisJson.improvements
+    : ['Consider practicing more'];
+
+  const actionPlan = Array.isArray(analysisJson.actionPlan)
+    ? analysisJson.actionPlan.filter(Boolean)
+    : [];
+
+  return {
+    ...analysisJson,
+    contentScore: clampScore(analysisJson.contentScore, 50),
+    deliveryScore: clampScore(analysisJson.deliveryScore, 50),
+    feedback: analysisJson.feedback || 'Speech analysis completed.',
+    topic: analysisJson.topic || 'Topic analysis not available.',
+    strengths,
+    improvements,
+    actionPlan,
+    ranking: analysisJson.ranking || analysisJson.rank || '',
+    poorQuality: Boolean(analysisJson.poorQuality)
+  };
+};
+
+const clampScore = (value, defaultValue = 50) => {
+  const num = Number(value);
+  if (Number.isFinite(num)) {
+    return Math.min(100, Math.max(0, Math.round(num)));
+  }
+  return defaultValue;
+};
+
+const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const base64String = reader.result.split(',')[1];
+    resolve(base64String);
+  };
+  reader.onerror = () => reject(new Error('Failed to read blob as base64'));
+  reader.readAsDataURL(blob);
+});
+
+const safeReadText = async (response) => {
+  try {
+    return await response.text();
+  } catch (error) {
+    console.error('Failed to read response text:', error);
+    return '';
   }
 };
 
