@@ -77,7 +77,23 @@ module.exports = async (req, res) => {
   }
 
   try {
-    if (!/^[A-Za-z0-9+/=]+$/.test(video)) {
+    const sanitizedVideo = typeof video === 'string'
+      ? video.replace(/\s+/g, '')
+      : '';
+
+    if (
+      !sanitizedVideo ||
+      !/^[A-Za-z0-9+/]+={0,2}$/.test(sanitizedVideo)
+    ) {
+      return res.status(400).json({
+        message: 'Invalid video data format',
+        error: 'INVALID_VIDEO_FORMAT'
+      });
+    }
+
+    try {
+      Buffer.from(sanitizedVideo, 'base64');
+    } catch (decodeError) {
       return res.status(400).json({
         message: 'Invalid video data format',
         error: 'INVALID_VIDEO_FORMAT'
@@ -116,7 +132,7 @@ Keep your assessment grounded in what you observe visually and avoid commenting 
               {
                 inline_data: {
                   mime_type: mimeType || 'video/mp4',
-                  data: video
+                  data: sanitizedVideo
                 }
               }
             ]

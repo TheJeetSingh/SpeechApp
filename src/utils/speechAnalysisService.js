@@ -102,6 +102,10 @@ export const analyzeSpeech = async (audioBlob, topic, speechType, speechContext,
 };
 
 const analyzeVideoWithGemini = async (videoBlob, { topic, speechType, duration }) => {
+  if (!isBlobLike(videoBlob)) {
+    throw new Error('Invalid video blob provided for analysis');
+  }
+
   const base64Video = await blobToBase64(videoBlob);
 
   const response = await fetch(`${API_BASE}/analyze-video`, {
@@ -273,6 +277,20 @@ const blobToBase64 = (blob) => new Promise((resolve, reject) => {
   reader.onerror = () => reject(new Error('Failed to read blob as base64'));
   reader.readAsDataURL(blob);
 });
+
+const isBlobLike = (value) => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  if (typeof Blob !== 'undefined' && value instanceof Blob) {
+    return true;
+  }
+
+  return typeof value.size === 'number'
+    && typeof value.type === 'string'
+    && typeof value.arrayBuffer === 'function';
+};
 
 const safeReadText = async (response) => {
   try {
