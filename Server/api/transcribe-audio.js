@@ -201,17 +201,53 @@ module.exports = async (req, res) => {
 
   try {
     const { audio } = req.body;
-    
-    if (!audio) {
-      return res.status(400).json({ 
+
+    if (!audio || typeof audio !== 'string') {
+      return res.status(400).json({
         message: "Audio data is required",
         error: "AUDIO_MISSING"
       });
     }
-    
-    // Convert base64 to buffer
-    const audioBuffer = Buffer.from(audio, 'base64');
-    
+
+    const sanitizedAudio = audio.replace(/\s+/g, '');
+
+    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(sanitizedAudio)) {
+      return res.status(400).json({
+        message: 'Invalid audio data format',
+        error: 'INVALID_AUDIO_DATA'
+      });
+    }
+
+    let audioBuffer;
+
+    try {
+      audioBuffer = Buffer.from(sanitizedAudio, 'base64');
+    } catch (bufferError) {
+      console.error('Failed to decode audio base64:', bufferError);
+      return res.status(400).json({
+        message: 'Unable to decode audio data',
+        error: 'INVALID_AUDIO_DATA'
+      });
+    }
+
+    if (!audioBuffer || audioBuffer.length === 0) {
+      return res.status(400).json({
+        message: 'Audio data could not be decoded',
+        error: 'INVALID_AUDIO_DATA'
+      });
+    }
+
+    const reconverted = audioBuffer.toString('base64');
+    const normalizedInput = sanitizedAudio.replace(/=+$/, '');
+    const normalizedOutput = reconverted.replace(/=+$/, '');
+
+    if (normalizedInput !== normalizedOutput) {
+      return res.status(400).json({
+        message: 'Audio data failed validation',
+        error: 'INVALID_AUDIO_DATA'
+      });
+    }
+
     // Process the audio with AssemblyAI
     const transcript = await processAudioWithAssemblyAI(audioBuffer);
     

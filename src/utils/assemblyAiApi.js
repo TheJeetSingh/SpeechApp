@@ -1,3 +1,5 @@
+import { buildApiUrl } from './apiConfig';
+
 /**
  * AssemblyAI API utility functions for speech analysis
  * This client-side code calls our server endpoint which handles the AssemblyAI API
@@ -147,18 +149,31 @@ export const waitForTranscriptionCompletion = async (transcriptId) => {
  * @param {Blob} audioBlob - The audio blob to process
  * @returns {Promise<string>} - The transcript text
  */
+const TRANSCRIBE_AUDIO_ENDPOINT = buildApiUrl('/api/transcribe-audio');
+
+const sanitizeBase64 = (value) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.replace(/\s+/g, '');
+};
+
 export const processAudioWithAssemblyAI = async (audioBlob) => {
   try {
     console.log("Processing audio with AssemblyAI via server endpoint");
     
     // Convert blob to base64
     const base64Audio = await blobToBase64(audioBlob);
+    const sanitizedAudio = sanitizeBase64(base64Audio);
+
+    if (!sanitizedAudio) {
+      throw new Error('Failed to encode audio data');
+    }
     
     // Call our server endpoint
-    const apiUrl = process.env.NODE_ENV === 'production' 
-      ? '/api/transcribe-audio' 
-      : '/api/transcribe-audio';
-    
+    const apiUrl = TRANSCRIBE_AUDIO_ENDPOINT;
+
     console.log(`Sending request to transcribe audio API: ${apiUrl}`);
     
     const response = await fetch(apiUrl, {
@@ -167,7 +182,7 @@ export const processAudioWithAssemblyAI = async (audioBlob) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        audio: base64Audio
+        audio: sanitizedAudio
       }),
     });
     

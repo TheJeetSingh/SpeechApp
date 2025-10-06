@@ -83,6 +83,14 @@ function ChatSession() {
     
     if (analysisData) {
       // Format the speech analysis data into a welcome message
+      const actionPlanSection = analysisData.actionPlan && analysisData.actionPlan.length > 0
+        ? `\n### Action Plan:\n${analysisData.actionPlan.map(step => `- ${step}`).join('\n')}`
+        : '';
+
+      const videoAdviceSection = analysisData.videoAdvice
+        ? `\n### Visual Coaching Highlights:\n${analysisData.videoAdvice.summary || 'Visual feedback summary unavailable.'}\n\n${analysisData.videoAdvice.visualStrengths && analysisData.videoAdvice.visualStrengths.length > 0 ? '**Visual Strengths:**\n' + analysisData.videoAdvice.visualStrengths.map(item => `- ${item}`).join('\n') + '\n\n' : ''}${analysisData.videoAdvice.visualImprovements && analysisData.videoAdvice.visualImprovements.length > 0 ? '**Visual Improvements:**\n' + analysisData.videoAdvice.visualImprovements.map(item => `- ${item}`).join('\n') + '\n\n' : ''}${typeof analysisData.videoAdvice.confidence === 'number' ? `Confidence: ${analysisData.videoAdvice.confidence}/5\n` : ''}`
+        : '';
+
       const speechInfo = `
 ## Speech Analysis Summary
 
@@ -90,6 +98,7 @@ function ChatSession() {
 **Topic:** ${analysisData.topic || "N/A"}
 **Duration:** ${formatTime(analysisData.duration) || "N/A"}
 **Grade:** ${analysisData.grade || "N/A"} (${analysisData.score || 0}/100)
+${analysisData.ranking ? `**Ranking:** ${analysisData.ranking}` : ''}
 
 ### Transcript:
 ${analysisData.transcript || "No transcript available."}
@@ -102,6 +111,8 @@ ${analysisData.strengths?.map(strength => `- ${strength}`).join('\n') || "- None
 
 ### Areas for Improvement:
 ${analysisData.improvements?.map(improvement => `- ${improvement}`).join('\n') || "- None identified"}
+${actionPlanSection}
+${videoAdviceSection}
 
 How would you like me to help you improve your speech?
       `;

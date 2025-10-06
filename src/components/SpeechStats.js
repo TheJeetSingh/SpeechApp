@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { colors, animations, particlesConfig } from '../styles/theme';
-import { FiClock, FiAward, FiRotateCcw, FiHome, FiTarget, FiArrowRight, FiDownload, FiCpu, FiMic, FiMessageSquare, FiTrendingUp, FiTrendingDown, FiAlertCircle } from 'react-icons/fi';
+import { FiClock, FiAward, FiRotateCcw, FiHome, FiTarget, FiArrowRight, FiDownload, FiCpu, FiMic, FiMessageSquare, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiVideo } from 'react-icons/fi';
 import Particles from 'react-tsparticles';
 import { useSpring, animated, config } from 'react-spring';
 import html2canvas from 'html2canvas';
@@ -233,8 +233,11 @@ function SpeechStats() {
       feedback: speechAnalysis?.feedback || "",
       strengths: speechAnalysis?.strengths || [],
       improvements: speechAnalysis?.improvements || [],
+      actionPlan: speechAnalysis?.actionPlan || [],
+      ranking: speechAnalysis?.ranking || "",
+      videoAdvice: speechAnalysis?.videoAdvice || null,
     };
-    
+
     // Navigate to the chat session with the analysis data
     navigate('/chat-session', { state: { analysisData } });
   };
@@ -609,7 +612,7 @@ function SpeechStats() {
                             </h4>
                             <ul style={styles.analysisList}>
                               {speechAnalysis.improvements.map((improvement, index) => (
-                                <motion.li 
+                                <motion.li
                                   key={index}
                                   style={styles.analysisListItem}
                                   initial={{ x: -20, opacity: 0 }}
@@ -621,6 +624,84 @@ function SpeechStats() {
                               ))}
                             </ul>
                           </div>
+
+                          {speechAnalysis.actionPlan && speechAnalysis.actionPlan.length > 0 && (
+                            <div style={styles.analysisSection}>
+                              <h4 style={styles.analysisSectionTitle}>
+                                <FiTarget size={18} color={colors.accent.orange} />
+                                <span>Action Plan</span>
+                              </h4>
+                              <ul style={styles.analysisList}>
+                                {speechAnalysis.actionPlan.map((step, index) => (
+                                  <motion.li
+                                    key={index}
+                                    style={styles.analysisListItem}
+                                    initial={{ x: -20, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    transition={{ delay: 2.1 + (index * 0.1) }}
+                                  >
+                                    {step}
+                                  </motion.li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {speechAnalysis.videoAdvice && (
+                            <div style={styles.analysisSection}>
+                              <h4 style={styles.analysisSectionTitle}>
+                                <FiVideo size={18} color={colors.accent.purple} />
+                                <span>Visual Coaching</span>
+                              </h4>
+                              <p style={styles.analysisSectionText}>
+                                {speechAnalysis.videoAdvice.summary || 'Visual feedback summary unavailable.'}
+                              </p>
+
+                              {speechAnalysis.videoAdvice.visualStrengths && speechAnalysis.videoAdvice.visualStrengths.length > 0 && (
+                                <div style={styles.subSection}>
+                                  <h5 style={styles.subSectionTitle}>Visual Strengths</h5>
+                                  <ul style={styles.analysisList}>
+                                    {speechAnalysis.videoAdvice.visualStrengths.map((strength, index) => (
+                                      <motion.li
+                                        key={`video-strength-${index}`}
+                                        style={styles.analysisListItem}
+                                        initial={{ x: -20, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        transition={{ delay: 2.3 + (index * 0.1) }}
+                                      >
+                                        {strength}
+                                      </motion.li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {speechAnalysis.videoAdvice.visualImprovements && speechAnalysis.videoAdvice.visualImprovements.length > 0 && (
+                                <div style={styles.subSection}>
+                                  <h5 style={styles.subSectionTitle}>Visual Improvements</h5>
+                                  <ul style={styles.analysisList}>
+                                    {speechAnalysis.videoAdvice.visualImprovements.map((tip, index) => (
+                                      <motion.li
+                                        key={`video-improvement-${index}`}
+                                        style={styles.analysisListItem}
+                                        initial={{ x: -20, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        transition={{ delay: 2.5 + (index * 0.1) }}
+                                      >
+                                        {tip}
+                                      </motion.li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {typeof speechAnalysis.videoAdvice.confidence === 'number' && (
+                                <p style={styles.analysisSectionText}>
+                                  <strong>Confidence:</strong> {speechAnalysis.videoAdvice.confidence}/5
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -1110,6 +1191,17 @@ const styles = {
     color: colors.text.secondary,
     marginBottom: '0.5rem',
     lineHeight: '1.4',
+  },
+  subSection: {
+    marginTop: '1rem',
+  },
+  subSectionTitle: {
+    fontSize: '0.95rem',
+    fontWeight: 600,
+    color: colors.text.primary,
+    marginBottom: '0.4rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
   },
   poorQualityBox: {
     display: 'flex',
